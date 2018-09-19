@@ -209,14 +209,14 @@ public class Detective {
         String nameOfGroup = file.getCellData(column, row - 1).trim();
         for(byte dayOfWeek = 1; dayOfWeek <= 7; dayOfWeek++)
         {
-            int c = column;
+            //int c = column;
             int r = (row + 1) + (dayOfWeek - 1) * countOfCouples * 2;
             coupleOfWeek.addAll(
                     GetCouplesFromDay
-                            (c, r, nameOfGroup, DayOfWeek.of(dayOfWeek), seeker, ignoresCoupleTitle, times,
+                            (column, r, nameOfGroup, DayOfWeek.of(dayOfWeek), seeker, ignoresCoupleTitle, times,
                                     GetAddressOfDay
                                             (
-                                                    new Point(c, r),
+                                                    new Point(column, r),
                                                     countOfCouples,
                                                     seeker.defaultAddress,
                                                     ignoresCoupleTitle,
@@ -294,7 +294,8 @@ public class Detective {
      * @param CR Координаты фразы "Неделя".
      * @param file Файл, в котором надо подсчитать количество пар.
      * @return Количество пар в одном дне недели.
-     * @throws DetectiveException
+     * @throws DetectiveException Ошибка при поиске порядковых номеров пар.
+     * @throws IOException Файл excel стал недоступным.
      */
     private static int GetCountCoupleInDay(Point CR, ExcelFileInterface file) throws DetectiveException, IOException {
         int OldNumber = Integer.MIN_VALUE; // Последнее число, которое было прочитано.
