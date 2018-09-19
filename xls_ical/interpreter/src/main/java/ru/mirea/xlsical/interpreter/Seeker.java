@@ -8,7 +8,7 @@ package ru.mirea.xlsical.interpreter;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.TimeZone;
+import java.time.ZoneId;
 
 public class Seeker implements Serializable {
     /**
@@ -30,7 +30,7 @@ public class Seeker implements Serializable {
     /**
      * Часовой пояс, где будут пары. Это значение в начале семестра.
      */
-    public final TimeZone timezoneStart;
+    public final ZoneId timezoneStart;
     /**
      * Адрес кампуса по-умолчанию.
      */
@@ -48,7 +48,7 @@ public class Seeker implements Serializable {
      * @param timezoneStart Часовой пояс, где будут пары. Это значение в начале семестра.
      * @param defaultAddress Какой адрес корпуса по-умолчанию?
      */
-    public Seeker(String nameOfSeeker, SeekerType seekerType, LocalDate dateStart, LocalDate dateFinish, TimeZone timezoneStart, String defaultAddress) {
+    public Seeker(String nameOfSeeker, SeekerType seekerType, LocalDate dateStart, LocalDate dateFinish, ZoneId timezoneStart, String defaultAddress) {
         this.nameOfSeeker = nameOfSeeker;
         this.seekerType = seekerType;
         this.dateStart = dateStart;

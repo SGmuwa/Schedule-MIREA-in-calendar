@@ -1,10 +1,11 @@
+import org.junit.Assert;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import ru.mirea.xlsical.CouplesDetective.Couple;
 
 import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.time.zone.TimeZone;
 import java.util.regex.Pattern;
 
 public class CoupleTest {
@@ -22,7 +23,7 @@ public class CoupleTest {
 
         DayOfWeek day = DayOfWeek.MONDAY;
 
-        TimeZone timezone = TimeZone.getDefault();
+        ZoneId timezone = ZoneId.systemDefault();
 
         String nGr = "Группа-01 32";
         String nam = "Математика и инженерия."; // http://xpoint.ru/forums/internet/standards/thread/29138.xhtml
@@ -33,9 +34,13 @@ public class CoupleTest {
 
         List<Couple> out = Couple.GetCouplesByPeriod(start, finish, time1, time2, timezone, day, true, nGr, nam, typ, tic, aud, add);
 
+        assertNotNull(out);
+
         /* Количество */            assertEquals(1, out.size());
-        LocalDateTime localDateTime = LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 1), LocalTime.of(0, 1, 0));
-        /* Время начала пары*/      assertEquals(OffsetDateTime.of(localDateTime, timezone.getOffset(localDateTime.getLong())), out.get(0).DateAndTimeOfCouple);
+        ZonedDateTime zonedDateTimeDateTime = ZonedDateTime.of(
+                LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 1), LocalTime.of(0, 1, 0)),
+                        ZoneId.systemDefault());
+        /* Время начала пары*/      assertEquals(zonedDateTimeDateTime, out.get(0).DateAndTimeOfCouple);
         /* Продолжительность пары*/ assertEquals(Duration.between(time1, time2), out.get(0).DurationOfCouple);
         /* Название группы */       assertEquals(nGr, out.get(0).NameOfGroup);
         /* Название предмета */     assertEquals(nam, out.get(0).ItemTitle);
@@ -59,9 +64,7 @@ public class CoupleTest {
 
         DayOfWeek day = DayOfWeek.MONDAY;
 
-        int timezone = 3 * 60 * 60; // GMT+3:00
-
-        assertEquals(3 * 60 * 60, ZoneOffset.ofTotalSeconds(timezone).getTotalSeconds());
+        ZoneId timezone = ZoneId.of("GMT+3:00"); // GMT+3:00
 
         String nGr = "Группа-01 32";
         String nam = "Математика и инженерия."; // http://xpoint.ru/forums/internet/standards/thread/29138.xhtml
@@ -72,8 +75,14 @@ public class CoupleTest {
 
         List<Couple> out = Couple.GetCouplesByPeriod(start, finish, time1, time2, timezone, day, true, nGr, nam, typ, tic, aud, add);
 
+        assertNotNull(out);
+
         /* Количество */            assertEquals(1, out.size());
-        /* Время начала пары*/      assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 1), LocalTime.of(0, 1, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(0).DateAndTimeOfCouple);
+        ZonedDateTime zonedDateTime = ZonedDateTime.of(
+                LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 1), LocalTime.of(0, 1, 0)),
+                timezone
+        );
+        /* Время начала пары*/      assertEquals(zonedDateTime, out.get(0).DateAndTimeOfCouple);
         /* Продолжительность пары*/ assertEquals(Duration.between(time1, time2), out.get(0).DurationOfCouple);
         /* Название группы */       assertEquals(nGr, out.get(0).NameOfGroup);
         /* Название предмета */     assertEquals(nam, out.get(0).ItemTitle);
@@ -97,7 +106,7 @@ public class CoupleTest {
 
         DayOfWeek day = DayOfWeek.MONDAY;
 
-        TimeZone timezone = TimeZone.getDefault(); // GMT+0:00
+        ZoneId timezone = ZoneId.of("GMT+00:00"); // GMT+0:00
 
         String nGr = "Группа-24 32";
         String nam = "Русский jaja номер Нан 1 4 2."; // http://xpoint.ru/forums/internet/standards/thread/29138.xhtml
@@ -108,8 +117,14 @@ public class CoupleTest {
 
         List<Couple> out = Couple.GetCouplesByPeriod(start, finish, time1, time2, timezone, day, true, nGr, nam, typ, tic, aud, add);
 
+        assertNotNull(out);
+
         /* Количество */            assertEquals(1, out.size());
-        /* Время начала пары*/      assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 1), LocalTime.of(0, 1, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(0).DateAndTimeOfCouple);
+        ZonedDateTime zonedDateTime = ZonedDateTime.of(
+                LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 1), LocalTime.of(0, 1, 0)),
+                timezone
+        );
+        /* Время начала пары*/      assertEquals(zonedDateTime, out.get(0).DateAndTimeOfCouple);
         /* Продолжительность пары*/ assertEquals(Duration.between(time1, time2), out.get(0).DurationOfCouple);
         /* Название группы */       assertEquals(nGr, out.get(0).NameOfGroup);
         /* Название предмета */     assertEquals(nam, out.get(0).ItemTitle);
@@ -133,7 +148,7 @@ public class CoupleTest {
 
         DayOfWeek day = DayOfWeek.TUESDAY;
 
-        TimeZone timezone = TimeZone.getDefault(); // GMT+0:00
+        ZoneId timezone = ZoneId.of("UTC+00:00"); // UTC+0:00
 
         String nGr = "Группа-,";
         String nam = "Математика и н. значения .pgtju340)(HG(fvhgvh"; // http://xpoint.ru/forums/internet/standards/thread/29138.xhtml
@@ -144,9 +159,11 @@ public class CoupleTest {
 
         List<Couple> out = Couple.GetCouplesByPeriod(start, finish, time1, time2, timezone, day, true, nGr, nam, typ, tic, aud, add);
 
+        assertNotNull(out);
+
         /* Количество */            assertEquals(2, out.size());
-        /* Время начала пары*/      assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 2), LocalTime.of(9, 0, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(0).DateAndTimeOfCouple);
-        /* Время начала пары*/      assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 2 + 14), LocalTime.of(9, 0, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(1).DateAndTimeOfCouple);
+        /* Время начала пары*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 2), LocalTime.of(9, 0, 0)), timezone), out.get(0).DateAndTimeOfCouple);
+        /* Время начала пары*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 2), LocalTime.of(9, 0, 0)), timezone).plus(2, ChronoUnit.WEEKS), out.get(1).DateAndTimeOfCouple);
         for(Couple o : out)
         {
             /* Продолжительность пары*/ assertEquals(Duration.between(time1, time2), o.DurationOfCouple);
@@ -173,7 +190,7 @@ public class CoupleTest {
 
         DayOfWeek day = DayOfWeek.WEDNESDAY; // Среда
 
-        TimeZone timezone = TimeZone.getDefault(); // GMT+0:00
+        ZoneId timezone = ZoneId.of("GMT+0:00"); // GMT+0:00
 
         String nGr = "АБВГ-01-ГА";
         String nam = ",vrihjegijrw\"woefkweo\21ew_093i2-FFOKEOKOкуцпцшокш342хгйе9з3кшйз3сь4мш9рХШАООХЕ3пп4хзр54.епз35щлр344щее.3уе4.н.3ен.ен.45..5н.54.542FPQWQ#@(-)@(#)$oqfk"; // http://xpoint.ru/forums/internet/standards/thread/29138.xhtml
@@ -184,16 +201,18 @@ public class CoupleTest {
 
         List<Couple> out = Couple.GetCouplesByPeriod(start, finish, time1, time2, timezone, day, true, nGr, nam, typ, tic, aud, add);
 
+        assertNotNull(out);
+
         /* Количество */            assertEquals(9, out.size());
-        /* Время начала пары 1*/      assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(0).DateAndTimeOfCouple);
-        /* Время начала пары 2*/      assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 17), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(1).DateAndTimeOfCouple);
-        /* Время начала пары 3*/      assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 31), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(2).DateAndTimeOfCouple);
-        /* Время начала пары 4*/      assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.FEBRUARY, 14), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(3).DateAndTimeOfCouple);
-        /* Время начала пары 5*/      assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.FEBRUARY, 28), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(4).DateAndTimeOfCouple);
-        /* Время начала пары 6*/      assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.MARCH, 14), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(5).DateAndTimeOfCouple);
-        /* Время начала пары 7*/      assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.MARCH, 28), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(6).DateAndTimeOfCouple);
-        /* Время начала пары 8*/      assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.APRIL, 11), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(7).DateAndTimeOfCouple);
-        /* Время начала пары 9*/      assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.APRIL, 25), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(8).DateAndTimeOfCouple);
+        /* Время начала пары 1*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(0  , ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(0).DateAndTimeOfCouple);
+        /* Время начала пары 2*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(2  , ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(1).DateAndTimeOfCouple);
+        /* Время начала пары 3*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(2*2, ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(2).DateAndTimeOfCouple);
+        /* Время начала пары 4*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(3*2, ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(3).DateAndTimeOfCouple);
+        /* Время начала пары 5*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(4*2, ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(4).DateAndTimeOfCouple);
+        /* Время начала пары 6*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(5*2, ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(5).DateAndTimeOfCouple);
+        /* Время начала пары 7*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(6*2, ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(6).DateAndTimeOfCouple);
+        /* Время начала пары 8*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(7*2, ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(7).DateAndTimeOfCouple);
+        /* Время начала пары 9*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(8*2, ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(8).DateAndTimeOfCouple);
         for(Couple o : out)
         {
             /* Продолжительность пары*/ assertEquals(Duration.between(time1, time2), o.DurationOfCouple);
@@ -220,7 +239,7 @@ public class CoupleTest {
 
         DayOfWeek day = DayOfWeek.THURSDAY; // Четверг
 
-        TimeZone timezone = TimeZone.getDefault(); // GMT+0:00
+        ZoneId timezone = ZoneId.of("GMT+00:00"); // GMT+0:00
 
         String nGr = "АБВГ-01-ГА";
         String nam = ",vrihjegijrw\"woefkweo\21ew_093i2-FFOKEOKOкуцпцшокш342хгйе9з3кшйз3сь4мш9рХШАООХЕ3пп4хзр54.епз35щлр344щее.3уе4.н.3ен.ен.45..5н.54.542FPQWQ#@(-)@(#)$oqfk"; // http://xpoint.ru/forums/internet/standards/thread/29138.xhtml
@@ -232,14 +251,17 @@ public class CoupleTest {
         List<Couple> out = Couple.GetCouplesByPeriod(start, finish, time1, time2, timezone, day, false, nGr, nam, typ, tic, aud, add);
 
         /* Количество */            assertEquals(8, out.size());
-        /* Время начала пары 1*/      assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(0).DateAndTimeOfCouple);
-        /* Время начала пары 2*/      assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 25), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(1).DateAndTimeOfCouple);
-        /* Время начала пары 3*/      assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.FEBRUARY, 8), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(2).DateAndTimeOfCouple);
-        /* Время начала пары 4*/      assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.FEBRUARY, 22), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(3).DateAndTimeOfCouple);
-        /* Время начала пары 5*/      assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.MARCH, 8), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(4).DateAndTimeOfCouple);
-        /* Время начала пары 6*/      assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.MARCH, 22), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(5).DateAndTimeOfCouple);
-        /* Время начала пары 7*/      assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.APRIL, 5), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(6).DateAndTimeOfCouple);
-        /* Время начала пары 8*/      assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.APRIL, 19), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(7).DateAndTimeOfCouple);
+
+        assertNotNull(out);
+
+        /* Время начала пары 1*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(0  , ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(0).DateAndTimeOfCouple);
+        /* Время начала пары 2*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(2  , ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(1).DateAndTimeOfCouple);
+        /* Время начала пары 3*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(2*2, ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(2).DateAndTimeOfCouple);
+        /* Время начала пары 4*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(2*3, ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(3).DateAndTimeOfCouple);
+        /* Время начала пары 5*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(2*4, ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(4).DateAndTimeOfCouple);
+        /* Время начала пары 6*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(2*5, ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(5).DateAndTimeOfCouple);
+        /* Время начала пары 7*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(2*6, ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(6).DateAndTimeOfCouple);
+        /* Время начала пары 8*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(2*7, ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(7).DateAndTimeOfCouple);
         for(Couple o : out)
         {
             /* Продолжительность пары*/ assertEquals(Duration.between(time1, time2), o.DurationOfCouple);
@@ -343,7 +365,7 @@ public class CoupleTest {
 
         DayOfWeek day = DayOfWeek.THURSDAY; // Четверг
 
-        TimeZone timezone = TimeZone.getDefault(); // GMT+0:00
+        ZoneId timezone = ZoneId.of("Europe/Moscow"); // Moscow
 
         // Имя группы.
         String nGr = "АБВГ-01-ГА";
@@ -360,10 +382,12 @@ public class CoupleTest {
 
         List<Couple> out = Couple.GetCouplesByPeriod(start, finish, time1, time2, timezone, day, false, nGr, nam, typ, tic, aud, add);
 
+        assertNotNull(out);
+
         /* Количество */            assertEquals(3, out.size());
-        /* Время начала пары 1*/    assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(0).DateAndTimeOfCouple);
-        /* Время начала пары 2*/    assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 25), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(1).DateAndTimeOfCouple);
-        /* Время начала пары 4*/    assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.FEBRUARY, 22), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(2).DateAndTimeOfCouple);
+        /* Время начала пары 1*/    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY , 11), LocalTime.of(10, 40, 0)), timezone), out.get(0).DateAndTimeOfCouple);
+        /* Время начала пары 2*/    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY , 25), LocalTime.of(10, 40, 0)), timezone), out.get(1).DateAndTimeOfCouple);
+        /* Время начала пары 4*/    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.FEBRUARY, 22), LocalTime.of(10, 40, 0)), timezone), out.get(2).DateAndTimeOfCouple);
         for(Couple o : out)
         {
             /* Продолжительность пары*/ assertEquals(Duration.between(time1, time2), o.DurationOfCouple);
@@ -392,7 +416,7 @@ public class CoupleTest {
 
         DayOfWeek day = DayOfWeek.THURSDAY; // Четверг
 
-        TimeZone timezone = TimeZone.getDefault(); // GMT+0:00
+        ZoneId timezone = ZoneId.of("GMT+00:00"); // GMT+0:00
 
         // Имя группы.
         String nGr = "АБВГ-01-ГА";
@@ -412,7 +436,7 @@ public class CoupleTest {
         /* Количество */            assertEquals(5, out.size());
         /* Время начала пары 3*/
         assertEquals(
-                OffsetDateTime.of(
+                ZonedDateTime.of(
                         LocalDateTime.of(
                                 LocalDate.of(
                                         2018, Month.FEBRUARY, 8
@@ -425,10 +449,10 @@ public class CoupleTest {
                 ),
                 out.get(0).DateAndTimeOfCouple
         );
-        /* Время начала пары 5*/    assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.MARCH, 8), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(1).DateAndTimeOfCouple);
-        /* Время начала пары 6*/    assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.MARCH, 22), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(2).DateAndTimeOfCouple);
-        /* Время начала пары 7*/    assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.APRIL, 5), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(3).DateAndTimeOfCouple);
-        /* Время начала пары 8*/    assertEquals(OffsetDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.APRIL, 19), LocalTime.of(10, 40, 0)), ZoneOffset.ofTotalSeconds(timezone)), out.get(4).DateAndTimeOfCouple);
+        /* Время начала пары 5*/    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.MARCH, 8 ), LocalTime.of(10, 40, 0)), timezone), out.get(1).DateAndTimeOfCouple);
+        /* Время начала пары 6*/    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.MARCH, 22), LocalTime.of(10, 40, 0)), timezone), out.get(2).DateAndTimeOfCouple);
+        /* Время начала пары 7*/    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.APRIL, 5 ), LocalTime.of(10, 40, 0)), timezone), out.get(3).DateAndTimeOfCouple);
+        /* Время начала пары 8*/    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.APRIL, 19), LocalTime.of(10, 40, 0)), timezone), out.get(4).DateAndTimeOfCouple);
         for(Couple o : out)
         {
             /* Продолжительность пары*/ assertEquals(Duration.between(time1, time2), o.DurationOfCouple);

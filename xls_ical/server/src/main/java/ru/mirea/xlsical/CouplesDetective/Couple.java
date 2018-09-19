@@ -2,7 +2,6 @@ package ru.mirea.xlsical.CouplesDetective;
 
 import java.time.*;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,7 +10,7 @@ public class Couple {
     /**
      * Дата и время пары.
      */
-    public OffsetDateTime DateAndTimeOfCouple;
+    public ZonedDateTime DateAndTimeOfCouple;
     /**
      * Количество времени, сколько длится пара.
      */
@@ -58,7 +57,7 @@ public class Couple {
      * @param address Адрес корпуса.
      * @return Возвращает, в какие дни будут пары.
      */
-    public static List<Couple> GetCouplesByPeriod(LocalDate start, LocalDate finish, LocalTime timeStartOfCouple, LocalTime timeFinishOfCouple, TimeZone timezoneStart, DayOfWeek dayOfWeek, boolean isOdd, String nameOfGroup, String itemTitle, String typeOfLesson, String nameOfTeacher, String audience, String address) {
+    public static List<Couple> GetCouplesByPeriod(LocalDate start, LocalDate finish, LocalTime timeStartOfCouple, LocalTime timeFinishOfCouple, ZoneId timezoneStart, DayOfWeek dayOfWeek, boolean isOdd, String nameOfGroup, String itemTitle, String typeOfLesson, String nameOfTeacher, String audience, String address) {
         ///.get(Calendar.DAY_OF_WEEK);
         // TODO: Данная функция ещё не разработана.
         itemTitle = itemTitle.trim();
