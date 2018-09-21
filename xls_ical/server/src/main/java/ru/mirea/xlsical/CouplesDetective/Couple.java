@@ -16,7 +16,7 @@ public class Couple {
     /**
      * Количество времени, сколько длится пара.
      */
-    public Duration DurationOfCouple;
+    public ZonedDateTime DateAndTimeFinishOfCouple;
     /**
      * Название группы.
      */
@@ -44,9 +44,11 @@ public class Couple {
 
     /**
      * Получает на входе данные про одну строку. Принимает решение, в какие дни будут пары. Не делает выборку данных.
+     * @param timeStartOfCouple Время начала пары.
+     * @param timeFinishOfCouple Время конца пары.
      * @param seeker Критерии, в которых указано, в каких рамках необходимо составить расписание.
      * @param nameOfGroup Рассматриваемая группа.
-     * @param dayOfWeek Рассматриваемый день недели. Использование: Напрмер, Calendar.MUNDAY.
+     * @param dayOfWeek Рассматриваемый день недели.
      * @param isOdd True, если это для не чётной недели. False, если эта строка для чётной недели.
      * @param itemTitle Первая строка данных названия предмета. Сюда может входить и номера недель.
      * @param typeOfLesson Первая строка типа занятия.
@@ -55,7 +57,7 @@ public class Couple {
      * @param address Адрес корпуса.
      * @return Возвращает, в какие дни будут пары.
      */
-    public static List<Couple> GetCouplesByPeriod(Seeker seeker, DayOfWeek dayOfWeek, boolean isOdd, String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address) {
+    public static List<Couple> GetCouplesByPeriod(Seeker seeker, LocalTime timeStartOfCouple, LocalTime timeFinishOfCouple, DayOfWeek dayOfWeek, boolean isOdd, String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address) {
         ZonedDateTime startT =  ZonedDateTime.of(LocalDateTime.of(seeker.dateStart, LocalTime.of(0, 0)), seeker.timezoneStart);
         ZonedDateTime finishT = ZonedDateTime.of(LocalDateTime.of(seeker.dateFinish, LocalTime.of(23, 50)), seeker.timezoneStart);
         ZonedDateTime current = startT;
@@ -66,6 +68,7 @@ public class Couple {
         audience = audience.trim();
         address = address.trim();
         return null;
+
     }
 
     /**

@@ -37,11 +37,14 @@ public class CoupleTest {
         assertNotNull(out);
 
         /* Количество */            assertEquals(1, out.size());
-        ZonedDateTime zonedDateTimeDateTime = ZonedDateTime.of(
-                LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 1), LocalTime.of(0, 1, 0)),
+        ZonedDateTime zonedDateTimeDateTime1 = ZonedDateTime.of(
+                LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 1), time1),
                         ZoneId.systemDefault());
-        /* Время начала пары*/      assertEquals(zonedDateTimeDateTime, out.get(0).DateAndTimeOfCouple);
-        /* Продолжительность пары*/ assertEquals(Duration.between(time1, time2), out.get(0).DurationOfCouple);
+        ZonedDateTime zonedDateTimeDateTime2 = ZonedDateTime.of(
+                LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 1), time2),
+                ZoneId.systemDefault());
+        /* Время начала пары */     assertEquals(zonedDateTimeDateTime1, out.get(0).DateAndTimeOfCouple);
+        /* Время конца пары */      assertEquals(zonedDateTimeDateTime2, out.get(0).DateAndTimeFinishOfCouple);
         /* Название группы */       assertEquals(nGr, out.get(0).NameOfGroup);
         /* Название предмета */     assertEquals(nam, out.get(0).ItemTitle);
         /* Тип пары */              assertEquals(typ, out.get(0).TypeOfLesson);
@@ -82,8 +85,11 @@ public class CoupleTest {
                 LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 1), LocalTime.of(0, 1, 0)),
                 timezone
         );
-        /* Время начала пары*/      assertEquals(zonedDateTime, out.get(0).DateAndTimeOfCouple);
-        /* Продолжительность пары*/ assertEquals(Duration.between(time1, time2), out.get(0).DurationOfCouple);
+        ZonedDateTime zonedDateTimeDateTime2 = ZonedDateTime.of(
+                LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 1), time2),
+                ZoneId.systemDefault());
+        /* Время начала пары */     assertEquals(zonedDateTime, out.get(0).DateAndTimeOfCouple);
+        /* Время конца пары */      assertEquals(zonedDateTimeDateTime2, out.get(0).DateAndTimeFinishOfCouple);
         /* Название группы */       assertEquals(nGr, out.get(0).NameOfGroup);
         /* Название предмета */     assertEquals(nam, out.get(0).ItemTitle);
         /* Тип пары */              assertEquals(typ, out.get(0).TypeOfLesson);
@@ -124,8 +130,11 @@ public class CoupleTest {
                 LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 1), LocalTime.of(0, 1, 0)),
                 timezone
         );
-        /* Время начала пары*/      assertEquals(zonedDateTime, out.get(0).DateAndTimeOfCouple);
-        /* Продолжительность пары*/ assertEquals(Duration.between(time1, time2), out.get(0).DurationOfCouple);
+        ZonedDateTime zonedDateTimeDateTime2 = ZonedDateTime.of(
+                LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 1), time2),
+                ZoneId.systemDefault());
+        /* Время начала пары */     assertEquals(zonedDateTime, out.get(0).DateAndTimeOfCouple);
+        /* Время конца пары */      assertEquals(zonedDateTimeDateTime2, out.get(0).DateAndTimeFinishOfCouple);
         /* Название группы */       assertEquals(nGr, out.get(0).NameOfGroup);
         /* Название предмета */     assertEquals(nam, out.get(0).ItemTitle);
         /* Тип пары */              assertEquals(typ, out.get(0).TypeOfLesson);
@@ -164,9 +173,11 @@ public class CoupleTest {
         /* Количество */            assertEquals(2, out.size());
         /* Время начала пары*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 2), LocalTime.of(9, 0, 0)), timezone), out.get(0).DateAndTimeOfCouple);
         /* Время начала пары*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 2), LocalTime.of(9, 0, 0)), timezone).plus(2, ChronoUnit.WEEKS), out.get(1).DateAndTimeOfCouple);
+
+        /* Время конца пары */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 2), time2), timezone), out.get(0).DateAndTimeFinishOfCouple);
+        /* Время конца пары */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 2), time2), timezone).plus(2, ChronoUnit.WEEKS), out.get(1).DateAndTimeFinishOfCouple);
         for(Couple o : out)
         {
-            /* Продолжительность пары*/ assertEquals(Duration.between(time1, time2), o.DurationOfCouple);
             /* Название группы */       assertEquals(nGr, o.NameOfGroup);
             /* Название предмета */     assertEquals(nam, o.ItemTitle);
             /* Тип пары */              assertEquals(typ, o.TypeOfLesson);
@@ -203,7 +214,7 @@ public class CoupleTest {
 
         assertNotNull(out);
 
-        /* Количество */            assertEquals(9, out.size());
+        /* Количество */              assertEquals(9, out.size());
         /* Время начала пары 1*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(0  , ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(0).DateAndTimeOfCouple);
         /* Время начала пары 2*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(2  , ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(1).DateAndTimeOfCouple);
         /* Время начала пары 3*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(2*2, ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(2).DateAndTimeOfCouple);
@@ -213,9 +224,20 @@ public class CoupleTest {
         /* Время начала пары 7*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(6*2, ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(6).DateAndTimeOfCouple);
         /* Время начала пары 8*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(7*2, ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(7).DateAndTimeOfCouple);
         /* Время начала пары 9*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(8*2, ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(8).DateAndTimeOfCouple);
+
+        /* Время конца пары 1 */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(0  , ChronoUnit.WEEKS), time2), timezone), out.get(0).DateAndTimeFinishOfCouple);
+        /* Время конца пары 2 */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(2  , ChronoUnit.WEEKS), time2), timezone), out.get(1).DateAndTimeFinishOfCouple);
+        /* Время конца пары 3 */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(2*2, ChronoUnit.WEEKS), time2), timezone), out.get(2).DateAndTimeFinishOfCouple);
+        /* Время конца пары 4 */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(3*2, ChronoUnit.WEEKS), time2), timezone), out.get(3).DateAndTimeFinishOfCouple);
+        /* Время конца пары 5 */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(4*2, ChronoUnit.WEEKS), time2), timezone), out.get(4).DateAndTimeFinishOfCouple);
+        /* Время конца пары 6 */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(5*2, ChronoUnit.WEEKS), time2), timezone), out.get(5).DateAndTimeFinishOfCouple);
+        /* Время конца пары 7 */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(6*2, ChronoUnit.WEEKS), time2), timezone), out.get(6).DateAndTimeFinishOfCouple);
+        /* Время конца пары 8 */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(7*2, ChronoUnit.WEEKS), time2), timezone), out.get(7).DateAndTimeFinishOfCouple);
+        /* Время конца пары 9 */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(8*2, ChronoUnit.WEEKS), time2), timezone), out.get(8).DateAndTimeFinishOfCouple);
+
+
         for(Couple o : out)
         {
-            /* Продолжительность пары*/ assertEquals(Duration.between(time1, time2), o.DurationOfCouple);
             /* Название группы */       assertEquals(nGr, o.NameOfGroup);
             /* Название предмета */     assertEquals(nam, o.ItemTitle);
             /* Тип пары */              assertEquals(typ, o.TypeOfLesson);
@@ -262,9 +284,17 @@ public class CoupleTest {
         /* Время начала пары 6*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(2*5, ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(5).DateAndTimeOfCouple);
         /* Время начала пары 7*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(2*6, ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(6).DateAndTimeOfCouple);
         /* Время начала пары 8*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(2*7, ChronoUnit.WEEKS), LocalTime.of(10, 40, 0)), timezone), out.get(7).DateAndTimeOfCouple);
+
+        /* Время конца пары 1 */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(0  , ChronoUnit.WEEKS), time2), timezone), out.get(0).DateAndTimeFinishOfCouple);
+        /* Время конца пары 2 */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(2  , ChronoUnit.WEEKS), time2), timezone), out.get(1).DateAndTimeFinishOfCouple);
+        /* Время конца пары 3 */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(2*2, ChronoUnit.WEEKS), time2), timezone), out.get(2).DateAndTimeFinishOfCouple);
+        /* Время конца пары 4 */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(2*3, ChronoUnit.WEEKS), time2), timezone), out.get(3).DateAndTimeFinishOfCouple);
+        /* Время конца пары 5 */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(2*4, ChronoUnit.WEEKS), time2), timezone), out.get(4).DateAndTimeFinishOfCouple);
+        /* Время конца пары 6 */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(2*5, ChronoUnit.WEEKS), time2), timezone), out.get(5).DateAndTimeFinishOfCouple);
+        /* Время конца пары 7 */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(2*6, ChronoUnit.WEEKS), time2), timezone), out.get(6).DateAndTimeFinishOfCouple);
+        /* Время конца пары 8 */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(2*7, ChronoUnit.WEEKS), time2), timezone), out.get(7).DateAndTimeFinishOfCouple);
         for(Couple o : out)
         {
-            /* Продолжительность пары*/ assertEquals(Duration.between(time1, time2), o.DurationOfCouple);
             /* Название группы */       assertEquals(nGr, o.NameOfGroup);
             /* Название предмета */     assertEquals(nam, o.ItemTitle);
             /* Тип пары */              assertEquals(typ, o.TypeOfLesson);
@@ -388,9 +418,13 @@ public class CoupleTest {
         /* Время начала пары 1*/    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY , 11), LocalTime.of(10, 40, 0)), timezone), out.get(0).DateAndTimeOfCouple);
         /* Время начала пары 2*/    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY , 25), LocalTime.of(10, 40, 0)), timezone), out.get(1).DateAndTimeOfCouple);
         /* Время начала пары 4*/    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.FEBRUARY, 22), LocalTime.of(10, 40, 0)), timezone), out.get(2).DateAndTimeOfCouple);
+
+        /* Время конца пары 1*/    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY , 11), time2), timezone), out.get(0).DateAndTimeFinishOfCouple);
+        /* Время конца пары 2*/    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY , 25), time2), timezone), out.get(1).DateAndTimeFinishOfCouple);
+        /* Время конца пары 4*/    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.FEBRUARY, 22), time2), timezone), out.get(2).DateAndTimeFinishOfCouple);
+
         for(Couple o : out)
         {
-            /* Продолжительность пары*/ assertEquals(Duration.between(time1, time2), o.DurationOfCouple);
             /* Название группы */       assertEquals(nGr, o.NameOfGroup);
             /* Название предмета */     assertEquals(nam, o.ItemTitle);
             /* Тип пары */              assertEquals(typ, o.TypeOfLesson);
@@ -453,9 +487,13 @@ public class CoupleTest {
         /* Время начала пары 6*/    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.MARCH, 22), LocalTime.of(10, 40, 0)), timezone), out.get(2).DateAndTimeOfCouple);
         /* Время начала пары 7*/    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.APRIL, 5 ), LocalTime.of(10, 40, 0)), timezone), out.get(3).DateAndTimeOfCouple);
         /* Время начала пары 8*/    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.APRIL, 19), LocalTime.of(10, 40, 0)), timezone), out.get(4).DateAndTimeOfCouple);
+
+        /* Время конца пары 5 */    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.MARCH, 8 ), time2), timezone), out.get(1).DateAndTimeFinishOfCouple);
+        /* Время конца пары 6 */    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.MARCH, 22), time2), timezone), out.get(2).DateAndTimeFinishOfCouple);
+        /* Время конца пары 7 */    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.APRIL, 5 ), time2), timezone), out.get(3).DateAndTimeFinishOfCouple);
+        /* Время конца пары 8 */    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.APRIL, 19), time2), timezone), out.get(4).DateAndTimeFinishOfCouple);
         for(Couple o : out)
         {
-            /* Продолжительность пары*/ assertEquals(Duration.between(time1, time2), o.DurationOfCouple);
             /* Название группы */       assertEquals(nGr, o.NameOfGroup);
             /* Название предмета */     assertEquals(nam, o.ItemTitle);
             /* Тип пары */              assertEquals(typ, o.TypeOfLesson);
