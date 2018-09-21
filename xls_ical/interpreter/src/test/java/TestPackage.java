@@ -5,7 +5,7 @@ import ru.mirea.xlsical.interpreter.Seeker;
 import ru.mirea.xlsical.interpreter.SeekerType;
 
 import java.time.LocalDate;
-import java.util.TimeZone;
+import java.time.ZoneId;
 
 import static org.junit.Assert.*;
 
@@ -34,7 +34,7 @@ public class TestPackage {
                                                         SeekerType.Teacher,
                                                         LocalDate.MIN,
                                                         LocalDate.MAX,
-                                                        TimeZone.getDefault(),
+                                                        ZoneId.systemDefault(),
                                                         "МУУУУУУ",
                                                         1)
                                 ).
@@ -49,7 +49,7 @@ public class TestPackage {
                         SeekerType.Teacher,
                         LocalDate.MIN,
                         LocalDate.MAX,
-                        TimeZone.getDefault(),
+                        ZoneId.systemDefault(),
                         "МУУУУУУ",
                         1), a.QueryCriteria);
     }

@@ -75,8 +75,9 @@ public class Seeker implements Serializable {
                             seekerType.equals(e.seekerType) &&
                             dateStart.equals(e.dateStart) &&
                             dateFinish.equals(e.dateFinish) &&
-                            timezoneStart == e.timezoneStart &&
-                            defaultAddress.equals(e.defaultAddress);
+                            timezoneStart.equals(e.timezoneStart) &&
+                            defaultAddress.equals(e.defaultAddress) &&
+                            startWeek == e.startWeek;
         }
         return false;
     }

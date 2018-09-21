@@ -65,7 +65,7 @@ public class Couple {
         nameOfTeacher = nameOfTeacher.trim();
         audience = audience.trim();
         address = address.trim();
-        
+        return null;
     }
 
     /**
