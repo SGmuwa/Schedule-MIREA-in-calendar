@@ -36,7 +36,7 @@ public class TestPackage {
                                                         LocalDate.MAX,
                                                         TimeZone.getDefault(),
                                                         "МУУУУУУ",
-                                                        startWeek)
+                                                        1)
                                 ).
                                 toByteArray()
                 );
@@ -51,6 +51,6 @@ public class TestPackage {
                         LocalDate.MAX,
                         TimeZone.getDefault(),
                         "МУУУУУУ",
-                        startWeek), a.QueryCriteria);
+                        1), a.QueryCriteria);
     }
 }
