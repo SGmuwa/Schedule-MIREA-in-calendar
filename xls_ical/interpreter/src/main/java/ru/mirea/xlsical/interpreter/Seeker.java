@@ -35,6 +35,10 @@ public class Seeker implements Serializable {
      * Адрес кампуса по-умолчанию.
      */
     public final String defaultAddress;
+    /**
+     * Первоначальный номер недели. По-умолчанию указывать = 1.
+     */
+    public final int startWeek;
 
 
     //public List<Couple> Couples = new LinkedList<>(); Нельзя здесь зависимость от Couple.
@@ -47,14 +51,16 @@ public class Seeker implements Serializable {
      * @param dateFinish Дата конца составления расписания. До какого календарного дня надо составлять расписание? Дата указывается по местному времени.
      * @param timezoneStart Часовой пояс, где будут пары. Это значение в начале семестра.
      * @param defaultAddress Какой адрес корпуса по-умолчанию?
+     * @param startWeek Первоначальный номер недели. По-умолчанию указывать = 1.
      */
-    public Seeker(String nameOfSeeker, SeekerType seekerType, LocalDate dateStart, LocalDate dateFinish, ZoneId timezoneStart, String defaultAddress) {
+    public Seeker(String nameOfSeeker, SeekerType seekerType, LocalDate dateStart, LocalDate dateFinish, ZoneId timezoneStart, String defaultAddress, int startWeek) {
         this.nameOfSeeker = nameOfSeeker;
         this.seekerType = seekerType;
         this.dateStart = dateStart;
         this.dateFinish = dateFinish;
         this.timezoneStart = timezoneStart;
         this.defaultAddress = defaultAddress;
+        this.startWeek = startWeek;
     }
 
     @Override

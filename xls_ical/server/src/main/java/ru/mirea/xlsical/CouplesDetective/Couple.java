@@ -59,12 +59,13 @@ public class Couple {
         ZonedDateTime startT =  ZonedDateTime.of(LocalDateTime.of(seeker.dateStart, LocalTime.of(0, 0)), seeker.timezoneStart);
         ZonedDateTime finishT = ZonedDateTime.of(LocalDateTime.of(seeker.dateFinish, LocalTime.of(23, 50)), seeker.timezoneStart);
         ZonedDateTime current = startT;
+        int currentW = seeker.startWeek;
         itemTitle = itemTitle.trim();
         typeOfLesson = typeOfLesson.trim();
         nameOfTeacher = nameOfTeacher.trim();
         audience = audience.trim();
         address = address.trim();
-
+        
     }
 
     /**

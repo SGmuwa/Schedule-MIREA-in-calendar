@@ -21,7 +21,7 @@ public class TestSeeker {
                 LocalDate.of(2000, 5, 5),
                 LocalDate.of(2000, 5, 10),
                 TimeZone.getDefault(),
-                "Москва, проспект Вернадского, 78, РТУ МИРЭА");
+                "Москва, проспект Вернадского, 78, РТУ МИРЭА", startWeek);
 
         assertEquals("name", test.nameOfSeeker);
         assertEquals(SeekerType.Teacher, test.seekerType);
