@@ -1,5 +1,7 @@
 package ru.mirea.xlsical.CouplesDetective;
 
+import ru.mirea.xlsical.interpreter.Seeker;
+
 import java.time.*;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -41,7 +43,32 @@ public class Couple {
     public String TypeOfLesson;
 
     /**
-     * Получает на входе данные про две строки. Принимает решение, в какие дни будут пары.
+     * Получает на входе данные про одну строку. Принимает решение, в какие дни будут пары. Не делает выборку данных.
+     * @param seeker Критерии, в которых указано, в каких рамках необходимо составить расписание.
+     * @param nameOfGroup Рассматриваемая группа.
+     * @param dayOfWeek Рассматриваемый день недели. Использование: Напрмер, Calendar.MUNDAY.
+     * @param isOdd True, если это для не чётной недели. False, если эта строка для чётной недели.
+     * @param itemTitle Первая строка данных названия предмета. Сюда может входить и номера недель.
+     * @param typeOfLesson Первая строка типа занятия.
+     * @param nameOfTeacher Первая строка данных преподавателя.
+     * @param audience Первая строка аудитории.
+     * @param address Адрес корпуса.
+     * @return Возвращает, в какие дни будут пары.
+     */
+    public static List<Couple> GetCouplesByPeriod(Seeker seeker, DayOfWeek dayOfWeek, boolean isOdd, String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address) {
+        ZonedDateTime startT =  ZonedDateTime.of(LocalDateTime.of(seeker.dateStart, LocalTime.of(0, 0)), seeker.timezoneStart);
+        ZonedDateTime finishT = ZonedDateTime.of(LocalDateTime.of(seeker.dateFinish, LocalTime.of(23, 50)), seeker.timezoneStart);
+        ZonedDateTime current = startT;
+        itemTitle = itemTitle.trim();
+        typeOfLesson = typeOfLesson.trim();
+        nameOfTeacher = nameOfTeacher.trim();
+        audience = audience.trim();
+        address = address.trim();
+
+    }
+
+    /**
+     * Получает на входе данные про одну строку. Принимает решение, в какие дни будут пары. Не делает выборку данных.
      * @param start Дата и время начала сессии. Расписание будет составлено с этого дня и времени.
      * @param finish Дата и время окончания сессии. Расписание будет составлено до этого дня и времени.
      * @param timeStartOfCouple Время начала пары.
