@@ -18,20 +18,9 @@ import java.util.Random;
 
 public class TaskExecutor implements Runnable {
 
-    private static final File pathToTemp;
     private static final Random ran = new Random();
     private Queue<Package> qIn;
     private Queue<Package> qOut;
-
-    static {
-        pathToTemp = new File(System.getProperty("java.io.tmpdir") + File.separator + "gosha");
-        if (!pathToTemp.exists()) {
-            pathToTemp.mkdir();
-        } else {
-            deleteDir(pathToTemp);
-            pathToTemp.mkdir();
-        }
-    }
 
     private static void deleteDir(File file) {
         File[] contents = file.listFiles();
