@@ -11,9 +11,9 @@ import java.io.ObjectInputStream;
 public class PackageToClient extends Package {
 
     /**
-     * Тут содержатся файл .iCal.
+     * Тут содержатся путь до файла "*.iCal".
      */
-    public final byte[] CalFile;
+    public final String CalFile;
 
     /**
      * Тут содержится количество созданных мероприятий.
@@ -27,10 +27,13 @@ public class PackageToClient extends Package {
 
     /**
     Строит данные отправляемые на клиент.
+     @param ctx Уникальный идентификатор сообщения.
      @param CalFile Тут содержатся файл .iCal.
      @param Count Тут содержится количество созданных мероприятий.
+     @param Messages Сообщение от обработчика пользователю клиента.
      */
-    public PackageToClient(byte[] CalFile, int Count, String Messages) {
+    public PackageToClient(Object ctx, String CalFile, int Count, String Messages) {
+        super(ctx);
         this.CalFile = CalFile;
         this.Count = Count;
         this.Messages = Messages;

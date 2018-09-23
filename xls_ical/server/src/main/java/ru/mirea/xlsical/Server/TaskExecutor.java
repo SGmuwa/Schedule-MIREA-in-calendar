@@ -1,12 +1,12 @@
 package ru.mirea.xlsical.Server;
 
-import io.netty.channel.ChannelHandlerContext;
 import ru.mirea.xlsical.CouplesDetective.ExportCouplesToICal;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
 import ru.mirea.xlsical.CouplesDetective.Couple;
 import ru.mirea.xlsical.CouplesDetective.Detective;
 import ru.mirea.xlsical.CouplesDetective.DetectiveException;
+import ru.mirea.xlsical.interpreter.Package;
 import ru.mirea.xlsical.interpreter.PackageToClient;
 import ru.mirea.xlsical.interpreter.PackageToServer;
 
@@ -20,8 +20,8 @@ public class TaskExecutor implements Runnable {
 
     private static final File pathToTemp;
     private static final Random ran = new Random();
-    private Queue<ID_Pack> qIn;
-    private Queue<ID_Pack> qOut;
+    private Queue<Package> qIn;
+    private Queue<Package> qOut;
 
     static {
         pathToTemp = new File(System.getProperty("java.io.tmpdir") + File.separator + "gosha");
@@ -43,7 +43,7 @@ public class TaskExecutor implements Runnable {
         file.delete();
     }
 
-    public TaskExecutor(Queue<ID_Pack> qIn, Queue<ID_Pack> qOut) {
+    public TaskExecutor(Queue<Package> qIn, Queue<Package> qOut) {
         this.qIn = qIn;
         this.qOut = qOut;
     }
@@ -54,7 +54,7 @@ public class TaskExecutor implements Runnable {
     }
 
     public void step() {
-        ID_Pack message;
+        Package message;
         List<Couple> couples;
         message = poll();
         PackageToServer a;
@@ -66,22 +66,22 @@ public class TaskExecutor implements Runnable {
             return;
         }
         try {
-            couples = Detective.startAnInvestigations(a.QueryCriteria, extractsBytes(a.ExcelsFiles));
+            couples = Detective.startAnInvestigations(a.queryCriteria, extractsBytes(a.excelsFiles));
         } catch (IOException error) {
-            pull(new ID_Pack(ctx, new PackageToClient(new byte[0], 0, "Ошибка внутри сервера.")));
+            pull(new Package(ctx, new PackageToClient(new byte[0], 0, "Ошибка внутри сервера.")));
             System.out.println("[ERROR] Почему папка temp не доступна??");
             return;
         } catch (DetectiveException error) {
-            pull(new ID_Pack(ctx, new PackageToClient(new byte[0], 0, error.getMessage())));
+            pull(new Package(ctx, new PackageToClient(new byte[0], 0, error.getMessage())));
             return;
         }
         String out = ExportCouplesToICal.start(couples);
-        pull(new ID_Pack(ctx, new PackageToClient(out.getBytes(), couples.size(), "ok.")));
+        pull(new Package(ctx, new PackageToClient(out.getBytes(), couples.size(), "ok.")));
     }
 
-    private ID_Pack poll() {
+    private Package poll() {
         synchronized (qIn) {
-            ID_Pack out;
+            Package out;
             do {
                 out = qIn.poll();
             } while (out == null);
@@ -89,7 +89,7 @@ public class TaskExecutor implements Runnable {
         }
     }
 
-    private void pull(ID_Pack pack) {
+    private void pull(Package pack) {
         synchronized (qOut) {qOut.add(pack);}
     }
 

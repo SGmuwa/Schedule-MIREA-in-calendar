@@ -42,7 +42,7 @@ public class TestPackage {
                 );
 
         assertArrayEquals(new byte[][]{"My Testing из изи".getBytes(), "VERY".getBytes()},
-                a.ExcelsFiles);
+                a.excelsFiles);
         assertEquals(new Seeker
                 (
                         "1",
@@ -51,6 +51,6 @@ public class TestPackage {
                         LocalDate.MAX,
                         ZoneId.systemDefault(),
                         "МУУУУУУ",
-                        1), a.QueryCriteria);
+                        1), a.queryCriteria);
     }
 }

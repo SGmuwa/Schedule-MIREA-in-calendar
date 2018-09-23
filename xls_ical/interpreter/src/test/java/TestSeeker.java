@@ -38,8 +38,8 @@ public class TestSeeker {
 
         PackageToServer sv = new PackageToServer(new byte[][] {{0, 0}}, test);
 
-        assertEquals(test, sv.QueryCriteria);
-        assertArrayEquals(new byte[][] {{0, 0}}, sv.ExcelsFiles);
+        assertEquals(test, sv.queryCriteria);
+        assertArrayEquals(new byte[][] {{0, 0}}, sv.excelsFiles);
     }
 
 

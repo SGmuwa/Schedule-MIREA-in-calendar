@@ -4,6 +4,15 @@ import java.io.*;
 
 public abstract class Package implements Serializable {
 
+    public Package(Object ctx) {
+        this.ctx = ctx;
+    }
+
+    /**
+     * Уникальный индентификатор сообщения.
+     */
+    public final Object ctx;
+
     /**
      * Преобразует текущий класс в поток байтов.
      * @return Хранилище данного класса в виде байтов.

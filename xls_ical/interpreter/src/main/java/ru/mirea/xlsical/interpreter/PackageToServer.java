@@ -11,23 +11,24 @@ import java.io.ObjectInputStream;
 public class PackageToServer extends Package {
 
     /**
-    Тут содержатся файлы и .xls и .xlsx
-    Это массив файлов. Каждый файл - это массив байтов.
+    Тут содержатся пути до файлов .xls и .xlsx.
      */
-    public final byte[][] ExcelsFiles;
+    public final String[] excelsFiles;
     /**
     Тут содержатся критерии запроса.
      */
-    public final Seeker QueryCriteria;
+    public final Seeker queryCriteria;
 
     /**
     Строит данные отправляемые на сервер.
-     @param ExcelsFiles Тут содержатся файлы и .xls и .xlsx. Это массив файлов. Каждый файл - это массив байтов.
-     @param QueryCriteria Тут содержатся критерии запроса.
+     @param ctx Уникальный идентификатор сообщения.
+     @param excelsFiles Тут содержатся пути до файлов .xls и .xlsx.
+     @param queryCriteria Тут содержатся критерии запроса.
      */
-    public PackageToServer(byte[][] ExcelsFiles, Seeker QueryCriteria) {
-        this.ExcelsFiles = ExcelsFiles;
-        this.QueryCriteria = QueryCriteria;
+    public PackageToServer(Object ctx, String[] excelsFiles, Seeker queryCriteria) {
+        super(ctx);
+        this.excelsFiles = excelsFiles;
+        this.queryCriteria = queryCriteria;
     }
 
 
