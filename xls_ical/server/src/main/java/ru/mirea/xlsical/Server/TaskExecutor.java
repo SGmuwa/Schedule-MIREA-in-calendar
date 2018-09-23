@@ -6,7 +6,6 @@ import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
 import ru.mirea.xlsical.CouplesDetective.Couple;
 import ru.mirea.xlsical.CouplesDetective.Detective;
 import ru.mirea.xlsical.CouplesDetective.DetectiveException;
-import ru.mirea.xlsical.interpreter.Package;
 import ru.mirea.xlsical.interpreter.PackageToClient;
 import ru.mirea.xlsical.interpreter.PackageToServer;
 
@@ -44,6 +43,7 @@ public class TaskExecutor implements Runnable {
         Collection<ExcelFileInterface> fs = null;
         try {
             fs = openExcelFiles(inputP.excelsFiles);
+            couples = Detective.startAnInvestigations(inputP.queryCriteria, fs);
         } catch (IOException error) {
             qOut.add(new PackageToClient(inputP.ctx, null, 0, "Ошибка внутри сервера."));
             error.printStackTrace();
