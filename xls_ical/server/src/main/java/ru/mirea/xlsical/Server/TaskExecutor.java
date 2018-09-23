@@ -11,96 +11,108 @@ import ru.mirea.xlsical.interpreter.PackageToClient;
 import ru.mirea.xlsical.interpreter.PackageToServer;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.SynchronousQueue;
 
 public class TaskExecutor implements Runnable {
 
-    private static final Random ran = new Random();
-    private Queue<Package> qIn;
-    private Queue<Package> qOut;
+    private final SynchronousQueue<PackageToServer> qIn;
+    private final SynchronousQueue<PackageToClient> qOut;
 
-    private static void deleteDir(File file) {
-        File[] contents = file.listFiles();
-        if (contents != null) {
-            for (File f : contents) {
-                deleteDir(f);
-            }
-        }
-        file.delete();
+    public TaskExecutor() {
+        this.qIn = new SynchronousQueue<>();
+        this.qOut = new SynchronousQueue<>();
     }
 
-    public TaskExecutor(Queue<Package> qIn, Queue<Package> qOut) {
-        this.qIn = qIn;
-        this.qOut = qOut;
-    }
-
+    /**
+     * Запускает выполнение задач.
+     */
     @Override
     public void run() {
-        while(!Thread.currentThread().isInterrupted()) step();
+        while(!Thread.currentThread().isInterrupted())
+            step();
     }
 
     public void step() {
-        Package message;
         List<Couple> couples;
-        message = poll();
-        PackageToServer a;
-        Object ctx = message.id;
-        if(message.data instanceof PackageToServer)
-            a = (PackageToServer) message.data;
-        else {
-            System.out.println("Error to convert to PackageToServer.");
+        PackageToServer inputP;
+        do inputP = qIn.poll(); while (inputP == null);
+        if(inputP.excelsFiles == null) {
+            qOut.add(new PackageToClient(inputP.ctx, null, 0, "Ошибка внутри сервера."));
             return;
         }
+        Collection<ExcelFileInterface> fs = null;
         try {
-            couples = Detective.startAnInvestigations(a.queryCriteria, extractsBytes(a.excelsFiles));
+            fs = openExcelFiles(inputP.excelsFiles);
         } catch (IOException error) {
-            pull(new Package(ctx, new PackageToClient(new byte[0], 0, "Ошибка внутри сервера.")));
-            System.out.println("[ERROR] Почему папка temp не доступна??");
+            qOut.add(new PackageToClient(inputP.ctx, null, 0, "Ошибка внутри сервера."));
+            error.printStackTrace();
             return;
         } catch (DetectiveException error) {
-            pull(new Package(ctx, new PackageToClient(new byte[0], 0, error.getMessage())));
+            qOut.add(new PackageToClient(inputP.ctx, null, 0, error.getMessage()));
             return;
+        } finally {
+            if(fs != null)
+            for(Closeable file : fs)
+                if(file != null)
+                    try {
+                        file.close();
+                    }
+                    catch (IOException err) {
+                        err.printStackTrace();
+                        System.out.println("Can't close file into error.");
+                    }
         }
-        String out = ExportCouplesToICal.start(couples);
-        pull(new Package(ctx, new PackageToClient(out.getBytes(), couples.size(), "ok.")));
+        qOut.add(new PackageToClient(
+                inputP.ctx,
+                ExportCouplesToICal.start(couples),
+                couples.size(),
+                "ok."));
     }
 
-    private Package poll() {
-        synchronized (qIn) {
-            Package out;
-            do {
-                out = qIn.poll();
-            } while (out == null);
-            return out;
-        }
+    public PackageToClient poll() {
+        return qOut.poll();
     }
 
-    private void pull(Package pack) {
-        synchronized (qOut) {qOut.add(pack);}
+    public void pull(PackageToServer pack) {
+        qIn.add(pack);
     }
 
-    private ArrayList<ExcelFileInterface> extractsBytes(byte[][] files) {
-        ArrayList<ExcelFileInterface> output = new ArrayList<>(files.length);
-        for(int index = files.length - 1; index >= 0; index--) {
-            output.add(extractsBytes(files[index]));
+    private ArrayList<ExcelFileInterface> openExcelFiles(String[] filesStr) {
+        ArrayList<ExcelFileInterface> output = new ArrayList<>(filesStr.length);
+        for(int index = filesStr.length - 1; index >= 0; index--) {
+            output.add(openExcelFiles(filesStr[index]));
         }
         return output;
     }
 
-    private ExcelFileInterface extractsBytes(byte[] file) {
-        File a = new File(pathToTemp, ran.nextInt() + "" + ran.nextInt() + ".xlsxlsx.bin");
-        try {
-            a.createNewFile();
-        } catch (IOException error) {
+    private ArrayList<ExcelFileInterface> openExcelFiles(Collection<? extends String> filesStr) {
+        int size = filesStr.size();
+        ArrayList<ExcelFileInterface> output = new ArrayList<>(size);
+        for(String str : filesStr) {
+            output.add(openExcelFiles(str));
+        }
+        return output;
+    }
+
+    private LinkedList<ExcelFileInterface> openExcelFiles(Iterable<? extends String> filesStr) {
+        LinkedList<ExcelFileInterface> output = new LinkedList<>();
+        for(String str : filesStr) {
+            output.add(openExcelFiles(str));
+        }
+        return output;
+    }
+
+    private ExcelFileInterface openExcelFiles(String fileStr) {
+        File a = new File(fileStr);
+        if(!a.canRead()) {
+            System.out.println("TaskExecutor::openExcelFiles(String fileStr) - can't reed file " + fileStr);
             return null;
         }
-        try(FileOutputStream out = new FileOutputStream(a)) {
-            out.write(file);
+        try {
             return new OpenFile(a.getAbsolutePath());
         } catch (IOException error) {
+            error.printStackTrace();
             return null;
         }
     }
