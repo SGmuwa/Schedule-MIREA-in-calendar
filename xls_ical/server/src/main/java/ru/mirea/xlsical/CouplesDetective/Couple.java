@@ -62,13 +62,14 @@ public class Couple {
         ZonedDateTime finishT = ZonedDateTime.of(LocalDateTime.of(seeker.dateFinish, LocalTime.of(23, 50)), seeker.timezoneStart);
         ZonedDateTime current = startT;
         int currentW = seeker.startWeek;
-        itemTitle = itemTitle.trim();
-        typeOfLesson = typeOfLesson.trim();
-        nameOfTeacher = nameOfTeacher.trim();
-        audience = audience.trim();
-        address = address.trim();
-        return null;
 
+        itemTitle = normalizeString(itemTitle);
+        typeOfLesson = normalizeString(typeOfLesson);
+        nameOfTeacher = normalizeString(nameOfTeacher);
+        audience = normalizeString(audience);
+        address = normalizeString(address);
+
+        //if(isStringHaveWeek())
     }
 
     /**
@@ -122,5 +123,22 @@ public class Couple {
         Pattern p = Pattern.compile("((^.+\\s)|(^))кр\\.?.+$");
         Matcher m = p.matcher(itemTitle.replaceAll("\n", " "));
         return m.matches();
+    }
+
+    /**
+     * Удаляет символы 0..0x1F, заменяя на пробелы. Удаляет пробелы слева и справа.
+     * @param input Входная строка, из которой необходимо удалить управляющие символы.
+     * @return Новый экземпляр строки без управляющих символов и левых-правых пробелов.
+     */
+    private static String normalizeString(String input) {
+        if(input == null)
+            return null;
+        StringBuilder in = new StringBuilder(input);
+        for(int i = in.length() - 1; i >= 0; i--) {
+            if(in.charAt(i) < 32) {
+                in.replace(i, i, " ");
+            }
+        }
+        return in.toString().trim();
     }
 }
