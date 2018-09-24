@@ -362,22 +362,23 @@ public class CoupleTest {
 
 
         assertTrue(Couple.isStringHaveWeek("1 н. 1"));
-        assertTrue(Couple.isStringHaveWeek("1 н. 1\n"));
-        assertTrue(Couple.isStringHaveWeek("кр 5 н Логика\n"));
-        assertTrue(Couple.isStringHaveWeek("кр. 5 н. Логика\n"));
-        assertFalse(Couple.isStringHaveWeek("Внешний и внутренний PR\n"));
-        assertFalse(Couple.isStringHaveWeek("Дискретная математика\n"));
-        assertTrue(Couple.isStringHaveWeek("11,13,15,17 н. Правоведение\n"));
-        assertTrue(Couple.isStringHaveWeek("11,13,15,17 н Правоведение\n"));
+        assertTrue(Couple.isStringHaveWeek("1 н. 1"));
+        assertTrue(Couple.isStringHaveWeek("кр 5 н Логика"));
+        assertTrue(Couple.isStringHaveWeek("кр. 5 н. Логика"));
+        assertFalse(Couple.isStringHaveWeek("Внешний и внутренний PR"));
+        assertFalse(Couple.isStringHaveWeek("Дискретная математика"));
+        assertTrue(Couple.isStringHaveWeek("11,13,15,17 н. Правоведение"));
+        assertTrue(Couple.isStringHaveWeek("11,13,15,17 н Правоведение"));
+        assertFalse(Couple.isStringHaveWeek("История Неполита"));
 
-        assertTrue(Couple.isStringHaveWeekException("кр 5 н Логика\n"));
-        assertTrue(Couple.isStringHaveWeekException("кр. 5 н. Логика\n"));
-        assertFalse(Couple.isStringHaveWeekException("Внешний и внутренний PR\n"));
-        assertFalse(Couple.isStringHaveWeekException("Дискретная математика\n"));
-        assertFalse(Couple.isStringHaveWeekException("11,13,15,17 н. Правоведение\n"));
+        assertTrue(Couple.isStringHaveWeekException("кр 5 н Логика"));
+        assertTrue(Couple.isStringHaveWeekException("кр. 5 н. Логика"));
+        assertFalse(Couple.isStringHaveWeekException("Внешний и внутренний PR"));
+        assertFalse(Couple.isStringHaveWeekException("Дискретная математика"));
+        assertFalse(Couple.isStringHaveWeekException("11,13,15,17 н. Правоведение"));
 
-        assertFalse(Couple.isStringHaveWeek(",vrihjegijrw\"woefkweo\21ew_093i2-FFOKEOKOкуцпцшокш342хгйе9з3кшйз3сь4мш9рХШАООХЕ3пп4хзр54.епз35щлр344щее.3уе4.н.3ен.ен.45..5н.54.542FPQWQ#@(-)@(#)$oqfk"));
-        assertFalse(Couple.isStringHaveWeekException(",vrihjegijrw\"woefkweo\21ew_093i2-FFOKEOKOкуцпцшокш342хгйе9з3кшйз3сь4мш9рХШАООХЕ3пп4хзр54.епз35щлр344щее.3уе4.н.3ен.ен.45..5н.54.542FPQWQ#@(-)@(#)$oqfk"));
+        assertFalse(Couple.isStringHaveWeek(",vrihjegijrw\"woefkweoew_093i2-FFOKEOKOкуцпцшокш342хгйе9з3кшйз3сь4мш9рХШАООХЕ3пп4хзр54.епз35щлр344щее.3уе4.н.3ен.ен.45..5н.54.542FPQWQ#@(-)@(#)$oqfk"));
+        assertFalse(Couple.isStringHaveWeekException(",vrihjegijrw\"woefkweoew_093i2-FFOKEOKOкуцпцшокш342хгйе9з3кшйз3сь4мш9рХШАООХЕ3пп4хзр54.епз35щлр344щее.3уе4.н.3ен.ен.45..5н.54.542FPQWQ#@(-)@(#)$oqfk"));
 
     }
 
