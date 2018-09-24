@@ -69,7 +69,7 @@ public class Couple {
         audience = normalizeString(audience);
         address = normalizeString(address);
 
-        //if(isStringHaveWeek())
+        return null;
     }
 
     /**
@@ -81,7 +81,7 @@ public class Couple {
      * @param timezoneStart Часовой пояс, в котором начинается учебный план.
      * @param nameOfGroup Рассматриваемая группа.
      * @param dayOfWeek Рассматриваемый день недели. Использование: Напрмер, Calendar.MUNDAY.
-     * @param isOdd True, если это для не чётной недели. False, если эта строка для чётной недели.
+     * @param isOdd True, если это для нечётной недели. False, если эта строка для чётной недели.
      * @param itemTitle Первая строка данных названия предмета. Сюда может входить и номера недель.
      * @param typeOfLesson Первая строка типа занятия.
      * @param nameOfTeacher Первая строка данных преподавателя.
@@ -101,6 +101,35 @@ public class Couple {
     }
 
     /**
+     * Данная функция вернёт, на каких неделях пара есть.
+     * @param itemTitle Заголовок названия предмета из таблицы расписания.
+     * @param isOdd True, если это для нечётной недели. False, если эта строка для чётной недели.
+     * @return Массив необходимых недель.
+     */
+    private static int[] getWeeks(String itemTitle, boolean isOdd){
+        if(isStringHaveWeek(itemTitle))
+        {
+            if(isStringHaveWeekException(itemTitle))
+            {
+
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Данная функция отвечает, содержится ли в тексте (например, в названии предмета) запись о том, что пара начинается только с или до какой-то недели.
+     * @param itemTitle Заголовок названия предмета из таблицы расписания.
+     * @return True, если есть комментарий о начале или конце недель. Иначе - false.
+     */
+    public static boolean isStringBeginEndWeek(String itemTitle){
+        // ^.+ н\.? .+$|^н\.? .+$|^.+ н\.?\b.+$
+        Pattern p = Pattern.compile("((^.+\\s)|(^))[нН]\\.?.+$");
+        Matcher m = p.matcher(itemTitle);
+        return m.matches();
+    }
+
+    /**
      * Данная функция отвечает, содержится ли в тексте (например, в названии предмета) заметки о том, в каких неделях проходят пары.
      * @param itemTitle Заголовок названия предмета из таблицы расписания.
      * @return True, если стоит учесть внимание на исключения. Иначе - false.
@@ -108,7 +137,7 @@ public class Couple {
     public static boolean isStringHaveWeek(String itemTitle){
         // ^.+ н\.? .+$|^н\.? .+$|^.+ н\.?\b.+$
         Pattern p = Pattern.compile("((^.+\\s)|(^))[нН]\\.?.+$");
-        Matcher m = p.matcher(itemTitle.replaceAll("\n", " "));
+        Matcher m = p.matcher(itemTitle);
         return m.matches();
     }
 
@@ -121,7 +150,7 @@ public class Couple {
         // н\\.? |^н\\.? | н\\.?\b
         if(!isStringHaveWeek(itemTitle)) return false;
         Pattern p = Pattern.compile("((^.+\\s)|(^))кр\\.?.+$");
-        Matcher m = p.matcher(itemTitle.replaceAll("\n", " "));
+        Matcher m = p.matcher(itemTitle);
         return m.matches();
     }
 

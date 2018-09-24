@@ -31,15 +31,15 @@ public class TestSeeker {
         assertEquals("Москва, проспект Вернадского, 78, РТУ МИРЭА", test.defaultAddress);
         assertEquals(1, test.startWeek);
 
-        PackageToClient cl = new PackageToClient(new byte[]{0, 0}, 0, "Всё ок");
-        assertArrayEquals(new byte[]{0, 0}, cl.CalFile);
+        PackageToClient cl = new PackageToClient(0, "", 0, "Всё ок");
+        assertEquals("", cl.CalFile);
         assertEquals(0, cl.Count);
         assertEquals("Всё ок", cl.Messages);
 
-        PackageToServer sv = new PackageToServer(new byte[][] {{0, 0}}, test);
+        PackageToServer sv = new PackageToServer(0, new String[]{""}, test);
 
         assertEquals(test, sv.queryCriteria);
-        assertArrayEquals(new byte[][] {{0, 0}}, sv.excelsFiles);
+        assertArrayEquals(new String[]{""}, sv.excelsFiles);
     }
 
 
