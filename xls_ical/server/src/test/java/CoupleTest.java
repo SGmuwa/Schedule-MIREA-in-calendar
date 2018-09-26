@@ -358,7 +358,7 @@ public class CoupleTest {
                         .matcher("1 н. 1\n").matches()
         );
 
-        // --------
+        // -------- ^J
 
 
         assertTrue(Couple.isStringHaveWeek("1 н. 1"));

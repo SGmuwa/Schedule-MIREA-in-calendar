@@ -282,7 +282,7 @@ public class Detective {
      * @param <T> Произвольный тип данных. Желаетльно, чтобы equals был определён.
      * @return {@code True}, если в {@code list} есть содержание элемента {@code reference}. Иначе - {@code False}.
      */
-    private static <T> boolean IsEqualsInList(Iterable<T> list, T reference){
+    public static <T> boolean IsEqualsInList(Iterable<T> list, T reference){
         for(T v : list)
             if(v.equals(reference)) return true;
         return false;
@@ -340,7 +340,7 @@ public class Detective {
      * @param inputT Входящее время в строковом представлении.
      * @return Возвращает время в минутах.
      */
-    private static int GetMinutesFromTimeString(String inputT) {
+    public static int GetMinutesFromTimeString(String inputT) {
         if(inputT == null || inputT.isEmpty()) return 0;
         String[] HHMM = inputT.trim().split("-");
         if(HHMM.length == 1) HHMM = inputT.trim().split(":");
@@ -352,7 +352,7 @@ public class Detective {
      * @param input Входной текст, который следует проверить.
      * @return {@code True}, если в input записано число или же строка пуста, иначе - {@code False}.
      */
-    private static boolean IsStringNumber(String input) {
+    public static boolean IsStringNumber(String input) {
         char[] buffer = input.trim().toCharArray();
         for(char a : buffer)
             if(a > '9' || a < '0') return false;
