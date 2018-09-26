@@ -62,13 +62,14 @@ public class Couple {
         ZonedDateTime finishT = ZonedDateTime.of(LocalDateTime.of(seeker.dateFinish, LocalTime.of(23, 50)), seeker.timezoneStart);
         ZonedDateTime current = startT;
         int currentW = seeker.startWeek;
-        itemTitle = itemTitle.trim();
-        typeOfLesson = typeOfLesson.trim();
-        nameOfTeacher = nameOfTeacher.trim();
-        audience = audience.trim();
-        address = address.trim();
-        return null;
 
+        itemTitle = normalizeString(itemTitle);
+        typeOfLesson = normalizeString(typeOfLesson);
+        nameOfTeacher = normalizeString(nameOfTeacher);
+        audience = normalizeString(audience);
+        address = normalizeString(address);
+
+        return null;
     }
 
     /**
@@ -80,7 +81,7 @@ public class Couple {
      * @param timezoneStart Часовой пояс, в котором начинается учебный план.
      * @param nameOfGroup Рассматриваемая группа.
      * @param dayOfWeek Рассматриваемый день недели. Использование: Напрмер, Calendar.MUNDAY.
-     * @param isOdd True, если это для не чётной недели. False, если эта строка для чётной недели.
+     * @param isOdd True, если это для нечётной недели. False, если эта строка для чётной недели.
      * @param itemTitle Первая строка данных названия предмета. Сюда может входить и номера недель.
      * @param typeOfLesson Первая строка типа занятия.
      * @param nameOfTeacher Первая строка данных преподавателя.
@@ -100,14 +101,43 @@ public class Couple {
     }
 
     /**
+     * Данная функция вернёт, на каких неделях пара есть.
+     * @param itemTitle Заголовок названия предмета из таблицы расписания.
+     * @param isOdd True, если это для нечётной недели. False, если эта строка для чётной недели.
+     * @return Массив необходимых недель.
+     */
+    private static int[] getWeeks(String itemTitle, boolean isOdd){
+        if(isStringHaveWeek(itemTitle))
+        {
+            if(isStringHaveWeekException(itemTitle))
+            {
+
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Данная функция отвечает, содержится ли в тексте (например, в названии предмета) запись о том, что пара начинается только с или до какой-то недели.
+     * @param itemTitle Заголовок названия предмета из таблицы расписания.
+     * @return True, если есть комментарий о начале или конце недель. Иначе - false.
+     */
+    public static boolean isStringBeginEndWeek(String itemTitle){
+        // ^.+ н\.? .+$|^н\.? .+$|^.+ н\.?\b.+$
+        Pattern p = Pattern.compile("($| )(До|до|с|С) \\d+(\\.| |$)"); // TODO: ERROR!
+        Matcher m = p.matcher(itemTitle);
+        return m.matches();
+    }
+
+    /**
      * Данная функция отвечает, содержится ли в тексте (например, в названии предмета) заметки о том, в каких неделях проходят пары.
      * @param itemTitle Заголовок названия предмета из таблицы расписания.
      * @return True, если стоит учесть внимание на исключения. Иначе - false.
      */
     public static boolean isStringHaveWeek(String itemTitle){
         // ^.+ н\.? .+$|^н\.? .+$|^.+ н\.?\b.+$
-        Pattern p = Pattern.compile("((^.+\\s)|(^))[нН]\\.?.+$");
-        Matcher m = p.matcher(itemTitle.replaceAll("\n", " "));
+        Pattern p = Pattern.compile("($| )[нН](\\.| |$)"); // TODO: ERROR!
+        Matcher m = p.matcher(itemTitle);
         return m.matches();
     }
 
@@ -119,8 +149,25 @@ public class Couple {
     public static boolean isStringHaveWeekException(String itemTitle){
         // н\\.? |^н\\.? | н\\.?\b
         if(!isStringHaveWeek(itemTitle)) return false;
-        Pattern p = Pattern.compile("((^.+\\s)|(^))кр\\.?.+$");
-        Matcher m = p.matcher(itemTitle.replaceAll("\n", " "));
+        Pattern p = Pattern.compile("($| )[кК]р(\\.| |$)"); // TODO: ERROR!
+        Matcher m = p.matcher(itemTitle);
         return m.matches();
+    }
+
+    /**
+     * Удаляет символы 0..0x1F, заменяя на пробелы. Удаляет пробелы слева и справа.
+     * @param input Входная строка, из которой необходимо удалить управляющие символы.
+     * @return Новый экземпляр строки без управляющих символов и левых-правых пробелов.
+     */
+    private static String normalizeString(String input) {
+        if(input == null)
+            return null;
+        StringBuilder in = new StringBuilder(input);
+        for(int i = in.length() - 1; i >= 0; i--) {
+            if(in.charAt(i) < 32) {
+                in.replace(i, i, " ");
+            }
+        }
+        return in.toString().trim();
     }
 }

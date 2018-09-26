@@ -13,9 +13,10 @@ public class TestPackage {
 
     @Test
     public void StartTestClient() throws ClassNotFoundException {
-        PackageToClient a = PackageToClient.fromByteArray(new PackageToClient("My Testing из изи".getBytes(), 777, "Всё ок!").toByteArray());
+        PackageToClient a = PackageToClient.fromByteArray(new PackageToClient(123, "My Testing из изи", 777, "Всё ок!").toByteArray());
 
-        assertArrayEquals("My Testing из изи".getBytes(), a.CalFile);
+        assertEquals(123, a.ctx);
+        assertEquals("My Testing из изи", a.CalFile);
         assertEquals(777, a.Count);
         assertEquals("Всё ок!", a.Messages);
     }
@@ -26,8 +27,9 @@ public class TestPackage {
                 (
                         new PackageToServer
                                 (
-                                        new byte[][]{"My Testing из изи".getBytes(),
-                                                "VERY".getBytes()},
+                                        312423,
+                                        new String[]{"My Testing из изи",
+                                                "VERY"},
                                         new Seeker
                                                 (
                                                         "1",
@@ -41,7 +43,7 @@ public class TestPackage {
                                 toByteArray()
                 );
 
-        assertArrayEquals(new byte[][]{"My Testing из изи".getBytes(), "VERY".getBytes()},
+        assertArrayEquals(new String[]{"My Testing из изи", "VERY"},
                 a.excelsFiles);
         assertEquals(new Seeker
                 (
