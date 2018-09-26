@@ -47,7 +47,7 @@ public class DetectiveTest {
 
         ExcelFileInterface file = null;
         try {
-            file = new OpenFile("test-01.xlsx");
+            file = new OpenFile("xls-test\\IIT-3k-18_19-osen.xlsx");
         } catch (IOException e)
         {
             System.out.println(e.getLocalizedMessage());
