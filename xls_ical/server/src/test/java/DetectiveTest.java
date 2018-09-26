@@ -29,14 +29,11 @@ public class DetectiveTest {
 
     @Test
     public void IsEqualsInListTest(){
-        Integer a;
-        Integer b;
-        ArrayList <T> list = new ArrayList <T>();
+        String a = "a";
+        String b = "b";
+        ArrayList <String> list = new ArrayList <String>();
         list.add(a);
         assertEquals(true, Detective.IsEqualsInList(list, a));;
         assertEquals(false, Detective.IsEqualsInList(list, b));;
     }
-
-    @Test
-    public void
 }
