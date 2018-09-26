@@ -1,7 +1,12 @@
 import ru.mirea.xlsical.CouplesDetective.Detective;
 import org.junit.Assert;
 import org.junit.Test;
+import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
+import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
+
 import static org.junit.Assert.*;
+
+import java.io.IOException;
 import java.util.*;
 import java.awt.*;
 
@@ -35,5 +40,30 @@ public class DetectiveTest {
         list.add(a);
         assertEquals(true, Detective.IsEqualsInList(list, a));;
         assertEquals(false, Detective.IsEqualsInList(list, b));;
+    }
+
+    @Test
+    public void openFirstXls() {
+
+        ExcelFileInterface file = null;
+        try {
+            file = new OpenFile("test-01.xlsx");
+        } catch (IOException e)
+        {
+            System.out.println(e.getLocalizedMessage());
+        }
+        assertNotNull(file);
+
+        try {
+            System.out.println(file.getCellData(1, 1));
+            System.out.println(file.getCellData(2, 1));
+            System.out.println(file.getCellData(1, 2));
+            System.out.println(file.getCellData(2, 2));
+
+            file.close();
+
+        } catch (IOException e) {
+            System.out.println(e.getLocalizedMessage());
+        }
     }
 }
