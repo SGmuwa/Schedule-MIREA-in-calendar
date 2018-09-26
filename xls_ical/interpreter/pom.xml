@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>ru.gosha</groupId>
+    <groupId>ru.mirea.xlsical</groupId>
     <artifactId>interpreter</artifactId>
-    <version>0.1</version>
+    <version>1.0</version>
     <packaging>jar</packaging>
 
     <dependencies>
