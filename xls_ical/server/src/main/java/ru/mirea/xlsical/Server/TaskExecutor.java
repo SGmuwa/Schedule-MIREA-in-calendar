@@ -11,16 +11,16 @@ import ru.mirea.xlsical.interpreter.PackageToServer;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class TaskExecutor implements Runnable {
 
-    private final SynchronousQueue<PackageToServer> qIn;
-    private final SynchronousQueue<PackageToClient> qOut;
+    private final ConcurrentLinkedQueue<PackageToServer> qIn;
+    private final ConcurrentLinkedQueue<PackageToClient> qOut;
 
     public TaskExecutor() {
-        this.qIn = new SynchronousQueue<>();
-        this.qOut = new SynchronousQueue<>();
+        this.qIn = new ConcurrentLinkedQueue<>();
+        this.qOut = new ConcurrentLinkedQueue<>();
     }
 
     /**
@@ -70,12 +70,21 @@ public class TaskExecutor implements Runnable {
                 "ok."));
     }
 
+    /**
+     * Вытаскивает элемент из очереди и удаляет его. Возвращает null, если очередь пуста.
+     * @return Пакет от обработчика.
+     */
     public PackageToClient poll() {
         return qOut.poll();
     }
 
-    public void pull(PackageToServer pack) {
-        qIn.add(pack);
+    /**
+     * Добавляет элемент в очередь задач.
+     * @param pack Пакет с требованиями к решению задачи.
+     * @return true (as specified by Collection.add).
+     */
+    public boolean add(PackageToServer pack) {
+        return qIn.add(pack);
     }
 
     private ArrayList<ExcelFileInterface> openExcelFiles(String[] filesStr) {
