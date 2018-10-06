@@ -8,6 +8,7 @@ public class ExportCouplesToICalTest {
 
     @Test
     public void Tutorial(){
+        // http://ical4j.sourceforge.net/introduction.html
         TimeZoneRegistry registry = TimeZoneRegistryFactory.getInstance().createRegistry();
         TimeZone timezone = registry.getTimeZone("Australia/Melbourne");
 
