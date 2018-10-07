@@ -170,11 +170,11 @@ public class Detective {
      * @param file Файл, в котором следует искать.
      * @return Координаты первого найденного слова "Предмет".
      */
-    private static Point SeekFirstCouple(ExcelFileInterface file) throws DetectiveException {
+    private static Point SeekFirstCouple(ExcelFileInterface file) throws DetectiveException, IOException {
         try {
             return SeekEverythingInLeftUp("Предмет", file);
         }
-        catch (Exception e){
+        catch (DetectiveException e){
             throw new DetectiveException(e.getMessage() + "\nНевозможно найти хотя бы один предмет в таблице Excel.");
         }
     }
