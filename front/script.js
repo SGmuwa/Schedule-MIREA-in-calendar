@@ -58,6 +58,13 @@ $('document').ready(function(){
 			$('#wrapperForSettings').css('display', 'none');	
 			flagForSettings = false;
 		}
+		if(flagForTimezones == true){
+
+			$('#divForTimezones').css('display', 'none');
+			$('#supportDivForBottomBorder').css('display', 'none');
+			$('body').css('height', windowHeight);
+			flagForTimezones = false;
+		}
 	});
 	$('#getButton').on('click', function(){
 
