@@ -3,6 +3,10 @@ package ru.mirea.xlsical.CouplesDetective;
 import ru.mirea.xlsical.interpreter.Seeker;
 
 import java.time.*;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
+import java.time.temporal.TemporalField;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -60,10 +64,10 @@ public class Couple {
      * @return Возвращает, в какие дни будут пары.
      */
     public static List<Couple> GetCouplesByPeriod(Seeker seeker, LocalTime timeStartOfCouple, LocalTime timeFinishOfCouple, DayOfWeek dayOfWeek, boolean isOdd, String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address) {
+        // TODO: Данная функция ещё не разработана.
         ZonedDateTime startT =  ZonedDateTime.of(LocalDateTime.of(seeker.dateStart, LocalTime.of(0, 0)), seeker.timezoneStart);
         ZonedDateTime finishT = ZonedDateTime.of(LocalDateTime.of(seeker.dateFinish, LocalTime.of(23, 50)), seeker.timezoneStart);
         ZonedDateTime current = startT;
-        int currentW = seeker.startWeek;
 
         itemTitle = normalizeString(itemTitle);
         typeOfLesson = normalizeString(typeOfLesson);
@@ -71,6 +75,13 @@ public class Couple {
         audience = normalizeString(audience);
         address = normalizeString(address);
 
+        List<Integer> weeks = getWeeks(itemTitle, seeker.startWeek, startT.get(ChronoField.ALIGNED_WEEK_OF_YEAR) - finishT.get(ChronoField.ALIGNED_WEEK_OF_YEAR), isOdd);
+        for(Integer numberOfWeek : weeks) {
+            // Передвигаемся на неделю.
+            current = startT.plus(numberOfWeek - 1, ChronoUnit.WEEKS);
+            // Двигаемся к 00:00 dayOfWeek.
+
+        }
         return null;
     }
 
@@ -111,7 +122,7 @@ public class Couple {
      * @return Список необходимых недель.
      */
     private static List<Integer> getWeeks(String itemTitle, int startWeek, int limitWeek, boolean isOdd){
-        if(limitWeek < startWeek) return null;
+        if(limitWeek < startWeek) return new ArrayList<>(1);
         ArrayList<Integer> goodWeeks = new ArrayList<>(limitWeek/2 + 1); // Контейнер с хорошими неделями
         List<Integer> exc = getAllExceptionWeeks(itemTitle);
         // Изменение входных параметров в зависимости от itemTitle.
