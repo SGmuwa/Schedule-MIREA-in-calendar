@@ -148,9 +148,9 @@ public class Couple {
      */
     public static boolean isStringHaveWeek(String itemTitle){
         // ^.+ н\.? .+$|^н\.? .+$|^.+ н\.?\b.+$
-        Pattern p = Pattern.compile("($| )[нН](\\.| |$)"); // TODO: ERROR!
+        Pattern p = Pattern.compile("($| )[нН](\\.| |$)");
         Matcher m = p.matcher(itemTitle);
-        return m.matches();
+        return m.find();
     }
 
     public static Integer[] getAllIntsFromString(String input) {
@@ -171,9 +171,9 @@ public class Couple {
     public static boolean isStringHaveWeekException(String itemTitle){
         // н\\.? |^н\\.? | н\\.?\b
         if(!isStringHaveWeek(itemTitle)) return false;
-        Pattern p = Pattern.compile("($| )[кК]р(\\.| |$)"); // TODO: ERROR!
+        Pattern p = Pattern.compile("(^| )[кК]р(\\.| |$)");
         Matcher m = p.matcher(itemTitle);
-        return m.matches();
+        return m.find();
     }
 
     /**
