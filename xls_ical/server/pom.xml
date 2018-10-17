@@ -13,27 +13,32 @@
     </parent>
 
     <dependencies>
+        <!-- Для работы Excel -->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
             <version>3.12</version>
         </dependency>
+        <!-- Для работы Excel -->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>3.12</version>
         </dependency>
+        <!-- Для работы тестов -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.11</version>
             <scope>test</scope>
         </dependency>
+        <!-- Ранее использовалось для netty подключений -->
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
             <version>4.1.25.Final</version>
         </dependency>
+        <!-- Код из interpreter помещён в отдельный пакет для создания иных пакетов для взаимодействия с текущим TaskExecutor -->
         <dependency>
             <groupId>ru.mirea.xlsical</groupId>
             <artifactId>interpreter</artifactId>
@@ -44,6 +49,7 @@
             <artifactId>slf4j-jdk14</artifactId>
             <version>1.7.25</version>
         </dependency>
+        <!-- Используется для экспорта в ical -->
         <dependency>
             <groupId>org.mnode.ical4j</groupId>
             <artifactId>ical4j</artifactId>
@@ -53,6 +59,7 @@
     </dependencies>
 
     <build>
+        <!-- Используется для создания единого jar файла -->
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>

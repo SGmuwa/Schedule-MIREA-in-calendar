@@ -4,7 +4,6 @@ import ru.mirea.xlsical.interpreter.Seeker;
 
 import java.time.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -114,7 +113,7 @@ public class Couple {
     private static List<Integer> getWeeks(String itemTitle, int startWeek, int limitWeek, boolean isOdd){
         if(limitWeek < startWeek) return null;
         ArrayList<Integer> goodWeeks = new ArrayList<>(limitWeek/2 + 1); // Контейнер с хорошими неделями
-        List<Integer> exc = getAllExcetionWeeks(itemTitle);
+        List<Integer> exc = getAllExceptionWeeks(itemTitle);
         // Изменение входных параметров в зависимости от itemTitle.
         {
             Integer startWeekFromString = getFromStringStartWeek(itemTitle); // Получаем, с какой недели идут пары.
@@ -127,6 +126,47 @@ public class Couple {
                 goodWeeks.add(i); // Пусть все недели - хорошие.
         }
         return goodWeeks;
+    }
+
+    /**
+     * Функция ищет, до какой недели идут пары. Ищет "До %d", где %d - целое число.
+     * @param itemTitle Заголовок названия предмета из таблицы расписания.
+     * @return Возвращает %d. В случае, если не найдено - возвращается {@code null}.
+     */
+    private static Integer getFromStringFinishWeek(String itemTitle) {
+        Pattern p = Pattern.compile("(^| )[Дд]о ?+\\d+");
+        Matcher m = p.matcher(itemTitle);
+        if(m.find())
+            return Integer.parseInt(m.group().substring(3));
+        else
+            return null;
+    }
+
+    /**
+     * Функция ищет, с какой недели идут пары. Ищет "C %d", где %d - целое число.
+     * @param itemTitle Заголовок названия предмета из таблицы расписания.
+     * @return Возвращает %d. В случае, если не найдено - возвращается {@code null}.
+     */
+    private static Integer getFromStringStartWeek(String itemTitle) {
+        Pattern p = Pattern.compile("(^| )[СсCc] ?+\\d+");
+        Matcher m = p.matcher(itemTitle);
+        if(m.find())
+            return Integer.parseInt(m.group().substring(2));
+        else return null;
+    }
+
+    /**
+     * Функция ищет, в каких неделях есть исключения. Ищет "Кроме %d" или "кр. %d", где %d - целое число.
+     * @param itemTitle Заголовок названия предмета из таблицы расписания.
+     * @return Возвращает %d. В случае, если не найдено - возвращается пустой список.
+     */
+    private static List<Integer> getAllExceptionWeeks(String itemTitle) {
+        Pattern p = Pattern.compile("[Кк]р(оме)?.? ?\\d+([,;] ?\\d+)+");
+        Matcher m = p.matcher(itemTitle);
+        if(m.find())
+            return getAllIntsFromString(m.group());
+        else
+            return new LinkedList<>();
     }
 
     /**
@@ -153,14 +193,28 @@ public class Couple {
         return m.find();
     }
 
-    public static Integer[] getAllIntsFromString(String input) {
+    /**
+     * Находит отрицательные и положительные целые числа в строке и выдаёт их список.
+     * @param input Входная строка, где следует проводить поиск целых чисел.
+     * @return Перечень найденных целых чисел. Если не найдено - пустой список.
+     */
+    private static List<Integer> getAllIntsFromString(String input) {
         LinkedList<Integer> numbers = new LinkedList<Integer>();
         Pattern p = Pattern.compile("-?\\d+");
         Matcher m = p.matcher(input);
         while (m.find()) {
             numbers.add(Integer.parseInt(m.group()));
         }
-        return ((Integer[])numbers.toArray());
+        return numbers;
+    }
+
+    private static Integer getFirstIntFromString(String input) {
+        Pattern p = Pattern.compile("-?\\d+");
+        Matcher m = p.matcher(input);
+        if (m.find())
+            return Integer.parseInt(m.group());
+        else
+            return null;
     }
 
     /**
