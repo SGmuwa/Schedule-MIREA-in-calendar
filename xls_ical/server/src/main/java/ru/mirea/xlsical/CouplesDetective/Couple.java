@@ -3,6 +3,9 @@ package ru.mirea.xlsical.CouplesDetective;
 import ru.mirea.xlsical.interpreter.Seeker;
 
 import java.time.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -103,18 +106,27 @@ public class Couple {
     /**
      * Данная функция вернёт, на каких неделях пара есть.
      * @param itemTitle Заголовок названия предмета из таблицы расписания.
+     * @param startWeek С какой недели начинается учёба?
+     * @param limitWeek Максимальный доступный номер недели.
      * @param isOdd True, если это для нечётной недели. False, если эта строка для чётной недели.
-     * @return Массив необходимых недель.
+     * @return Список необходимых недель.
      */
-    private static int[] getWeeks(String itemTitle, boolean isOdd){
-        if(isStringHaveWeek(itemTitle))
+    private static List<Integer> getWeeks(String itemTitle, int startWeek, int limitWeek, boolean isOdd){
+        if(limitWeek < startWeek) return null;
+        ArrayList<Integer> goodWeeks = new ArrayList<>(limitWeek/2 + 1); // Контейнер с хорошими неделями
+        List<Integer> exc = getAllExcetionWeeks(itemTitle);
+        // Изменение входных параметров в зависимости от itemTitle.
         {
-            if(isStringHaveWeekException(itemTitle))
-            {
-
-            }
+            Integer startWeekFromString = getFromStringStartWeek(itemTitle); // Получаем, с какой недели идут пары.
+            if (startWeekFromString != null && startWeekFromString > startWeek) startWeek = startWeekFromString;
+            Integer finishWeekFromString = getFromStringFinishWeek(itemTitle); // Получаем, с какой недели идут пары.
+            if (finishWeekFromString != null && finishWeekFromString < limitWeek) limitWeek = finishWeekFromString;
         }
-        return null;
+        for(int i = startWeek; i < limitWeek + 1; i += 2) {
+            if(!exc.contains((Integer) i)) // Если это не исключение
+                goodWeeks.add(i); // Пусть все недели - хорошие.
+        }
+        return goodWeeks;
     }
 
     /**
@@ -139,6 +151,16 @@ public class Couple {
         Pattern p = Pattern.compile("($| )[нН](\\.| |$)"); // TODO: ERROR!
         Matcher m = p.matcher(itemTitle);
         return m.matches();
+    }
+
+    public static Integer[] getAllIntsFromString(String input) {
+        LinkedList<Integer> numbers = new LinkedList<Integer>();
+        Pattern p = Pattern.compile("-?\\d+");
+        Matcher m = p.matcher(input);
+        while (m.find()) {
+            numbers.add(Integer.parseInt(m.group()));
+        }
+        return ((Integer[])numbers.toArray());
     }
 
     /**
