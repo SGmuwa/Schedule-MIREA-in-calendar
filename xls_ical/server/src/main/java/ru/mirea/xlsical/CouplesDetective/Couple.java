@@ -15,6 +15,18 @@ import java.util.regex.Pattern;
 
 
 public class Couple {
+
+    private Couple(ZonedDateTime dateAndTimeOfCouple, ZonedDateTime dateAndTimeFinishOfCouple, String nameOfGroup, String nameOfTeacher, String itemTitle, String audience, String address, String typeOfLesson) {
+        DateAndTimeOfCouple = dateAndTimeOfCouple;
+        DateAndTimeFinishOfCouple = dateAndTimeFinishOfCouple;
+        NameOfGroup = nameOfGroup;
+        NameOfTeacher = nameOfTeacher;
+        ItemTitle = itemTitle;
+        Audience = audience;
+        Address = address;
+        TypeOfLesson = typeOfLesson;
+    }
+
     /**
      * Дата и время пары.
      */
@@ -50,9 +62,9 @@ public class Couple {
 
     /**
      * Получает на входе данные про одну строку. Принимает решение, в какие дни будут пары. Не делает выборку данных.
+     * @param seeker Критерии, в которых указано, в каких рамках необходимо составить расписание.
      * @param timeStartOfCouple Время начала пары.
      * @param timeFinishOfCouple Время конца пары.
-     * @param seeker Критерии, в которых указано, в каких рамках необходимо составить расписание.
      * @param nameOfGroup Рассматриваемая группа.
      * @param dayOfWeek Рассматриваемый день недели.
      * @param isOdd True, если это для не чётной недели. False, если эта строка для чётной недели.
@@ -64,53 +76,79 @@ public class Couple {
      * @return Возвращает, в какие дни будут пары.
      */
     public static List<Couple> GetCouplesByPeriod(Seeker seeker, LocalTime timeStartOfCouple, LocalTime timeFinishOfCouple, DayOfWeek dayOfWeek, boolean isOdd, String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address) {
-        // TODO: Данная функция ещё не разработана.
-        ZonedDateTime startT =  ZonedDateTime.of(LocalDateTime.of(seeker.dateStart, LocalTime.of(0, 0)), seeker.timezoneStart);
-        ZonedDateTime finishT = ZonedDateTime.of(LocalDateTime.of(seeker.dateFinish, LocalTime.of(23, 50)), seeker.timezoneStart);
-        ZonedDateTime current = startT;
+        return GetCouplesByPeriod(seeker.dateStart, seeker.dateFinish, seeker.timezoneStart, seeker.startWeek, timeStartOfCouple, timeFinishOfCouple, dayOfWeek, isOdd, itemTitle, typeOfLesson, nameOfGroup, nameOfTeacher, audience, address);
+    }
 
-        itemTitle = normalizeString(itemTitle);
-        typeOfLesson = normalizeString(typeOfLesson);
-        nameOfTeacher = normalizeString(nameOfTeacher);
-        audience = normalizeString(audience);
-        address = normalizeString(address);
-
-        List<Integer> weeks = getWeeks(itemTitle, seeker.startWeek, startT.get(ChronoField.ALIGNED_WEEK_OF_YEAR) - finishT.get(ChronoField.ALIGNED_WEEK_OF_YEAR), isOdd);
-        for(Integer numberOfWeek : weeks) {
-            // Передвигаемся на неделю.
-            current = startT.plus(numberOfWeek - 1, ChronoUnit.WEEKS);
-            // Двигаемся к 00:00 dayOfWeek.
-
-        }
-        return null;
+    /**
+     * Функция убирает из названия предмета заметки о неделях.
+     * @param itemTitle Первая строка данных названия предмета. Сюда может входить и номера недель.
+     * @return Строка без цифр, "н.", "недель".
+     * @deprecated TODO: Данная функция ещё не реализована.
+     */
+    private static String clearFromWeeks(String itemTitle) {
+        return itemTitle;
     }
 
     /**
      * Получает на входе данные про одну строку. Принимает решение, в какие дни будут пары. Не делает выборку данных.
      * @param start Дата и время начала сессии. Расписание будет составлено с этого дня и времени.
      * @param finish Дата и время окончания сессии. Расписание будет составлено до этого дня и времени.
+     * @param startZoneId Часовой пояс, в котором начинается учебный план.
+     * @param startWeek С какого номера недели начать построение расписания?
      * @param timeStartOfCouple Время начала пары.
      * @param timeFinishOfCouple Время окончания пары.
-     * @param timezoneStart Часовой пояс, в котором начинается учебный план.
-     * @param nameOfGroup Рассматриваемая группа.
      * @param dayOfWeek Рассматриваемый день недели. Использование: Напрмер, Calendar.MUNDAY.
      * @param isOdd True, если это для нечётной недели. False, если эта строка для чётной недели.
      * @param itemTitle Первая строка данных названия предмета. Сюда может входить и номера недель.
      * @param typeOfLesson Первая строка типа занятия.
+     * @param nameOfGroup Рассматриваемая группа.
      * @param nameOfTeacher Первая строка данных преподавателя.
      * @param audience Первая строка аудитории.
      * @param address Адрес корпуса.
      * @return Возвращает, в какие дни будут пары.
      */
-    public static List<Couple> GetCouplesByPeriod(LocalDate start, LocalDate finish, LocalTime timeStartOfCouple, LocalTime timeFinishOfCouple, ZoneId timezoneStart, DayOfWeek dayOfWeek, boolean isOdd, String nameOfGroup, String itemTitle, String typeOfLesson, String nameOfTeacher, String audience, String address) {
-        ///.get(Calendar.DAY_OF_WEEK);
-        // TODO: Данная функция ещё не разработана.
-        itemTitle = itemTitle.trim();
-        if(itemTitle.contains(" н. ") || itemTitle.contains(" н "))
-        {
-            if(itemTitle.contains("кр. "));
+    public static List<Couple> GetCouplesByPeriod(LocalDate start, LocalDate finish, ZoneId startZoneId, int startWeek, LocalTime timeStartOfCouple, LocalTime timeFinishOfCouple, DayOfWeek dayOfWeek, boolean isOdd, String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address) {
+        List<Couple> out;
+        ZonedDateTime startT =  ZonedDateTime.of(LocalDateTime.of(start, LocalTime.of(0, 0)), startZoneId);
+        ZonedDateTime finishT = ZonedDateTime.of(LocalDateTime.of(start, LocalTime.of(23, 50)), startZoneId);
+        ZonedDateTime current = startT;
+        long durationBetweenStartAndFinish = Duration.between(timeStartOfCouple, timeFinishOfCouple).toNanos();
+
+        itemTitle = normalizeString(itemTitle);
+        typeOfLesson = normalizeString(typeOfLesson);
+        nameOfGroup = normalizeString(nameOfGroup);
+        nameOfTeacher = normalizeString(nameOfTeacher);
+        audience = normalizeString(audience);
+        address = normalizeString(address);
+
+        List<Integer> weeks = getWeeks(itemTitle, startWeek, startT.get(ChronoField.ALIGNED_WEEK_OF_YEAR) - finishT.get(ChronoField.ALIGNED_WEEK_OF_YEAR), isOdd);
+        itemTitle = clearFromWeeks(itemTitle);
+        out = new ArrayList<>(weeks.size() + 1);
+        for(Integer numberOfWeek /*Номер недели*/ : weeks) {
+            // Передвигаемся на неделю.
+            current = startT.plus(numberOfWeek - 1, ChronoUnit.WEEKS);
+            // Двигаемся к 00:00 dayOfWeek.
+            current = current.minusNanos(current.getNano()).minusSeconds(current.getSecond()).minusMinutes(current.getMinute()).minusHours(current.getHour());
+            int needAddDayOfWeek = current.getDayOfWeek().getValue() - dayOfWeek.getValue();
+            current = current.plusDays(needAddDayOfWeek);
+            current = current.plusNanos(timeStartOfCouple.getNano()).plusSeconds(timeStartOfCouple.getSecond()).plusMinutes(timeStartOfCouple.getMinute()).plusHours(timeStartOfCouple.getHour());
+            if(
+                    current.get(ChronoField.INSTANT_SECONDS) < ZonedDateTime.of(start, LocalTime.MIN, startZoneId).get(ChronoField.INSTANT_SECONDS) ||  // Использование LocalTime.MAX не безопасно: в дне может и не быть максимального локального времени. Использовано вместо этого прибавление одного дня и время 00:00.
+                            current.get(ChronoField.INSTANT_SECONDS) >= ZonedDateTime.of(finish.plusDays(1), LocalTime.MIN, startZoneId).get(ChronoField.INSTANT_SECONDS)) {
+                continue;
+            }
+            out.add(new Couple(
+                    current,
+                    current.plusNanos(durationBetweenStartAndFinish),
+                    nameOfGroup,
+                    nameOfTeacher,
+                    itemTitle,
+                    audience,
+                    address,
+                    typeOfLesson
+            ));
         }
-        return null;
+        return out;
     }
 
     /**
