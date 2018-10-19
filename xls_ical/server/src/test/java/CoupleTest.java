@@ -32,7 +32,7 @@ public class CoupleTest {
         String add = "Москва, проспект Вернадского 78, РТУ МИРЭА";
         String aud = "А-1";
 
-        List<Couple> out = Couple.GetCouplesByPeriod(start, finish, time1, time2, timezone, day, true, nGr, nam, typ, tic, aud, add);
+        List<Couple> out = Couple.GetCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, true, nam, typ, nGr, tic, aud, add);
 
         assertNotNull(out);
 
@@ -67,7 +67,7 @@ public class CoupleTest {
 
         DayOfWeek day = DayOfWeek.MONDAY;
 
-        ZoneId timezone = ZoneId.of("GMT+3:00"); // GMT+3:00
+        ZoneId timezone = ZoneId.of("GMT+03:00"); // GMT+3:00
 
         String nGr = "Группа-01 32";
         String nam = "Математика и инженерия."; // http://xpoint.ru/forums/internet/standards/thread/29138.xhtml
@@ -76,7 +76,7 @@ public class CoupleTest {
         String add = "Москва, проспект Вернадского 78, РТУ МИРЭА";
         String aud = "А-1";
 
-        List<Couple> out = Couple.GetCouplesByPeriod(start, finish, time1, time2, timezone, day, true, nGr, nam, typ, tic, aud, add);
+        List<Couple> out = Couple.GetCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, true, nam, typ, nGr, tic, aud, add);
 
         assertNotNull(out);
 
@@ -121,7 +121,7 @@ public class CoupleTest {
         String add = "Україна, Київ, Центральна 8";
         String aud = "202";
 
-        List<Couple> out = Couple.GetCouplesByPeriod(start, finish, time1, time2, timezone, day, true, nGr, nam, typ, tic, aud, add);
+        List<Couple> out = Couple.GetCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, true, nam, typ, nGr, tic, aud, add);
 
         assertNotNull(out);
 
@@ -166,7 +166,7 @@ public class CoupleTest {
         String add = "Москва, проспект Вернадского 78, РТУ МИРЭА";
         String aud = "А-1";
 
-        List<Couple> out = Couple.GetCouplesByPeriod(start, finish, time1, time2, timezone, day, true, nGr, nam, typ, tic, aud, add);
+        List<Couple> out = Couple.GetCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, true, nam, typ, nGr, tic, aud, add);
 
         assertNotNull(out);
 
@@ -210,7 +210,7 @@ public class CoupleTest {
         String add = "ВОдичка";
         String aud = "А-(-1) = А+1";
 
-        List<Couple> out = Couple.GetCouplesByPeriod(start, finish, time1, time2, timezone, day, true, nGr, nam, typ, tic, aud, add);
+        List<Couple> out = Couple.GetCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, true, nam, typ, nGr, tic, aud, add);
 
         assertNotNull(out);
 
@@ -270,7 +270,7 @@ public class CoupleTest {
         String add = "ВОдичка";
         String aud = "А-(-1) = А+1";
 
-        List<Couple> out = Couple.GetCouplesByPeriod(start, finish, time1, time2, timezone, day, false, nGr, nam, typ, tic, aud, add);
+        List<Couple> out = Couple.GetCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, false, nam, typ, nGr, tic, aud, add);
 
         /* Количество */            assertEquals(8, out.size());
 
@@ -411,7 +411,7 @@ public class CoupleTest {
         // Аудитория.
         String aud = "А-(-1) = А+1";
 
-        List<Couple> out = Couple.GetCouplesByPeriod(start, finish, time1, time2, timezone, day, false, nGr, nam, typ, tic, aud, add);
+        List<Couple> out = Couple.GetCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, false, nam, typ, nGr, tic, aud, add);
 
         assertNotNull(out);
 
@@ -466,7 +466,7 @@ public class CoupleTest {
         // Аудитория.
         String aud = "А-(-1) = А+1";
 
-        List<Couple> out = Couple.GetCouplesByPeriod(start, finish, time1, time2, timezone, day, false, nGr, nam, typ, tic, aud, add);
+        List<Couple> out = Couple.GetCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, false, nam, typ, nGr, tic, aud, add);
 
         /* Количество */            assertEquals(5, out.size());
         /* Время начала пары 3*/

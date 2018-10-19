@@ -254,16 +254,14 @@ public class Detective {
             String[] audiences = file.getCellData(cursor.x + 3, cursor.y).trim().split(("\r\n|\n"));
             for (int indexInLine = 0; indexInLine < titles.length; indexInLine++) {
                 Iterable<Couple> listCouplesOfLine = Couple.GetCouplesByPeriod(
-                        seeker.dateStart,
-                        seeker.dateFinish,
+                        seeker,
                         LocalTime.of(times[2*indexInLine] / 60, times[2*indexInLine] % 60),
                         LocalTime.of(times[2*indexInLine + 1] / 60, times[2*indexInLine + 1] % 60),
-                        seeker.timezoneStart,
                         dayOfWeek,
                         indexInLine % 2 == 1,
-                        nameOfGroup,
                         titles[indexInLine],
                         indexInLine < typeOfLessons.length ? typeOfLessons[indexInLine] : typeOfLessons[0],
+                        nameOfGroup,
                         indexInLine < teachers.length ? teachers[indexInLine] : teachers[0],
                         indexInLine < audiences.length ? audiences[indexInLine] : audiences[0],
                         address);

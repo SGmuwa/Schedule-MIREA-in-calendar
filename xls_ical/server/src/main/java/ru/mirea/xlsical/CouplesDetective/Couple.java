@@ -121,7 +121,7 @@ public class Couple {
         audience = normalizeString(audience);
         address = normalizeString(address);
 
-        List<Integer> weeks = getWeeks(itemTitle, startWeek, startT.get(ChronoField.ALIGNED_WEEK_OF_YEAR) - finishT.get(ChronoField.ALIGNED_WEEK_OF_YEAR), isOdd);
+        List<Integer> weeks = getWeeks(itemTitle, startWeek, (int)((Duration.between(timeStartOfCouple, timeFinishOfCouple).toDays() / 7) + 2), isOdd);
         itemTitle = clearFromWeeks(itemTitle);
         out = new ArrayList<>(weeks.size() + 1);
         for(Integer numberOfWeek /*Номер недели*/ : weeks) {
@@ -133,8 +133,8 @@ public class Couple {
             current = current.plusDays(needAddDayOfWeek);
             current = current.plusNanos(timeStartOfCouple.getNano()).plusSeconds(timeStartOfCouple.getSecond()).plusMinutes(timeStartOfCouple.getMinute()).plusHours(timeStartOfCouple.getHour());
             if(
-                    current.get(ChronoField.INSTANT_SECONDS) < ZonedDateTime.of(start, LocalTime.MIN, startZoneId).get(ChronoField.INSTANT_SECONDS) ||  // Использование LocalTime.MAX не безопасно: в дне может и не быть максимального локального времени. Использовано вместо этого прибавление одного дня и время 00:00.
-                            current.get(ChronoField.INSTANT_SECONDS) >= ZonedDateTime.of(finish.plusDays(1), LocalTime.MIN, startZoneId).get(ChronoField.INSTANT_SECONDS)) {
+                    current.getLong(ChronoField.INSTANT_SECONDS) < ZonedDateTime.of(start, LocalTime.MIN, startZoneId).getLong(ChronoField.INSTANT_SECONDS) ||  // Использование LocalTime.MAX не безопасно: в дне может и не быть максимального локального времени. Использовано вместо этого прибавление одного дня и время 00:00.
+                            current.getLong(ChronoField.INSTANT_SECONDS) >= ZonedDateTime.of(finish.plusDays(1), LocalTime.MIN, startZoneId).getLong(ChronoField.INSTANT_SECONDS)) {
                 continue;
             }
             out.add(new Couple(
