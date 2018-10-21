@@ -5,8 +5,6 @@ import ru.mirea.xlsical.interpreter.Seeker;
 import java.time.*;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAmount;
-import java.time.temporal.TemporalField;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -110,7 +108,7 @@ public class Couple {
     public static List<Couple> GetCouplesByPeriod(LocalDate start, LocalDate finish, ZoneId startZoneId, int startWeek, LocalTime timeStartOfCouple, LocalTime timeFinishOfCouple, DayOfWeek dayOfWeek, boolean isOdd, String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address) {
         List<Couple> out;
         ZonedDateTime startT =  ZonedDateTime.of(LocalDateTime.of(start, LocalTime.of(0, 0)), startZoneId);
-        ZonedDateTime finishT = ZonedDateTime.of(LocalDateTime.of(start, LocalTime.of(23, 50)), startZoneId);
+        ZonedDateTime finishT = ZonedDateTime.of(LocalDateTime.of(finish, LocalTime.of(23, 50)), startZoneId);
         ZonedDateTime current = startT;
         long durationBetweenStartAndFinish = Duration.between(timeStartOfCouple, timeFinishOfCouple).toNanos();
 
@@ -121,7 +119,7 @@ public class Couple {
         audience = normalizeString(audience);
         address = normalizeString(address);
 
-        List<Integer> weeks = getWeeks(itemTitle, startWeek, (int)((Duration.between(timeStartOfCouple, timeFinishOfCouple).toDays() / 7) + 2), isOdd);
+        List<Integer> weeks = getWeeks(itemTitle, startWeek, (int)((Duration.between(startT, finishT).toDays() / 7L) + 2L), isOdd);
         itemTitle = clearFromWeeks(itemTitle);
         out = new ArrayList<>(weeks.size() + 1);
         for(Integer numberOfWeek /*Номер недели*/ : weeks) {
@@ -129,12 +127,12 @@ public class Couple {
             current = startT.plus(numberOfWeek - 1, ChronoUnit.WEEKS);
             // Двигаемся к 00:00 dayOfWeek.
             current = current.minusNanos(current.getNano()).minusSeconds(current.getSecond()).minusMinutes(current.getMinute()).minusHours(current.getHour());
-            int needAddDayOfWeek = current.getDayOfWeek().getValue() - dayOfWeek.getValue();
+            int needAddDayOfWeek =  dayOfWeek.getValue() - current.getDayOfWeek().getValue();
             current = current.plusDays(needAddDayOfWeek);
             current = current.plusNanos(timeStartOfCouple.getNano()).plusSeconds(timeStartOfCouple.getSecond()).plusMinutes(timeStartOfCouple.getMinute()).plusHours(timeStartOfCouple.getHour());
             if(
-                    current.getLong(ChronoField.INSTANT_SECONDS) < ZonedDateTime.of(start, LocalTime.MIN, startZoneId).getLong(ChronoField.INSTANT_SECONDS) ||  // Использование LocalTime.MAX не безопасно: в дне может и не быть максимального локального времени. Использовано вместо этого прибавление одного дня и время 00:00.
-                            current.getLong(ChronoField.INSTANT_SECONDS) >= ZonedDateTime.of(finish.plusDays(1), LocalTime.MIN, startZoneId).getLong(ChronoField.INSTANT_SECONDS)) {
+                    current.getLong(ChronoField.INSTANT_SECONDS) < startT.getLong(ChronoField.INSTANT_SECONDS) ||  // Использование LocalTime.MAX не безопасно: в дне может и не быть максимального локального времени. Использовано вместо этого прибавление одного дня и время 00:00.
+                            current.getLong(ChronoField.INSTANT_SECONDS) >= finishT.getLong(ChronoField.INSTANT_SECONDS)) {
                 continue;
             }
             out.add(new Couple(
@@ -170,8 +168,9 @@ public class Couple {
             Integer finishWeekFromString = getFromStringFinishWeek(itemTitle); // Получаем, с какой недели идут пары.
             if (finishWeekFromString != null && finishWeekFromString < limitWeek) limitWeek = finishWeekFromString;
         }
-        for(int i = startWeek; i < limitWeek + 1; i += 2) {
-            if(!exc.contains((Integer) i)) // Если это не исключение
+        for(int i = startWeek % 2 == 0 ? isOdd ? startWeek + 1 : startWeek : isOdd ? startWeek : startWeek + 1;
+            i < limitWeek + 1; i += 2) {
+            if(!exc.contains(i)) // Если это не исключение
                 goodWeeks.add(i); // Пусть все недели - хорошие.
         }
         return goodWeeks;

@@ -32,7 +32,7 @@ public class CoupleTest {
         String add = "Москва, проспект Вернадского 78, РТУ МИРЭА";
         String aud = "А-1";
 
-        List<Couple> out = Couple.GetCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, true, nam, typ, nGr, tic, aud, add);
+        List<Couple> out = Couple.GetCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, false, nam, typ, nGr, tic, aud, add);
 
         assertNotNull(out);
 
@@ -76,7 +76,7 @@ public class CoupleTest {
         String add = "Москва, проспект Вернадского 78, РТУ МИРЭА";
         String aud = "А-1";
 
-        List<Couple> out = Couple.GetCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, true, nam, typ, nGr, tic, aud, add);
+        List<Couple> out = Couple.GetCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, false, nam, typ, nGr, tic, aud, add);
 
         assertNotNull(out);
 
@@ -87,7 +87,7 @@ public class CoupleTest {
         );
         ZonedDateTime zonedDateTimeDateTime2 = ZonedDateTime.of(
                 LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 1), time2),
-                ZoneId.systemDefault());
+                timezone);
         /* Время начала пары */     assertEquals(zonedDateTime, out.get(0).DateAndTimeOfCouple);
         /* Время конца пары */      assertEquals(zonedDateTimeDateTime2, out.get(0).DateAndTimeFinishOfCouple);
         /* Название группы */       assertEquals(nGr, out.get(0).NameOfGroup);
@@ -132,7 +132,7 @@ public class CoupleTest {
         );
         ZonedDateTime zonedDateTimeDateTime2 = ZonedDateTime.of(
                 LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 1), time2),
-                ZoneId.systemDefault());
+                timezone);
         /* Время начала пары */     assertEquals(zonedDateTime, out.get(0).DateAndTimeOfCouple);
         /* Время конца пары */      assertEquals(zonedDateTimeDateTime2, out.get(0).DateAndTimeFinishOfCouple);
         /* Название группы */       assertEquals(nGr, out.get(0).NameOfGroup);
@@ -170,12 +170,14 @@ public class CoupleTest {
 
         assertNotNull(out);
 
-        /* Количество */            assertEquals(2, out.size());
-        /* Время начала пары*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 2), LocalTime.of(9, 0, 0)), timezone), out.get(0).DateAndTimeOfCouple);
-        /* Время начала пары*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 2), LocalTime.of(9, 0, 0)), timezone).plus(2, ChronoUnit.WEEKS), out.get(1).DateAndTimeOfCouple);
+        /* Количество */            assertEquals(3, out.size());
+        /* Время начала пары*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 2), LocalTime.of(9, 0, 0)), timezone)                                        , out.get(0).DateAndTimeOfCouple);
+        /* Время начала пары*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 2), LocalTime.of(9, 0, 0)), timezone).plus(2  , ChronoUnit.WEEKS), out.get(1).DateAndTimeOfCouple);
+        /* Время начала пары*/      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 2), LocalTime.of(9, 0, 0)), timezone).plus(2*2, ChronoUnit.WEEKS), out.get(2).DateAndTimeOfCouple);
 
         /* Время конца пары */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 2), time2), timezone), out.get(0).DateAndTimeFinishOfCouple);
         /* Время конца пары */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 2), time2), timezone).plus(2, ChronoUnit.WEEKS), out.get(1).DateAndTimeFinishOfCouple);
+        /* Время конца пары */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 2), time2), timezone).plus(2*2, ChronoUnit.WEEKS), out.get(2).DateAndTimeFinishOfCouple);
         for(Couple o : out)
         {
             /* Название группы */       assertEquals(nGr, o.NameOfGroup);
@@ -201,10 +203,10 @@ public class CoupleTest {
 
         DayOfWeek day = DayOfWeek.WEDNESDAY; // Среда
 
-        ZoneId timezone = ZoneId.of("GMT+0:00"); // GMT+0:00
+        ZoneId timezone = ZoneId.of("GMT+00:00"); // GMT+0:00
 
         String nGr = "АБВГ-01-ГА";
-        String nam = ",vrihjegijrw\"woefkweo\21ew_093i2-FFOKEOKOкуцпцшокш342хгйе9з3кшйз3сь4мш9рХШАООХЕ3пп4хзр54.епз35щлр344щее.3уе4.н.3ен.ен.45..5н.54.542FPQWQ#@(-)@(#)$oqfk"; // http://xpoint.ru/forums/internet/standards/thread/29138.xhtml
+        String nam = ",vrihjegijrw\"woefkweoew_093i2-FFOKEOKOкуцпцшокш342хгйе9з3кшйз3сь4мш9рХШАООХЕ3пп4хзр54.епз35щлр344щее.3уе4.н.3ен.ен.45..5н.54.542FPQWQ#@(-)@(#)$oqfk"; // http://xpoint.ru/forums/internet/standards/thread/29138.xhtml
         String typ = "Лабораторная работа.";
         String tic = "ГГГГгггггг. А. а.";
         String add = "ВОдичка";
@@ -264,7 +266,7 @@ public class CoupleTest {
         ZoneId timezone = ZoneId.of("GMT+00:00"); // GMT+0:00
 
         String nGr = "АБВГ-01-ГА";
-        String nam = ",vrihjegijrw\"woefkweo\21ew_093i2-FFOKEOKOкуцпцшокш342хгйе9з3кшйз3сь4мш9рХШАООХЕ3пп4хзр54.епз35щлр344щее.3уе4.н.3ен.ен.45..5н.54.542FPQWQ#@(-)@(#)$oqfk"; // http://xpoint.ru/forums/internet/standards/thread/29138.xhtml
+        String nam = ",vrihjegijrw\"woefkweoew_093i2-FFOKEOKOкуцпцшокш342хгйе9з3кшйз3сь4мш9рХШАООХЕ3пп4хзр54.епз35щлр344щее.3уе4.н.3ен.ен.45..5н.54.542FPQWQ#@(-)@(#)$oqfk"; // http://xpoint.ru/forums/internet/standards/thread/29138.xhtml
         String typ = "Лабораторная работа.";
         String tic = "ГГГГгггггг. А. а.";
         String add = "ВОдичка";
