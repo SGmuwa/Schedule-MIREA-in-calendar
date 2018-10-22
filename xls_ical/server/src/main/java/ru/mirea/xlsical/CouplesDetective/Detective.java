@@ -183,7 +183,7 @@ public class Detective {
      * Ищет в регионе 20x10 заданную фразу и возвращает координаты.
      * @param Word Слово, которое следует искать.
      * @param file Файл, в котором требуется искать.
-     * @return Координаты первого найденного слова "Предмет".
+     * @return Координаты первого найденного слова.
      * @throws DetectiveException Упс! Не нашёл!
      */
     private static Point SeekEverythingInLeftUp(String Word, ExcelFileInterface file) throws DetectiveException, IOException {
@@ -288,10 +288,10 @@ public class Detective {
 
 
     /**
-     * Говорит, сколько пар в одном дне.
-     * @param CR Координаты фразы "Неделя".
+     * Говорит, сколько максимально пар может поместиться в одном дне учёбы.
+     * @param CR Координаты (столбец (x) и строка (y)), где находится фраза "Неделя".
      * @param file Файл, в котором надо подсчитать количество пар.
-     * @return Количество пар в одном дне недели.
+     * @return Максимальное количество пар в одном дне недели.
      * @throws DetectiveException Ошибка при поиске порядковых номеров пар.
      * @throws IOException Файл excel стал недоступным.
      */
