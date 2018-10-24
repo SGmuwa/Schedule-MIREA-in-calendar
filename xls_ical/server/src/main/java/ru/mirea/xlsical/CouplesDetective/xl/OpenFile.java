@@ -9,19 +9,12 @@ import java.io.IOException;
 
 public class OpenFile implements ExcelFileInterface {
 
-    HSSFWorkbook myExcelBookXLS = null;
-    XSSFWorkbook myExcelBookXLSX = null;
-    private boolean xls = false;
-    private boolean xlsx = false;
-    private String type = null;
-    private String result = null;
-    FileInputStream fileInputStream = null;
-    ExcelFileInterface readXLS = null;
-    ExcelFileInterface readXLSX = null;
+    private ExcelFileInterface myExcelBook = null;
 
 
     public OpenFile(String fileName) throws IOException {
-        fileInputStream = new FileInputStream(fileName);
+
+        String type = null;
 
         for (int i = 0; i < fileName.length(); i++){
             if (fileName.charAt(i) == '.'){
@@ -29,37 +22,21 @@ public class OpenFile implements ExcelFileInterface {
             }
         }
 
-        if (type.equals("xlsx")){
-            myExcelBookXLSX = new XSSFWorkbook(fileInputStream);
-            xlsx = true;
-            xls = false;
+        if (type != null && type.equals("xlsx")){
+            myExcelBook = new readFromExcelXLSX(fileName);
         }else {
-            if (type.equals("xls")){
-                myExcelBookXLS = new HSSFWorkbook(fileInputStream);
-                xls = true;
-                xlsx = false;
-            }
+            myExcelBook = new readFromExcelXLS(fileName);
         }
 
     }
 
     @Override
     public String getCellData(int Column, int Row) throws IOException {
-        if (xls){
-            readXLS = new readFromExcelXLS(myExcelBookXLS);
-            result = readXLS.getCellData(Column,Row);
-        } else {
-            if (xlsx){
-                readXLSX = new readFromExcelXLSX(myExcelBookXLSX);
-                result = readXLSX.getCellData(Column,Row);
-            }
-        }
-        return result;
+        return myExcelBook.getCellData(Column, Row);
     }
 
     @Override
     public void close() throws IOException {
-        fileInputStream.close();
-
+        myExcelBook.close();
     }
 }

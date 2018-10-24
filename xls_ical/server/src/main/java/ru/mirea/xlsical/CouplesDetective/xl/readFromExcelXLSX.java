@@ -8,12 +8,12 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 
 import java.io.IOException;
 
-public class readFromExcelXLSX implements ExcelFileInterface{
-    XSSFWorkbook myExcelBook = null;
+public class readFromExcelXLSX implements ExcelFileInterface {
 
+    private XSSFWorkbook myExcelBook;
 
-    readFromExcelXLSX(XSSFWorkbook myExcelBook) throws IOException {
-        this.myExcelBook = myExcelBook;
+    readFromExcelXLSX(String inputFile) throws IOException {
+        this.myExcelBook = new XSSFWorkbook(inputFile);
     }
 
     /**
@@ -24,20 +24,17 @@ public class readFromExcelXLSX implements ExcelFileInterface{
      */
 
     @Override
-    public String getCellData(int Column, int Row){
+    public String getCellData(int Column, int Row) {
         String name = null;
         XSSFSheet myExcelSheet = myExcelBook.getSheet("1");
         XSSFRow row = myExcelSheet.getRow(Row - 1);
-        if (Column < 0 || Row < 0)
-            name = null;
-        else {
+        if (Column >= 0 && Row >= 0)
             if (row == null)
                 name = " ";
             else {
-                if(row.getCell(Column - 1).getCellType() == XSSFCell.CELL_TYPE_STRING)
+                if (row.getCell(Column - 1).getCellType() == XSSFCell.CELL_TYPE_STRING)
                     name = row.getCell(Column - 1).getStringCellValue();
             }
-        }
 
         return name;
     }
@@ -49,6 +46,5 @@ public class readFromExcelXLSX implements ExcelFileInterface{
     @Override
     public void close() throws IOException {
         myExcelBook.close();
-
     }
 }

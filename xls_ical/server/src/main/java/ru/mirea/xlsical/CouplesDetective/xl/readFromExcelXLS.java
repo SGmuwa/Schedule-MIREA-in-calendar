@@ -4,15 +4,21 @@ import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 class readFromExcelXLS implements ExcelFileInterface {
-    HSSFWorkbook myExcelBook = null;
+    private HSSFWorkbook myExcelBook;
+    private InputStream fs;
 
 
-    readFromExcelXLS(HSSFWorkbook myExcelBook) throws IOException {
-        this.myExcelBook = myExcelBook;
+    readFromExcelXLS(String inputFile) throws IOException {
+        fs = new FileInputStream(inputFile);
+        this.myExcelBook = new HSSFWorkbook(fs);
     }
 
     /**
@@ -27,16 +33,13 @@ class readFromExcelXLS implements ExcelFileInterface {
         String name = null;
         HSSFSheet myExcelSheet = myExcelBook.getSheet("1");
         HSSFRow row = myExcelSheet.getRow(Row - 1);
-        if (Column < 0 || Row < 0)
-            name = null;
-        else {
+        if (Column >= 0 && Row >= 0)
             if (row == null)
                 name = " ";
             else {
                 if(row.getCell(Column - 1).getCellType() == HSSFCell.CELL_TYPE_STRING)
                     name = row.getCell(Column - 1).getStringCellValue();
             }
-        }
 
         return name;
     }
@@ -48,6 +51,6 @@ class readFromExcelXLS implements ExcelFileInterface {
     @Override
     public void close() throws IOException {
         myExcelBook.close();
-
+        fs.close();
     }
 }
