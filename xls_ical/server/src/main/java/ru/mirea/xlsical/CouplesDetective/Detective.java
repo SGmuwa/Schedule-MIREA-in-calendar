@@ -57,7 +57,6 @@ public class Detective {
      * @throws IOException Во время работы с Excel file - файл стал недоступен.
      */
     public static List<Couple> startAnInvestigation(Seeker seeker, ExcelFileInterface file) throws DetectiveException, IOException {
-        List<Couple> output = new LinkedList<>();
         Point WeekPositionFirst = SeekEverythingInLeftUp("Неделя", file);
         List<Point> IgnoresCoupleTitle = new LinkedList<>();
         int[] Times = GetTimes(WeekPositionFirst, file); // Узнать время начала и конца пар.
@@ -189,7 +188,7 @@ public class Detective {
     private static Point SeekEverythingInLeftUp(String Word, ExcelFileInterface file) throws DetectiveException, IOException {
         for(int y = 1; y <= 10; y++)
             for(int x = 1; x <= 20; x++)
-                if(file.getCellData(x, y).equals(Word)) return new Point(x, y);
+                if(Word.equals(file.getCellData(x, y))) return new Point(x, y);
         throw new DetectiveException("Невозможно найти заданное слово Word. Word = " + Word);
     }
 
@@ -297,19 +296,16 @@ public class Detective {
      */
     private static int GetCountCoupleInDay(Point CR, ExcelFileInterface file) throws DetectiveException, IOException {
         int OldNumber = Integer.MIN_VALUE; // Последнее число, которое было прочитано.
-        int output = 0;
         int x = CR.x - 3; // Остаёмся на одном и том же столбце!
         for (int y = CR.y + 1; y < CR.y + 100; y++) { // Движемся вниз по строкам!
-            if (!IsStringNumber(file.getCellData(x, y))) {// Если это не число
-                throw new DetectiveException("Ошибка при поиске порядковых номеров пар. На ячейке R3C5 должно быть написано \"Неделя\" а в ячейке R4C2 требуется порядковый номер пары.");
-            } else { // Если мы движемся правильно в сторону прочтения порядковых номеров (нам попадаются только числа), то
-                if (file.getCellData(x, y).isEmpty()) continue;
-                output++;
+            if (file.getCellData(x, y).isEmpty()) continue;
+            if(IsStringNumber(file.getCellData(x, y))) {
                 int NewNumber = Integer.parseInt(file.getCellData(x, y), 10);
                 if (NewNumber <= OldNumber) // Хоба! В резуьтате движения вних мы нашли тот момент, когда было 5... 6... и вот! 1!!!
-                    return output; // Тут надо записывать по сути КОЛИЧЕСТВО_ПАР * 2. Судя по расписанию, номер пары соответсвует количеству пройденых пар, и если мы нашли номер последней пары, то знаем и количество пар. Это NewNumber.
-                // Иначе продолжаем. continue;
+                    return OldNumber; // Тут надо записывать по сути КОЛИЧЕСТВО_ПАР. Судя по расписанию, номер пары соответсвует количеству пройденых пар, и если мы нашли номер последней пары, то знаем и количество пар. Это NewNumber.
+                OldNumber = NewNumber;
             }
+            // Иначе продолжаем. continue;
         }
         return 0;
     }
@@ -326,7 +322,7 @@ public class Detective {
             throw new DetectiveException("Ошибка при поиске время начала и конца пар -> Пока программа спускалась вниз по строкам, считая, сколько пар в одном дне, она прошла окола 100 строк и сказала идити вы все, я столько не хочу обрабатывать.");
         // Ура, мы знаем количество. Это output.length. Теперь можно считывать времена.
         int indexArray = 0;
-        for(int y = CR.y + 1; y <= CR.y + 1 + output.length*2; y+=2)
+        for(int y = CR.y + 1; y < CR.y + 1 + output.length; y+=2)
             for(int x = CR.x - 2; x <= CR.x - 1; x++)
                 // Заполняем масив временем.
                 output[indexArray++] = GetMinutesFromTimeString(file.getCellData(x, y));
@@ -351,6 +347,7 @@ public class Detective {
      * @return {@code True}, если в input записано число или же строка пуста, иначе - {@code False}.
      */
     public static boolean IsStringNumber(String input) {
+        if(input == null) return false;
         char[] buffer = input.trim().toCharArray();
         for(char a : buffer)
             if(a > '9' || a < '0') return false;

@@ -9,7 +9,7 @@ import java.io.IOException;
 
 public class OpenFile implements ExcelFileInterface {
 
-    private ExcelFileInterface myExcelBook = null;
+    private ExcelFileInterface myExcelBook;
 
 
     public OpenFile(String fileName) throws IOException {
@@ -18,7 +18,7 @@ public class OpenFile implements ExcelFileInterface {
 
         for (int i = 0; i < fileName.length(); i++){
             if (fileName.charAt(i) == '.'){
-                type = fileName.substring(i + 1, fileName.length());
+                type = fileName.substring(i + 1);
             }
         }
 

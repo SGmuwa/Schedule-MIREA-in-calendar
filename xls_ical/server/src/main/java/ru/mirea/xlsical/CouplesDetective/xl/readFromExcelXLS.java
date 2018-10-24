@@ -29,17 +29,15 @@ class readFromExcelXLS implements ExcelFileInterface {
      */
 
     @Override
-    public String getCellData(int Column, int Row){
-        String name = null;
+    public String getCellData(int Column, int Row) {
+        String name = "";
         HSSFSheet myExcelSheet = myExcelBook.getSheet("1");
         HSSFRow row = myExcelSheet.getRow(Row - 1);
-        if (Column >= 0 && Row >= 0)
-            if (row == null)
-                name = " ";
-            else {
-                if(row.getCell(Column - 1).getCellType() == HSSFCell.CELL_TYPE_STRING)
-                    name = row.getCell(Column - 1).getStringCellValue();
-            }
+        if (Column >= 0 && Row >= 0 && row != null)
+            if (row.getCell(Column - 1).getCellType() == HSSFCell.CELL_TYPE_STRING)
+                name = row.getCell(Column - 1).getStringCellValue();
+            else if(row.getCell(Column - 1).getCellType() == HSSFCell.CELL_TYPE_NUMERIC)
+                name = "" + (long)row.getCell(Column - 1).getNumericCellValue();
 
         return name;
     }

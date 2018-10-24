@@ -11,6 +11,7 @@ import net.fortuna.ical4j.model.property.Version;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.time.temporal.ChronoField;
 import java.util.Random;
 
@@ -30,8 +31,10 @@ public class ExportCouplesToICal {
         cal.getProperties().add(new ProdId("-//RTU Roflex Team//xls_ical//RU"));
         cal.getProperties().add(Version.VERSION_2_0);
         cal.getProperties().add(CalScale.GREGORIAN);
+        boolean count = false;
 
         for(Couple c : couples) {
+            count = true;
             VEvent ev = new VEvent();
             ev.getSummary().setValue(c.ItemTitle + " (" + c.TypeOfLesson + ")");
             ev.getDescription().setValue(c.Audience + "\\n" + c.NameOfGroup + "\\n" + c.NameOfTeacher);
@@ -42,8 +45,13 @@ public class ExportCouplesToICal {
             ev.getEndDate().getTimeZone().setID(c.DateAndTimeFinishOfCouple.getZone().toString());
             cal.getComponents().add(ev);
         }
+        if(!count)
+            return null;
 
-        String nameFile = "icals/" + java.time.Instant.now().toString() + "_" + ran.nextLong() + ".ics";
+        String nameFile = "icals\\" + java.time.Instant.now().getLong(ChronoField.INSTANT_SECONDS) + "_" + ran.nextLong() + ".ics";
+
+        if(!new File("icals").exists())
+            new File("icals").mkdir();
 
         FileOutputStream file = null;
         try {
@@ -65,7 +73,7 @@ public class ExportCouplesToICal {
      * @return Количество удалённых файлов.
      */
     private static int clearCashOlder24H() {
-        File[] files = new File("ical/").listFiles();
+        File[] files = new File("icals\\").listFiles();
         if (files == null) return 0;
         int countDel = 0;
         for(File f : files) {

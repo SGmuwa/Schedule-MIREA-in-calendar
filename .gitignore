@@ -14,9 +14,6 @@ hs_err_pid*
 .idea/*
 target/*
 
-*.xls
-*.xlsx
-
 *.idea*
 
 *.iml
@@ -31,3 +28,4 @@ xls_ical/interpreter/target/surefire-reports/TEST-TestPackage.xml
 xls_ical/interpreter/target/surefire-reports/TEST-TestSeeker.xml
 xls_ical/interpreter/target/surefire-reports/TestPackage.txt
 xls_ical/interpreter/target/surefire-reports/TestSeeker.txt
+*.ics

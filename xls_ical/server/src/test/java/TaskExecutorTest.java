@@ -28,7 +28,7 @@ public class TaskExecutorTest {
     public void sendSampleExcel() throws InterruptedException {
         TaskExecutor a = new TaskExecutor();
         a.add(new PackageToServer(null,
-                new String[]{"C:\\Users\\mothe\\Downloads\\IIT-3k-18_19-osen (2).xlsx"},
+                new String[]{"tests\\IIT-3k-18_19-osen (2).xlsx"},
                 new Seeker("ИКБО-04-16", SeekerType.StudyGroup, LocalDate.of(2018, 9, 1), LocalDate.of(2018, 12, 31), ZoneId.of("Europe/Minsk"), "Москва, Проспект Вернадского, 78", 0)));
 
         a.step();
