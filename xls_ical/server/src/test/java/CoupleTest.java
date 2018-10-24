@@ -1,4 +1,3 @@
-import org.junit.Assert;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import ru.mirea.xlsical.CouplesDetective.Couple;
@@ -206,7 +205,7 @@ public class CoupleTest {
         ZoneId timezone = ZoneId.of("GMT+00:00"); // GMT+0:00
 
         String nGr = "АБВГ-01-ГА";
-        String nam = ",vrihjegijrw\"woefkweoew_093i2-FFOKEOKOкуцпцшокш342хгйе9з3кшйз3сь4мш9рХШАООХЕ3пп4хзр54.епз35щлр344щее.3уе4.н.3ен.ен.45..5н.54.542FPQWQ#@(-)@(#)$oqfk"; // http://xpoint.ru/forums/internet/standards/thread/29138.xhtml
+        String nam = ",vrihjegijrw093i2-FFOKEOKOкуцпцшокш342хгйе9з3кшйз3сь4мш9рХШАООХЕ3пп4хзр54.епз35щлр344щее.3уе4.н3ен.е45..5н54.542FPQWQ#@(-)@(#)$oqfk"; // http://xpoint.ru/forums/internet/standards/thread/29138.xhtml
         String typ = "Лабораторная работа.";
         String tic = "ГГГГгггггг. А. а.";
         String add = "ВОдичка";
@@ -266,7 +265,7 @@ public class CoupleTest {
         ZoneId timezone = ZoneId.of("GMT+00:00"); // GMT+0:00
 
         String nGr = "АБВГ-01-ГА";
-        String nam = ",vrihjegijrw\"woefkweoew_093i2-FFOKEOKOкуцпцшокш342хгйе9з3кшйз3сь4мш9рХШАООХЕ3пп4хзр54.епз35щлр344щее.3уе4.н.3ен.ен.45..5н.54.542FPQWQ#@(-)@(#)$oqfk"; // http://xpoint.ru/forums/internet/standards/thread/29138.xhtml
+        String nam = ",vrihjegijrw093i2-FFOKEOKOкуцпцшокш342хгйе9з3кшйз3сь4мш9рХШАООХЕ3пп4хзр54.епз35щлр344щее.3уе4.н3ен.е45..5н54.542FPQWQ#@(-)@(#)$oqfk"; // http://xpoint.ru/forums/internet/standards/thread/29138.xhtml
         String typ = "Лабораторная работа.";
         String tic = "ГГГГгггггг. А. а.";
         String add = "ВОдичка";

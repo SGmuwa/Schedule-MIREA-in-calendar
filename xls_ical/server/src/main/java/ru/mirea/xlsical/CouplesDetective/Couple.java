@@ -157,10 +157,14 @@ public class Couple {
      * @param isOdd True, если это для нечётной недели. False, если эта строка для чётной недели.
      * @return Список необходимых недель.
      */
-    private static List<Integer> getWeeks(String itemTitle, int startWeek, int limitWeek, boolean isOdd){
-        if(limitWeek < startWeek) return new ArrayList<>(1);
-        ArrayList<Integer> goodWeeks = new ArrayList<>(limitWeek/2 + 1); // Контейнер с хорошими неделями
+    private static List<Integer> getWeeks(String itemTitle, int startWeek, int limitWeek, boolean isOdd) {
+        if (limitWeek < startWeek) return new ArrayList<>(1);
+        ArrayList<Integer> goodWeeks = new ArrayList<>(limitWeek / 2 + 1); // Контейнер с хорошими неделями
         List<Integer> exc = getAllExceptionWeeks(itemTitle);
+        List<Integer> onlyWeeks = null;
+        if (exc.size() == 0) {
+            onlyWeeks = getAllOnlyWeeks(itemTitle);
+        }
         // Изменение входных параметров в зависимости от itemTitle.
         {
             Integer startWeekFromString = getFromStringStartWeek(itemTitle); // Получаем, с какой недели идут пары.
@@ -168,11 +172,18 @@ public class Couple {
             Integer finishWeekFromString = getFromStringFinishWeek(itemTitle); // Получаем, с какой недели идут пары.
             if (finishWeekFromString != null && finishWeekFromString < limitWeek) limitWeek = finishWeekFromString;
         }
-        for(int i = startWeek % 2 == 0 ? isOdd ? startWeek + 1 : startWeek : isOdd ? startWeek : startWeek + 1;
-            i < limitWeek + 1; i += 2) {
-            if(!exc.contains(i)) // Если это не исключение
-                goodWeeks.add(i); // Пусть все недели - хорошие.
-        }
+        if (onlyWeeks != null)
+            for (Integer week : onlyWeeks) {
+                if (week < startWeek || week > limitWeek)
+                    continue;
+                goodWeeks.add(week);
+            }
+        if (goodWeeks.size() == 0)
+            for (int i = startWeek % 2 == 0 ? isOdd ? startWeek + 1 : startWeek : isOdd ? startWeek : startWeek + 1;
+                 i < limitWeek + 1; i += 2) {
+                if (!exc.contains(i)) // Если это не исключение
+                    goodWeeks.add(i); // Пусть все недели - хорошие.
+            }
         return goodWeeks;
     }
 
@@ -209,7 +220,26 @@ public class Couple {
      * @return Возвращает %d. В случае, если не найдено - возвращается пустой список.
      */
     private static List<Integer> getAllExceptionWeeks(String itemTitle) {
-        Pattern p = Pattern.compile("[Кк]р(оме)?.? ?\\d+([,;] ?\\d+)+");
+        // [Кк]р(\.|(оме))?.((((\d(, | и | )?)+) ?(нед([а-яА-Я]+)?\.?|н( |\.|$)))|((нед([а-яА-Я]+)?\.?|н( |\.|$)) ?((\d(, | и | )?)+)))
+
+        Pattern p = Pattern.compile("[Кк]р(\\.|(оме))?.((((\\d(, | и | )?)+) ?(нед([а-яА-Я]+)?\\.?|н( |\\.|$)))|((нед([а-яА-Я]+)?\\.?|н( |\\.|$)) ?((\\d(, | и | )?)+)))");
+        Matcher m = p.matcher(itemTitle);
+        if(m.find())
+            return getAllIntsFromString(m.group());
+        else
+            return new LinkedList<>();
+    }
+
+    /**
+     * Функция пытается найти такие выражения, как "%d, %d и %d н." и их вариации. Возвращает список недель.
+     * Pattern: {@code (((\d(, | и | )?)+) ?(нед|н( |\.|$)))|((нед|н( |\.|$)) ?((\d(, | и | )?)+))}
+     * @param itemTitle Заголовок названия предмета из таблицы расписания.
+     * @return Возвращает %d. В случае, если не найдено - возвращается пустой список.
+     */
+    private static List<Integer> getAllOnlyWeeks(String itemTitle) {
+        // ((\d(, | и | )?)+) ?(нед([а-яА-Я]+)?\.?|н( |\.|$))
+        // (((\d(, | и | )?)+) ?(нед([а-яА-Я]+)?\.?|н( |\.|$)))|((нед([а-яА-Я]+)?\.?|н( |\.)) ?((\d(, | и | )?)+))
+        Pattern p = Pattern.compile("(((\\d(, | и | )?)+) ?(нед([а-яА-Я]+)?\\.?|н( |\\.|$)))|((нед([а-яА-Я]+)?\\.?|н( |\\.)) ?((\\d(, | и | )?)+))");
         Matcher m = p.matcher(itemTitle);
         if(m.find())
             return getAllIntsFromString(m.group());
