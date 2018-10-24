@@ -73,8 +73,8 @@ public class Couple {
      * @param address Адрес корпуса.
      * @return Возвращает, в какие дни будут пары.
      */
-    public static List<Couple> GetCouplesByPeriod(Seeker seeker, LocalTime timeStartOfCouple, LocalTime timeFinishOfCouple, DayOfWeek dayOfWeek, boolean isOdd, String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address) {
-        return GetCouplesByPeriod(seeker.dateStart, seeker.dateFinish, seeker.timezoneStart, seeker.startWeek, timeStartOfCouple, timeFinishOfCouple, dayOfWeek, isOdd, itemTitle, typeOfLesson, nameOfGroup, nameOfTeacher, audience, address);
+    public static List<Couple> getCouplesByPeriod(Seeker seeker, LocalTime timeStartOfCouple, LocalTime timeFinishOfCouple, DayOfWeek dayOfWeek, boolean isOdd, String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address) {
+        return getCouplesByPeriod(seeker.dateStart, seeker.dateFinish, seeker.timezoneStart, seeker.startWeek, timeStartOfCouple, timeFinishOfCouple, dayOfWeek, isOdd, itemTitle, typeOfLesson, nameOfGroup, nameOfTeacher, audience, address);
     }
 
     /**
@@ -105,7 +105,7 @@ public class Couple {
      * @param address Адрес корпуса.
      * @return Возвращает, в какие дни будут пары.
      */
-    public static List<Couple> GetCouplesByPeriod(LocalDate start, LocalDate finish, ZoneId startZoneId, int startWeek, LocalTime timeStartOfCouple, LocalTime timeFinishOfCouple, DayOfWeek dayOfWeek, boolean isOdd, String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address) {
+    public static List<Couple> getCouplesByPeriod(LocalDate start, LocalDate finish, ZoneId startZoneId, int startWeek, LocalTime timeStartOfCouple, LocalTime timeFinishOfCouple, DayOfWeek dayOfWeek, boolean isOdd, String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address) {
         List<Couple> out;
         ZonedDateTime startT =  ZonedDateTime.of(LocalDateTime.of(start, LocalTime.of(0, 0)), startZoneId);
         ZonedDateTime finishT = ZonedDateTime.of(LocalDateTime.of(finish, LocalTime.of(23, 50)), startZoneId);
@@ -219,7 +219,7 @@ public class Couple {
      * @param itemTitle Заголовок названия предмета из таблицы расписания.
      * @return Возвращает %d. В случае, если не найдено - возвращается пустой список.
      */
-    private static List<Integer> getAllExceptionWeeks(String itemTitle) {
+    public static List<Integer> getAllExceptionWeeks(String itemTitle) {
         // [Кк]р(\.|(оме))?.((((\d(, | и | )?)+) ?(нед([а-яА-Я]+)?\.?|н( |\.|$)))|((нед([а-яА-Я]+)?\.?|н( |\.|$)) ?((\d(, | и | )?)+)))
 
         Pattern p = Pattern.compile("[Кк]р(\\.|(оме))?.((((\\d(, | и | )?)+) ?(нед([а-яА-Я]+)?\\.?|н( |\\.|$)))|((нед([а-яА-Я]+)?\\.?|н( |\\.|$)) ?((\\d(, | и | )?)+)))");
@@ -236,7 +236,7 @@ public class Couple {
      * @param itemTitle Заголовок названия предмета из таблицы расписания.
      * @return Возвращает %d. В случае, если не найдено - возвращается пустой список.
      */
-    private static List<Integer> getAllOnlyWeeks(String itemTitle) {
+    public static List<Integer> getAllOnlyWeeks(String itemTitle) {
         // ((\d(, | и | )?)+) ?(нед([а-яА-Я]+)?\.?|н( |\.|$))
         // (((\d(, | и | )?)+) ?(нед([а-яА-Я]+)?\.?|н( |\.|$)))|((нед([а-яА-Я]+)?\.?|н( |\.)) ?((\d(, | и | )?)+))
         Pattern p = Pattern.compile("(((\\d(, | и | )?)+) ?(нед([а-яА-Я]+)?\\.?|н( |\\.|$)))|((нед([а-яА-Я]+)?\\.?|н( |\\.)) ?((\\d(, | и | )?)+))");
@@ -245,30 +245,6 @@ public class Couple {
             return getAllIntsFromString(m.group());
         else
             return new LinkedList<>();
-    }
-
-    /**
-     * Данная функция отвечает, содержится ли в тексте (например, в названии предмета) запись о том, что пара начинается только с или до какой-то недели.
-     * @param itemTitle Заголовок названия предмета из таблицы расписания.
-     * @return True, если есть комментарий о начале или конце недель. Иначе - false.
-     */
-    public static boolean isStringBeginEndWeek(String itemTitle){
-        // ^.+ н\.? .+$|^н\.? .+$|^.+ н\.?\b.+$
-        Pattern p = Pattern.compile("($| )(До|до|с|С) \\d+(\\.| |$)"); // TODO: ERROR!
-        Matcher m = p.matcher(itemTitle);
-        return m.matches();
-    }
-
-    /**
-     * Данная функция отвечает, содержится ли в тексте (например, в названии предмета) заметки о том, в каких неделях проходят пары.
-     * @param itemTitle Заголовок названия предмета из таблицы расписания.
-     * @return True, если стоит учесть внимание на исключения. Иначе - false.
-     */
-    public static boolean isStringHaveWeek(String itemTitle){
-        // ^.+ н\.? .+$|^н\.? .+$|^.+ н\.?\b.+$
-        Pattern p = Pattern.compile("($| )[нН](\\.| |$)");
-        Matcher m = p.matcher(itemTitle);
-        return m.find();
     }
 
     /**
@@ -284,28 +260,6 @@ public class Couple {
             numbers.add(Integer.parseInt(m.group()));
         }
         return numbers;
-    }
-
-    private static Integer getFirstIntFromString(String input) {
-        Pattern p = Pattern.compile("-?\\d+");
-        Matcher m = p.matcher(input);
-        if (m.find())
-            return Integer.parseInt(m.group());
-        else
-            return null;
-    }
-
-    /**
-     * Данная функция отвечает, содержится ли в тексте (например, в названии предмета) заметки о том, в каких неделях не проходят пары.
-     * @param itemTitle Заголовок названия предмета из таблицы расписания.
-     * @return True, если стоит учесть внимание на исключения. Иначе - false.
-     */
-    public static boolean isStringHaveWeekException(String itemTitle){
-        // н\\.? |^н\\.? | н\\.?\b
-        if(!isStringHaveWeek(itemTitle)) return false;
-        Pattern p = Pattern.compile("(^| )[кК]р(\\.| |$)");
-        Matcher m = p.matcher(itemTitle);
-        return m.find();
     }
 
     /**

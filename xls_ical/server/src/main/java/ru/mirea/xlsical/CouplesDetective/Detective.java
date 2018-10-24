@@ -9,7 +9,7 @@ package ru.mirea.xlsical.CouplesDetective;
 2. Анализирую, является ли день днём самостоятельных занятий.
 3. Узнаю, по какому адресу занимаются в этот день.
 4. Добавляю в исключения строки с адресами.
-5. Разбиваю по двум строкам в GetCouplesByPeriod. Исключающие строки отправляются как "".
+5. Разбиваю по двум строкам в getCouplesByPeriod. Исключающие строки отправляются как "".
 
  */
 
@@ -253,7 +253,7 @@ public class Detective {
             String[] teachers = file.getCellData(cursor.x + 2, cursor.y).trim().split(("\r\n|\n"));
             String[] audiences = file.getCellData(cursor.x + 3, cursor.y).trim().split(("\r\n|\n"));
             for (int indexInLine = 0; indexInLine < titles.length; indexInLine++) {
-                Iterable<Couple> listCouplesOfLine = Couple.GetCouplesByPeriod(
+                Iterable<Couple> listCouplesOfLine = Couple.getCouplesByPeriod(
                         seeker,
                         LocalTime.of(times[2*indexInLine] / 60, times[2*indexInLine] % 60),
                         LocalTime.of(times[2*indexInLine + 1] / 60, times[2*indexInLine + 1] % 60),
@@ -266,7 +266,7 @@ public class Detective {
                         indexInLine < audiences.length ? audiences[indexInLine] : audiences[0],
                         address);
                 if(listCouplesOfLine != null) for (Couple coup : listCouplesOfLine)
-                    coupleOfDay.add(coup); // Все пары, которые вернусь с GetCouplesByPeriod надо добавить в наш список.
+                    coupleOfDay.add(coup); // Все пары, которые вернусь с getCouplesByPeriod надо добавить в наш список.
             }
         }
         return coupleOfDay;
