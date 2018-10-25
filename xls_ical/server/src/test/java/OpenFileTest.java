@@ -39,8 +39,8 @@ public class OpenFileTest {
         assertEquals("Error 1:2(AБ)", "АБ", openFile.getCellData(1,2));
         assertEquals("Error 2:1(БА)", "БА", openFile.getCellData(2,1));
         assertEquals("Error 2:2(Груша)", "Груша", openFile.getCellData(2,2));
-        assertEquals("Error -1:-1(null)", null, openFile.getCellData(-1,-1));
-        assertEquals("Error 999:999( )", " ", openFile.getCellData(999,999));
+        assertEquals("Error -1:-1(null)", "", openFile.getCellData(-1,-1));
+        assertEquals("Error 999:999( )", "", openFile.getCellData(999,999));
         openFile.close();
         new File("delete1.xls").delete();
     }
