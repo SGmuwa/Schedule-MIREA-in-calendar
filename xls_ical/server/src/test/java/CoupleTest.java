@@ -319,7 +319,7 @@ public class CoupleTest {
 
         assertTrue(
                 Pattern.compile("^[a-z0-9_-]{3,15}$")
-                        .matcher("vovan").matches()
+                        .matcher("vovan").matches() //TODO: пояснить как работает данная конструкция
         );
 
         assertFalse(
