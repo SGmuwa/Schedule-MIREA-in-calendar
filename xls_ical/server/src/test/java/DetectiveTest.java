@@ -1,9 +1,22 @@
+import ru.mirea.xlsical.CouplesDetective.Couple;
 import ru.mirea.xlsical.CouplesDetective.Detective;
-import org.junit.Assert;
 import org.junit.Test;
+import ru.mirea.xlsical.CouplesDetective.DetectiveException;
+import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
+import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
+import ru.mirea.xlsical.interpreter.Seeker;
+import ru.mirea.xlsical.interpreter.SeekerType;
+
 import static org.junit.Assert.*;
+import static ru.mirea.xlsical.CouplesDetective.Detective.GetTimes;
+
+import java.io.IOException;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.awt.*;
+import java.util.List;
 
 public class DetectiveTest {
     @Test
@@ -35,5 +48,84 @@ public class DetectiveTest {
         list.add(a);
         assertEquals(true, Detective.IsEqualsInList(list, a));;
         assertEquals(false, Detective.IsEqualsInList(list, b));;
+    }
+
+    @Test
+    public void startAnInvestigationTest() throws IOException{
+        ExcelFileInterface file = null;
+        try {
+            file = new OpenFile("IIT-3k-18_19-osen.xlsx");
+        } catch (IOException e)
+        {
+            System.out.println(e.getLocalizedMessage());
+        }
+        assertNotNull(file);
+        file.close();
+    }
+
+
+    @Test
+    public void GetCouplesFromDayTest() throws IOException {
+        List<Point> list = new ArrayList<>();
+        ExcelFileInterface file = null;
+        Collection<? extends Couple> col;
+        int[] times = {540,630,640,730,780,870,880,970,980,1070,1080,1170};
+
+        try{
+            file = new OpenFile("IIT-3k-18_19-osen.xlsx");
+        }catch(IOException e){
+                System.out.println(e.getLocalizedMessage());
+        }
+
+        Seeker seeker = new Seeker("Кузьмина М.Р.", SeekerType.StudyGroup, LocalDate.of(2018,9,1), LocalDate.of(2018, 10,1), ZoneId.of("UTC+3"), "пр-т Вернадского, 78", 1);
+        col = Detective.GetCouplesFromDay(6,3, "ИКБО-04-16",DayOfWeek.of(1), seeker, list, times, "пр-т Вернадского, 78", file);
+
+        //return col; Should be void.
+
+    }
+
+    @Test
+    public void openFirstXls() {
+
+        ExcelFileInterface file = null;
+        try {
+            file = new OpenFile("xls-test\\IIT-3k-18_19-osen.xlsx");
+        } catch (IOException e)
+        {
+            System.out.println(e.getLocalizedMessage());
+        }
+        assertNotNull(file);
+
+        try {
+            System.out.println(file.getCellData(1, 1));
+            System.out.println(file.getCellData(2, 1));
+            System.out.println(file.getCellData(1, 2));
+            System.out.println(file.getCellData(2, 2));
+
+            file.close();
+
+        } catch (IOException e) {
+            System.out.println(e.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void GetTimesTest(){
+        Point point = new Point(5,3);
+        ExcelFileInterface file = null;
+        int [] mas = {0,0};
+        try {
+            file = new OpenFile("IIT-3k-18_19-osen.xlsx");
+        }catch (IOException e){
+            System.out.println(e.getLocalizedMessage());
+        }
+        assertNotNull(file);
+
+        try {
+            mas = GetTimes(point, file);
+        }catch (DetectiveException | IOException e){
+            System.out.println(e.getLocalizedMessage());
+        }
+
     }
 }

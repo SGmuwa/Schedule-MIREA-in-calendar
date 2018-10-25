@@ -238,7 +238,7 @@ public class Detective {
      * @param file Файл, откуда надо производить чтение.
      * @return Множество занятий у группы в конкретный день.
      */
-    private static Collection<? extends Couple> GetCouplesFromDay(int column, int row, String nameOfGroup, DayOfWeek dayOfWeek, Seeker seeker, List<Point> ignoresCoupleTitle, int[] times, String address, ExcelFileInterface file) throws IOException {
+    public static Collection<? extends Couple> GetCouplesFromDay(int column, int row, String nameOfGroup, DayOfWeek dayOfWeek, Seeker seeker, List<Point> ignoresCoupleTitle, int[] times, String address, ExcelFileInterface file) throws IOException {
         LinkedList<Couple> coupleOfDay = new LinkedList<>();
         int countOfCouples = times.length / 2;
         for(Point cursor = new Point(column, row); cursor.y < row + countOfCouples*2; cursor.y++) { // Считываем каждую строчку
@@ -313,7 +313,7 @@ public class Detective {
      * @param file Excel файл.
      * @return Возвращает список времён в формате минут: {начало пары, конец пары}.
      */
-    private static int[] GetTimes(Point CR, ExcelFileInterface file) throws  DetectiveException, IOException {
+    public static int[] GetTimes(Point CR, ExcelFileInterface file) throws  DetectiveException, IOException {
         int[] output = new int[2 * GetCountCoupleInDay(CR, file)];
         if(output.length == 0)
             throw new DetectiveException("Ошибка при поиске время начала и конца пар -> Пока программа спускалась вниз по строкам, считая, сколько пар в одном дне, она прошла окола 100 строк и сказала идити вы все, я столько не хочу обрабатывать.");
