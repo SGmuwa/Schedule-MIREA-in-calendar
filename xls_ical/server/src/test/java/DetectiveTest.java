@@ -51,7 +51,7 @@ public class DetectiveTest {
     }
 
     @Test
-    public void startAnInvestigationTest() throws IOException{
+    public void startAnInvestigationTest(){
         ExcelFileInterface file = null;
         try {
             file = new OpenFile("IIT-3k-18_19-osen.xlsx");
@@ -60,25 +60,33 @@ public class DetectiveTest {
             System.out.println(e.getLocalizedMessage());
         }
         assertNotNull(file);
-        file.close();
+        try {
+            file.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
     @Test
-    public void GetCouplesFromDayTest() throws IOException {
+    public void GetCouplesFromDayTest(){
         List<Point> list = new ArrayList<>();
         ExcelFileInterface file = null;
         Collection<? extends Couple> col;
         int[] times = {540,630,640,730,780,870,880,970,980,1070,1080,1170};
 
         try{
-            file = new OpenFile("IIT-3k-18_19-osen.xlsx");
+            file = new OpenFile("test-01.xlsx");
         }catch(IOException e){
                 System.out.println(e.getLocalizedMessage());
         }
 
         Seeker seeker = new Seeker("Кузьмина М.Р.", SeekerType.StudyGroup, LocalDate.of(2018,9,1), LocalDate.of(2018, 10,1), ZoneId.of("UTC+3"), "пр-т Вернадского, 78", 1);
-        col = Detective.GetCouplesFromDay(6,3, "ИКБО-04-16",DayOfWeek.of(1), seeker, list, times, "пр-т Вернадского, 78", file);
+        try {
+            col = Detective.GetCouplesFromDay(6,3, "ИКБО-04-16",DayOfWeek.of(1), seeker, list, times, "пр-т Вернадского, 78", file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         //return col; Should be void.
 
@@ -89,7 +97,7 @@ public class DetectiveTest {
 
         ExcelFileInterface file = null;
         try {
-            file = new OpenFile("xls-test\\IIT-3k-18_19-osen.xlsx");
+            file = new OpenFile("IIT-3k-18_19-osen.xlsx");
         } catch (IOException e)
         {
             System.out.println(e.getLocalizedMessage());

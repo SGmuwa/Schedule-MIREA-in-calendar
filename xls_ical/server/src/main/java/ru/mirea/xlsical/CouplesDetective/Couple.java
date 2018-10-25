@@ -20,7 +20,7 @@ public class Couple {
     /**
      * Название группы.
      */
-    public String NameOfGroup;
+    public String NameOfGroup; 
     /**
      * Имя преподавателя.
      */
