@@ -116,7 +116,7 @@ public class TaskExecutor implements Runnable {
                 couples.size(),
                 "ok.");
     }
-
+    // TODO: написать описание перегруженных методов openExcelFiles
     private static ArrayList<ExcelFileInterface> openExcelFiles(String[] filesStr) {
         ArrayList<ExcelFileInterface> output = new ArrayList<>(filesStr.length);
         for(int index = filesStr.length - 1; index >= 0; index--) {
