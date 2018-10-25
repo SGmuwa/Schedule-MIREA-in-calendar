@@ -34,5 +34,6 @@ public class TaskExecutorTest {
         a.step();
         PackageToClient b = a.take();
         System.out.println(b.CalFile);
+        assertNotNull(b.CalFile);
     }
 }

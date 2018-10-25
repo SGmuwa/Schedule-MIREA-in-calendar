@@ -1,5 +1,6 @@
 package ru.mirea.xlsical.CouplesDetective;
 
+import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.*;
 import net.fortuna.ical4j.model.component.VEvent;
@@ -26,6 +27,7 @@ public class ExportCouplesToICal {
         if(ran.nextInt() % 1000 == 0)
             clearCashOlder24H(); // Очистка кэша.
         Calendar cal = new Calendar();
+        TimeZoneRegistry registry = new CalendarBuilder().getRegistry ();
         cal.getProperties().add(new ProdId("-//RTU Roflex Team//xls_ical//RU"));
         cal.getProperties().add(Version.VERSION_2_0);
         cal.getProperties().add(CalScale.GREGORIAN);
@@ -37,16 +39,14 @@ public class ExportCouplesToICal {
             ev.getProperties().add(new Summary((c.ItemTitle + " (" + c.TypeOfLesson + ")")));
             ev.getProperties().add(new Description(c.Audience + "\\n" + c.NameOfGroup + "\\n" + c.NameOfTeacher));
             ev.getProperties().add(new Location(c.Address));
+            ev.getProperties().add(new Uid(String.format("%d_%d@%s", java.time.ZonedDateTime.now().getLong(ChronoField.INSTANT_SECONDS), ran.nextLong(), "ru.mirea.xlsical")));
 
-            DateProperty date = new DtStart(new DateTime(c.DateAndTimeOfCouple.getLong(ChronoField.INSTANT_SECONDS)), false);
-            date.setTimeZone(new TimeZone(new VTimeZone()));
-            net.fortuna.ical4j.model.TimeZoneRegistry b = new TimeZoneRegistryImpl();
-            date.getTimeZone().setID(c.DateAndTimeOfCouple.getZone().toString());
+            DateProperty date = new DtStart(new DateTime(1000L*c.DateAndTimeOfCouple.getLong(ChronoField.INSTANT_SECONDS)), false);
+            date.setTimeZone(registry.getTimeZone(c.DateAndTimeOfCouple.getZone().toString()));
             ev.getProperties().add(date);
 
-            date = new DtEnd(new DateTime(c.DateAndTimeFinishOfCouple.getLong(ChronoField.INSTANT_SECONDS)), false);
-            date.setTimeZone(new TimeZone(new VTimeZone()));
-            date.getTimeZone().setID(c.DateAndTimeFinishOfCouple.getZone().toString());
+            date = new DtEnd(new DateTime(1000L*c.DateAndTimeFinishOfCouple.getLong(ChronoField.INSTANT_SECONDS)), false);
+            date.setTimeZone(registry.getTimeZone(c.DateAndTimeFinishOfCouple.getZone().toString()));
             ev.getProperties().add(date);
 
             cal.getComponents().add(ev);
