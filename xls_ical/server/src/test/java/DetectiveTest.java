@@ -31,13 +31,13 @@ public class DetectiveTest {
 
     @Test
     public void IsStringNumberTest(){
-        assertEquals(true, Detective.IsStringNumber("8"));
-        assertEquals(true,  Detective.IsStringNumber(""));
-        assertEquals(true, Detective.IsStringNumber("85"));
-        assertEquals(true,  Detective.IsStringNumber("0"));
-        assertEquals(false,  Detective.IsStringNumber("-3"));
-        assertEquals(false, Detective.IsStringNumber("f"));
-        assertEquals(false,  Detective.IsStringNumber("."));
+        assertTrue(Detective.IsStringNumber("8"));
+        assertTrue(Detective.IsStringNumber(""));
+        assertTrue(Detective.IsStringNumber("85"));
+        assertTrue(Detective.IsStringNumber("0"));
+        assertTrue(Detective.IsStringNumber("-3"));
+        assertFalse(Detective.IsStringNumber("f"));
+        assertFalse(Detective.IsStringNumber("."));
     }
 
     @Test
@@ -54,7 +54,7 @@ public class DetectiveTest {
     public void startAnInvestigationTest() throws IOException{
         ExcelFileInterface file = null;
         try {
-            file = new OpenFile("IIT-3k-18_19-osen.xlsx");
+            file = new OpenFile("tests/IIT-3k-18_19-osen.xlsx");
         } catch (IOException e)
         {
             System.out.println(e.getLocalizedMessage());
