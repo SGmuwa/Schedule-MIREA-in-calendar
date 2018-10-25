@@ -1,12 +1,10 @@
 package ru.mirea.xlsical.CouplesDetective;
 
 import net.fortuna.ical4j.data.CalendarOutputter;
-import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.*;
 import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.property.CalScale;
-import net.fortuna.ical4j.model.property.ProdId;
-import net.fortuna.ical4j.model.property.Version;
+import net.fortuna.ical4j.model.component.VTimeZone;
+import net.fortuna.ical4j.model.property.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,13 +34,21 @@ public class ExportCouplesToICal {
         for(Couple c : couples) {
             count = true;
             VEvent ev = new VEvent();
-            ev.getSummary().setValue(c.ItemTitle + " (" + c.TypeOfLesson + ")");
-            ev.getDescription().setValue(c.Audience + "\\n" + c.NameOfGroup + "\\n" + c.NameOfTeacher);
-            ev.getLocation().setValue(c.Address);
-            ev.getStartDate().setDate(new DateTime(c.DateAndTimeOfCouple.getLong(ChronoField.INSTANT_SECONDS)));
-            ev.getStartDate().getTimeZone().setID(c.DateAndTimeOfCouple.getZone().toString());
-            ev.getEndDate().setDate(new DateTime(c.DateAndTimeFinishOfCouple.getLong(ChronoField.INSTANT_SECONDS)));
-            ev.getEndDate().getTimeZone().setID(c.DateAndTimeFinishOfCouple.getZone().toString());
+            ev.getProperties().add(new Summary((c.ItemTitle + " (" + c.TypeOfLesson + ")")));
+            ev.getProperties().add(new Description(c.Audience + "\\n" + c.NameOfGroup + "\\n" + c.NameOfTeacher));
+            ev.getProperties().add(new Location(c.Address));
+
+            DateProperty date = new DtStart(new DateTime(c.DateAndTimeOfCouple.getLong(ChronoField.INSTANT_SECONDS)), false);
+            date.setTimeZone(new TimeZone(new VTimeZone()));
+            net.fortuna.ical4j.model.TimeZoneRegistry b = new TimeZoneRegistryImpl();
+            date.getTimeZone().setID(c.DateAndTimeOfCouple.getZone().toString());
+            ev.getProperties().add(date);
+
+            date = new DtEnd(new DateTime(c.DateAndTimeFinishOfCouple.getLong(ChronoField.INSTANT_SECONDS)), false);
+            date.setTimeZone(new TimeZone(new VTimeZone()));
+            date.getTimeZone().setID(c.DateAndTimeFinishOfCouple.getZone().toString());
+            ev.getProperties().add(date);
+
             cal.getComponents().add(ev);
         }
         if(!count)

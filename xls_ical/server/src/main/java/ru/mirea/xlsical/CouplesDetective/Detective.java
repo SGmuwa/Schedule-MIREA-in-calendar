@@ -61,38 +61,35 @@ public class Detective {
         List<Point> IgnoresCoupleTitle = new LinkedList<>();
         int[] Times = GetTimes(WeekPositionFirst, file); // Узнать время начала и конца пар.
         int CountCouples = Times.length / 2; // Узнать количество пар за день.
-        Point basePos;
-        try {
-            basePos = SeekFirstCouple(file); // Позиция первой записи "Предмет".
-            // Обычно на R3C6.
-        } catch (DetectiveException e) {
-            System.out.println(e.getMessage());
-            System.err.println(e.getMessage());
-            return new LinkedList<>(); // Нет пар в этом листе.
-        }
-        // Ура! Мы нашли базовую позицию!
+        Point basePos = SeekFirstCouple(file); // Позиция первой записи "Предмет". Обычно на R3C6.
+        // Ура! Мы нашли базовую позицию! Это basePos.
+        List<Couple> out = new LinkedList<>();
         for(
-                int lastEC = 10, // Last entry count - Счётчик последней записи.
+                int lastEC = 15, // Last entry count - Счётчик последней записи. Если долго не находим, то выходим из цикла.
                 posEntryX = basePos.x; // Это позиция записи. Указывает столбец, где есть запись "Предмет".
 
                 lastEC != 0;
 
-                lastEC--, posEntryX--
+                lastEC--, posEntryX++
                 )
         {
-            if(file.getCellData(posEntryX, basePos.y).equals("Предмет"))
-                for(int DayOfTheWeek = 1; DayOfTheWeek <= 7; DayOfTheWeek++) {
+            if("Предмет".equals(file.getCellData(posEntryX, basePos.y)) && file.getCellData(posEntryX, basePos.y).length() > 0) {
+                lastEC = 15;
+                System.out.println("R" + basePos.y + "C" + posEntryX);
+                for (int DayOfTheWeek = 1;
+                     DayOfTheWeek <= 7; DayOfTheWeek++) {
                     // Выставляем курсор на название первой пары дня.
                     Point cursor = new Point(posEntryX, basePos.y + 1 + DayOfTheWeek * CountCouples);
-                    if(IsDayFree(cursor, CountCouples, IgnoresCoupleTitle, file)) continue; // Если день свободен, то ничего не добавляем.
-                    String Address = GetAddressOfDay(cursor, CountCouples, seeker.defaultAddress, IgnoresCoupleTitle, file);
-                    return FilterCouplesBySeekerType(
+                    if (IsDayFree(cursor, CountCouples, IgnoresCoupleTitle, file))
+                        continue; // Если день свободен, то ничего не добавляем.
+                    out.addAll(FilterCouplesBySeekerType(
                             GetCouplesFromAnchor(posEntryX, basePos.y, seeker, Times, IgnoresCoupleTitle, file) /* Хорошо! Мы получили список занятий у группы. Если это группа - то просто добавить, если это преподаватель - то отфильтровать. */,
                             seeker
-                    );
+                    ));
                 }
+            }
         }
-        return new LinkedList<>();
+        return out;
     }
 
     /**
@@ -186,9 +183,9 @@ public class Detective {
      * @throws DetectiveException Упс! Не нашёл!
      */
     private static Point SeekEverythingInLeftUp(String Word, ExcelFileInterface file) throws DetectiveException, IOException {
-        for(int y = 1; y <= 10; y++)
-            for(int x = 1; x <= 20; x++)
-                if(Word.equals(file.getCellData(x, y))) return new Point(x, y);
+        for (int y = 1; y <= 10; y++)
+            for (int x = 1; x <= 20; x++)
+                if (Word.equals(file.getCellData(x, y))) return new Point(x, y);
         throw new DetectiveException("Невозможно найти заданное слово Word. Word = " + Word);
     }
 
@@ -247,10 +244,10 @@ public class Detective {
         for(Point cursor = new Point(column, row); cursor.y < row + countOfCouples*2; cursor.y++) { // Считываем каждую строчку
             if (IsEqualsInList(ignoresCoupleTitle, cursor))
                 continue; // Если такая запись под игнором, то игнорируем, ничего не делаем.
-            String[] titles = file.getCellData(cursor.x, cursor.y).trim().split("\r\n|\n"); // Регулярное выражение. Делать новую строку либо от \r\n либо от \n. Универсально!
-            String[] typeOfLessons = file.getCellData(cursor.x + 1, cursor.y).trim().split("\r\n|\n");
-            String[] teachers = file.getCellData(cursor.x + 2, cursor.y).trim().split(("\r\n|\n"));
-            String[] audiences = file.getCellData(cursor.x + 3, cursor.y).trim().split(("\r\n|\n"));
+            String[] titles = file.getCellData(cursor.x, cursor.y).trim().split("(\r\n|)\n"); // Регулярное выражение. Делать новую строку либо от \r\n либо от \n. Универсально!
+            String[] typeOfLessons = file.getCellData(cursor.x + 1, cursor.y).trim().split("(\r\n)|\n");
+            String[] teachers = file.getCellData(cursor.x + 2, cursor.y).trim().split(("(\r\n)|\n"));
+            String[] audiences = file.getCellData(cursor.x + 3, cursor.y).trim().split(("(\r\n)|\n"));
             for (int indexInLine = 0; indexInLine < titles.length; indexInLine++) {
                 Iterable<Couple> listCouplesOfLine = Couple.getCouplesByPeriod(
                         seeker,

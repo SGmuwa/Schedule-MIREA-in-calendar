@@ -26,12 +26,17 @@ public class readFromExcelXLSX implements ExcelFileInterface {
     @Override
     public String getCellData(int Column, int Row) {
         String name = "";
-        XSSFSheet myExcelSheet = myExcelBook.getSheet("1");
+        if(Column < 0 || Row < 0)
+            return name;
+        XSSFSheet myExcelSheet = myExcelBook.getSheetAt(0);
         XSSFRow row = myExcelSheet.getRow(Row - 1);
-        if (Column >= 0 && Row >= 0 && row != null)
-            if (row.getCell(Column - 1).getCellType() == XSSFCell.CELL_TYPE_STRING)
+        if(row == null)
+            return name;
+        XSSFCell cell = row.getCell(Column - 1);
+        if (cell != null)
+            if (cell.getCellType() == XSSFCell.CELL_TYPE_STRING)
                 name = row.getCell(Column - 1).getStringCellValue();
-            else if (row.getCell(Column - 1).getCellType() == XSSFCell.CELL_TYPE_NUMERIC)
+            else if (cell.getCellType() == XSSFCell.CELL_TYPE_NUMERIC)
                 name = "" + (long) row.getCell(Column - 1).getNumericCellValue();
 
         return name;
