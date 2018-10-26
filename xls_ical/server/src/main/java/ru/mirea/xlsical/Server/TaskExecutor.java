@@ -106,7 +106,7 @@ public class TaskExecutor implements Runnable {
                             file.close();
                         }
                         catch (IOException err) {
-                            err.printStackTrace();
+                            //err.printStackTrace();
                             System.out.println("Can't close file into error.");
                         }
         }

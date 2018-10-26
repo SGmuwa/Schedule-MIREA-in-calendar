@@ -220,8 +220,20 @@ public class Detective {
                                     file
                             )
             );
+            if(ijfiowej(coupleOfWeek))
+                ;
         }
         return coupleOfWeek;
+    }
+
+    private static boolean ijfiowej(LinkedList<Couple> coupleOfWeek) {
+        for (int i = 0; i < coupleOfWeek.size(); i++) {
+            if (coupleOfWeek.get(i).NameOfGroup.equals("ИКБО-04-16"))
+                for (int j = i + 1; j < coupleOfWeek.size(); j++)
+                    if (coupleOfWeek.get(j).NameOfGroup.equals("ИКБО-04-16") && coupleOfWeek.get(i).DateAndTimeOfCouple.equals(coupleOfWeek.get(j).DateAndTimeOfCouple))
+                        return true;
+        }
+        return false;
     }
 
     /**
@@ -254,7 +266,7 @@ public class Detective {
                         LocalTime.of(times[(cursor.y - row)/2*2] / 60, times[(cursor.y - row)/2*2] % 60),
                         LocalTime.of(times[(cursor.y - row)/2*2 + 1] / 60, times[(cursor.y - row)/2*2 + 1] % 60),
                         dayOfWeek,
-                        (cursor.y - row) % 2 == 1,
+                        (cursor.y - row) % 2 == 0,
                         titles[indexInLine],
                         indexInLine < typeOfLessons.length ? typeOfLessons[indexInLine] : typeOfLessons[0],
                         nameOfGroup,
