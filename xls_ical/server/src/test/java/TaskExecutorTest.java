@@ -67,6 +67,6 @@ public class TaskExecutorTest {
         PackageToClient b = a.take();
         System.out.println(b.CalFile);
         assertNotNull(b.CalFile);
-        //assertEquals(2, b.Count);
+        assertEquals(241, b.Count);
     }
 }
