@@ -21,8 +21,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
-import java.util.Collection;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
 
 // Класс, который занимается поиском расписания.
@@ -79,7 +78,7 @@ public class Detective {
                 for (int DayOfTheWeek = 1;
                      DayOfTheWeek <= 7; DayOfTheWeek++) {
                     // Выставляем курсор на название первой пары дня.
-                    Point cursor = new Point(posEntryX, basePos.y + 1 + DayOfTheWeek * CountCouples);
+                    Point cursor = new Point(posEntryX, basePos.y + 1 + (DayOfTheWeek - 1)* CountCouples*2);
                     if (IsDayFree(cursor, CountCouples, IgnoresCoupleTitle, file))
                         continue; // Если день свободен, то ничего не добавляем.
                     out.addAll(FilterCouplesBySeekerType(
@@ -245,6 +244,7 @@ public class Detective {
             if (IsEqualsInList(ignoresCoupleTitle, cursor))
                 continue; // Если такая запись под игнором, то игнорируем, ничего не делаем.
             String[] titles = file.getCellData(cursor.x, cursor.y).trim().split("(\r\n|)\n"); // Регулярное выражение. Делать новую строку либо от \r\n либо от \n. Универсально!
+            titles = deleteEmptyElementsInArray(titles);
             String[] typeOfLessons = file.getCellData(cursor.x + 1, cursor.y).trim().split("(\r\n)|\n");
             String[] teachers = file.getCellData(cursor.x + 2, cursor.y).trim().split(("(\r\n)|\n"));
             String[] audiences = file.getCellData(cursor.x + 3, cursor.y).trim().split(("(\r\n)|\n"));
@@ -254,7 +254,7 @@ public class Detective {
                         LocalTime.of(times[2*indexInLine] / 60, times[2*indexInLine] % 60),
                         LocalTime.of(times[2*indexInLine + 1] / 60, times[2*indexInLine + 1] % 60),
                         dayOfWeek,
-                        indexInLine % 2 == 1,
+                        (cursor.y - row) % 2 == 1,
                         titles[indexInLine],
                         indexInLine < typeOfLessons.length ? typeOfLessons[indexInLine] : typeOfLessons[0],
                         nameOfGroup,
@@ -266,6 +266,12 @@ public class Detective {
             }
         }
         return coupleOfDay;
+    }
+
+    private static String[] deleteEmptyElementsInArray(String [] input) {
+        List<String> out = new ArrayList<>(Arrays.asList(input));
+        out.removeIf((str) -> str == null || str.isEmpty() || " ".equals(str));
+        return out.toArray(new String[0]);
     }
 
 

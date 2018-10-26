@@ -37,7 +37,7 @@ public class ExportCouplesToICal {
             count = true;
             VEvent ev = new VEvent();
             ev.getProperties().add(new Summary((c.ItemTitle + " (" + c.TypeOfLesson + ")")));
-            ev.getProperties().add(new Description(c.Audience + "\\n" + c.NameOfGroup + "\\n" + c.NameOfTeacher));
+            ev.getProperties().add(new Description(c.Audience + "\n" + c.NameOfGroup + "\n" + c.NameOfTeacher));
             ev.getProperties().add(new Location(c.Address));
             ev.getProperties().add(new Uid(String.format("%d_%d@%s", java.time.ZonedDateTime.now().getLong(ChronoField.INSTANT_SECONDS), ran.nextLong(), "ru.mirea.xlsical")));
 
