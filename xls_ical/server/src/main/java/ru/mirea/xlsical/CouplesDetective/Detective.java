@@ -251,8 +251,8 @@ public class Detective {
             for (int indexInLine = 0; indexInLine < titles.length; indexInLine++) {
                 Iterable<Couple> listCouplesOfLine = Couple.getCouplesByPeriod(
                         seeker,
-                        LocalTime.of(times[2*indexInLine] / 60, times[2*indexInLine] % 60),
-                        LocalTime.of(times[2*indexInLine + 1] / 60, times[2*indexInLine + 1] % 60),
+                        LocalTime.of(times[(cursor.y - row)/2*2] / 60, times[(cursor.y - row)/2*2] % 60),
+                        LocalTime.of(times[(cursor.y - row)/2*2 + 1] / 60, times[(cursor.y - row)/2*2 + 1] % 60),
                         dayOfWeek,
                         (cursor.y - row) % 2 == 1,
                         titles[indexInLine],
