@@ -124,7 +124,7 @@ public class Couple {
         out = new ArrayList<>(weeks.size() + 1);
         for(Integer numberOfWeek /*Номер недели*/ : weeks) {
             // Передвигаемся на неделю.
-            current = startT.plus(numberOfWeek - 1, ChronoUnit.WEEKS);
+            current = startT.plus(numberOfWeek - startWeek, ChronoUnit.WEEKS);
             // Двигаемся к 00:00 dayOfWeek.
             current = current.minusNanos(current.getNano()).minusSeconds(current.getSecond()).minusMinutes(current.getMinute()).minusHours(current.getHour());
             int needAddDayOfWeek =  dayOfWeek.getValue() - current.getDayOfWeek().getValue();
