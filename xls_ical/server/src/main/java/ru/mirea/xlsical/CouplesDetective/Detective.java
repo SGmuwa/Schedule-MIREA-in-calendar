@@ -72,15 +72,11 @@ public class Detective {
                 lastEC--, posEntryX++
                 )
         {
-            if("Предмет".equals(file.getCellData(posEntryX, basePos.y)) && file.getCellData(posEntryX, basePos.y).length() > 0) {
+            if("Предмет".equals(file.getCellData(posEntryX, basePos.y)) && file.getCellData(posEntryX, basePos.y - 1).length() > 0) {
                 lastEC = 15;
                 System.out.println("R" + basePos.y + "C" + posEntryX);
-                for (int DayOfTheWeek = 1;
-                     DayOfTheWeek <= 7; DayOfTheWeek++) {
+                if (seeker.seekerType != SeekerType.StudyGroup || seeker.nameOfSeeker.toLowerCase().trim().equals(file.getCellData(posEntryX, basePos.y - 1).toLowerCase().trim())) {
                     // Выставляем курсор на название первой пары дня.
-                    Point cursor = new Point(posEntryX, basePos.y + 1 + (DayOfTheWeek - 1)* CountCouples*2);
-                    if (IsDayFree(cursor, CountCouples, IgnoresCoupleTitle, file))
-                        continue; // Если день свободен, то ничего не добавляем.
                     out.addAll(FilterCouplesBySeekerType(
                             GetCouplesFromAnchor(posEntryX, basePos.y, seeker, Times, IgnoresCoupleTitle, file) /* Хорошо! Мы получили список занятий у группы. Если это группа - то просто добавить, если это преподаватель - то отфильтровать. */,
                             seeker
@@ -115,25 +111,26 @@ public class Detective {
 
     /**
      * Отвечает на вопрос, является ли день свободным.
-     * @param titleOfDay Позиция названия первой пары дня.
+     * @param c Позиция названия первой пары дня. Столбец.
+     * @param r Позиция названия первой пары дня. Строка.
      * @param CountCouples Количество пар в дне.
      * @param IgnoresCoupleTitle Список адресов заголовков, которые следует игнорировать. Идёт только добавление элементов в список.
      * @param file Файл, откуда надо считывать данные.
      * @return Истина, если данный день является днём самостоятельных работ, или же если в дне нет записей. Иначе: False.
      */
-    private static boolean IsDayFree(Point titleOfDay, int CountCouples, List<Point> IgnoresCoupleTitle, ExcelFileInterface file) throws IOException {
-        for(int i = titleOfDay.y; i < titleOfDay.y + CountCouples*2; i++) {
-            if(!file.getCellData(titleOfDay.x, i).isEmpty())
+    private static boolean IsDayFree(int c, int r, int CountCouples, List<Point> IgnoresCoupleTitle, ExcelFileInterface file) throws IOException {
+        for(int i = r; i < r + CountCouples*2; i++) {
+            if(!file.getCellData(c, i).isEmpty())
             {
-                if(file.getCellData(titleOfDay.x, i).equals("День")) // Мы уже на второй строке встретим слово "День". Даю эту отпимизацию на то, что формат обозначения День самтостятельных занятий не изменится.
+                if(file.getCellData(c, i).equals("День")) // Мы уже на второй строке встретим слово "День". Даю эту отпимизацию на то, что формат обозначения День самтостятельных занятий не изменится.
                 {
-                    for(; i < titleOfDay.y + CountCouples*2; i++)
-                        IgnoresCoupleTitle.add(new Point(titleOfDay.x, i));
+                    for(; i < r + CountCouples*2; i++)
+                        IgnoresCoupleTitle.add(new Point(c, i));
                     return true;
                 }
                 else return false; // Если встретили что-то другое, то это что-то не то! Вряд ли день самостоятельных занятий!
             }
-            IgnoresCoupleTitle.add(new Point(titleOfDay.x, i));
+            IgnoresCoupleTitle.add(new Point(c, i));
         } // Опа! Все пары - пусты!
         return true;
     }
@@ -206,6 +203,8 @@ public class Detective {
         {
             //int c = column;
             int r = (row + 1) + (dayOfWeek - 1) * countOfCouples * 2;
+            if (IsDayFree(column, r, countOfCouples, ignoresCoupleTitle, file))
+                continue; // Если день свободен, то ничего не добавляем.
             coupleOfWeek.addAll(
                     GetCouplesFromDay
                             (column, r, nameOfGroup, DayOfWeek.of(dayOfWeek), seeker, ignoresCoupleTitle, times,

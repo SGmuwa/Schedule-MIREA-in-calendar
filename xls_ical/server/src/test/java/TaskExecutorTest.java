@@ -29,11 +29,44 @@ public class TaskExecutorTest {
         TaskExecutor a = new TaskExecutor();
         a.add(new PackageToServer(null,
                 new String[]{"tests\\IIT-3k-18_19-osen (2).xlsx"},
-                new Seeker("ИКБО-04-16", SeekerType.StudyGroup, LocalDate.of(2018, 9, 1), LocalDate.of(2018, 12, 31), ZoneId.of("Europe/Minsk"), "Москва, Проспект Вернадского, 78", 0)));
+                new Seeker(
+                        "ИКБО-04-16",
+                        SeekerType.StudyGroup,
+                        LocalDate.of(2018, 9, 1),
+                        LocalDate.of(2018, 9, 1),
+                        ZoneId.of("Europe/Minsk"),
+                        "Москва, Проспект Вернадского, 78",
+                        0
+                )
+        ));
 
         a.step();
         PackageToClient b = a.take();
         System.out.println(b.CalFile);
         assertNotNull(b.CalFile);
+        assertEquals(2, b.Count);
+    }
+
+    @Test
+    public void sendSampleExcelAllSem() throws InterruptedException {
+        TaskExecutor a = new TaskExecutor();
+        a.add(new PackageToServer(null,
+                new String[]{"tests\\IIT-3k-18_19-osen (2).xlsx"},
+                new Seeker(
+                        "ИКБО-04-16",
+                        SeekerType.StudyGroup,
+                        LocalDate.of(2018, 9, 1),
+                        LocalDate.of(2018, 12, 31),
+                        ZoneId.of("Europe/Minsk"),
+                        "Москва, Проспект Вернадского, 78",
+                        0
+                )
+        ));
+
+        a.step();
+        PackageToClient b = a.take();
+        System.out.println(b.CalFile);
+        assertNotNull(b.CalFile);
+        //assertEquals(2, b.Count);
     }
 }
