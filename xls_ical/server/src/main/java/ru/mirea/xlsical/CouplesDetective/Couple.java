@@ -12,6 +12,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
+/**
+ * Структура данных, которая представляет учебную пару в определённый день и время.
+ * Сокращённо: "Календарная пара".
+ * Время начала и конца пары, название группы и имя преподавателя,
+ * название предмета, аудитория, адрес, тип пары.
+ */
 public class Couple {
 
     private Couple(ZonedDateTime dateAndTimeOfCouple, ZonedDateTime dateAndTimeFinishOfCouple, String nameOfGroup, String nameOfTeacher, String itemTitle, String audience, String address, String typeOfLesson) {

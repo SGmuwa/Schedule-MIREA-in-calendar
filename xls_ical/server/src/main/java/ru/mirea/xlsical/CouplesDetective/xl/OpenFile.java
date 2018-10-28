@@ -11,7 +11,6 @@ public class OpenFile implements ExcelFileInterface {
 
     private ExcelFileInterface myExcelBook;
 
-
     public OpenFile(String fileName) throws IOException {
 
         String type = null;
