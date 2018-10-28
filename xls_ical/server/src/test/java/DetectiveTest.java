@@ -33,7 +33,7 @@ public class DetectiveTest {
     @Test
     public void IsStringNumberTest(){
         assertTrue(Detective.IsStringNumber("8"));
-        assertTrue(Detective.IsStringNumber(""));
+        assertFalse(Detective.IsStringNumber(""));
         assertTrue(Detective.IsStringNumber("85"));
         assertTrue(Detective.IsStringNumber("0"));
         assertTrue(Detective.IsStringNumber("-3"));

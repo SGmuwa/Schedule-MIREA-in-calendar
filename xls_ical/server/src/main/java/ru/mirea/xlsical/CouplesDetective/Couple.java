@@ -19,19 +19,6 @@ import java.util.regex.Pattern;
  * название предмета, аудитория, адрес, тип пары.
  */
 public class Couple {
-    @Override
-    public String toString() {
-        return "Couple{" +
-                "DateAndTimeOfCouple=" + DateAndTimeOfCouple +
-                ", DateAndTimeFinishOfCouple=" + DateAndTimeFinishOfCouple +
-                ", NameOfGroup='" + NameOfGroup + '\'' +
-                ", NameOfTeacher='" + NameOfTeacher + '\'' +
-                ", ItemTitle='" + ItemTitle + '\'' +
-                ", Audience='" + Audience + '\'' +
-                ", Address='" + Address + '\'' +
-                ", TypeOfLesson='" + TypeOfLesson + '\'' +
-                '}';
-    }
 
     private Couple(ZonedDateTime dateAndTimeOfCouple, ZonedDateTime dateAndTimeFinishOfCouple, String nameOfGroup, String nameOfTeacher, String itemTitle, String audience, String address, String typeOfLesson) {
         DateAndTimeOfCouple = dateAndTimeOfCouple;
@@ -298,4 +285,17 @@ public class Couple {
         return in.toString().trim();
     }
 
+    @Override
+    public String toString() {
+        return "Couple{" +
+                "DateAndTimeOfCouple=" + DateAndTimeOfCouple +
+                ", DateAndTimeFinishOfCouple=" + DateAndTimeFinishOfCouple +
+                ", NameOfGroup='" + NameOfGroup + '\'' +
+                ", NameOfTeacher='" + NameOfTeacher + '\'' +
+                ", ItemTitle='" + ItemTitle + '\'' +
+                ", Audience='" + Audience + '\'' +
+                ", Address='" + Address + '\'' +
+                ", TypeOfLesson='" + TypeOfLesson + '\'' +
+                '}';
+    }
 }

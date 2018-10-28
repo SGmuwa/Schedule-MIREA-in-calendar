@@ -23,6 +23,8 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Данный класс отвечает за получение календарных пар из Excel расписания.
@@ -221,20 +223,8 @@ public class Detective {
                                     file
                             )
             );
-            if(ijfiowej(coupleOfWeek))
-                ;
         }
         return coupleOfWeek;
-    }
-
-    private static boolean ijfiowej(LinkedList<Couple> coupleOfWeek) {
-        for (int i = 0; i < coupleOfWeek.size(); i++) {
-            if (coupleOfWeek.get(i).NameOfGroup.equals("ИКБО-04-16"))
-                for (int j = i + 1; j < coupleOfWeek.size(); j++)
-                    if (coupleOfWeek.get(j).NameOfGroup.equals("ИКБО-04-16") && coupleOfWeek.get(i).DateAndTimeOfCouple.equals(coupleOfWeek.get(j).DateAndTimeOfCouple))
-                        return true;
-        }
-        return false;
     }
 
     /**
@@ -358,15 +348,13 @@ public class Detective {
     }
 
     /**
-     * Возвращает ответ, может ли являться текст записью целого не отрицательного десятичного числа.
+     * Возвращает ответ, может ли являться текст записью целого десятичного числа.
      * @param input Входной текст, который следует проверить.
-     * @return {@code True}, если в input записано число или же строка пуста, иначе - {@code False}.
+     * @return {@code True}, если возможно корректно выполнить {@code Integer.parseInt(input)}, иначе - {@code False}.
      */
     public static boolean IsStringNumber(String input) {
-        if(input == null) return false;
-        char[] buffer = input.trim().toCharArray();
-        for(char a : buffer)
-            if(a > '9' || a < '0') return false;
-        return true;
+        Pattern p = Pattern.compile("-?\\d+");
+        Matcher m = p.matcher(input);
+        return m.matches();
     }
 }
