@@ -1,5 +1,6 @@
 package ru.mirea.xlsical.Server;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import ru.mirea.xlsical.CouplesDetective.ExportCouplesToICal;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
@@ -125,7 +126,7 @@ public class TaskExecutor implements Runnable {
     private static ArrayList<ExcelFileInterface> openExcelFiles(String[] filesStr) {
         ArrayList<ExcelFileInterface> output = new ArrayList<>(filesStr.length);
         for(int index = filesStr.length - 1; index >= 0; index--) {
-            output.add(openExcelFiles(filesStr[index]));
+            output.addAll(openExcelFiles(filesStr[index]));
         }
         return output;
     }
@@ -139,7 +140,7 @@ public class TaskExecutor implements Runnable {
         int size = filesStr.size();
         ArrayList<ExcelFileInterface> output = new ArrayList<>(size);
         for(String str : filesStr) {
-            output.add(openExcelFiles(str));
+            output.addAll(openExcelFiles(str));
         }
         return output;
     }
@@ -152,7 +153,7 @@ public class TaskExecutor implements Runnable {
     private static LinkedList<ExcelFileInterface> openExcelFiles(Iterable<? extends String> filesStr) {
         LinkedList<ExcelFileInterface> output = new LinkedList<>();
         for(String str : filesStr) {
-            output.add(openExcelFiles(str));
+            output.addAll(openExcelFiles(str));
         }
         return output;
     }
@@ -162,17 +163,17 @@ public class TaskExecutor implements Runnable {
      * @param fileStr Путь до файла Excel.
      * @return Список открытых Excel файлов.
      */
-    private static ExcelFileInterface openExcelFiles(String fileStr) {
+    private static ArrayList<? extends ExcelFileInterface> openExcelFiles(String fileStr) {
         File a = new File(fileStr);
         if(!a.canRead()) {
             System.out.println("TaskExecutor::openExcelFiles(String fileStr) - can't reed file " + fileStr);
-            return null;
+            return new ArrayList<>();
         }
         try {
-            return new OpenFile(a.getAbsolutePath());
-        } catch (IOException error) {
+            return OpenFile.newInstance(a.getAbsolutePath());
+        } catch (IOException | InvalidFormatException error) {
             error.printStackTrace();
-            return null;
+            return new ArrayList<>();
         }
     }
 }
