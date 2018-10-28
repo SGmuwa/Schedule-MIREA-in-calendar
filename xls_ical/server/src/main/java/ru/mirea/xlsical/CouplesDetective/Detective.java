@@ -44,7 +44,7 @@ public class Detective {
                 output.addAll(startAnInvestigation(seeker, f));
                 index++;
             } catch (DetectiveException error) {
-                throw new DetectiveException("Ошибка в файле с индексом " + index + ":" + error.getMessage());
+                throw new DetectiveException("Ошибка в файле с индексом " + index + ":" + error.getMessage(), f);
             }
         return output;
     }
@@ -169,7 +169,7 @@ public class Detective {
             return SeekEverythingInLeftUp("Предмет", file);
         }
         catch (DetectiveException e){
-            throw new DetectiveException(e.getMessage() + "\nНевозможно найти хотя бы один предмет в таблице Excel.");
+            throw new DetectiveException(e.getMessage() + "\nНевозможно найти хотя бы один предмет в таблице Excel.", file);
         }
     }
 
@@ -184,7 +184,7 @@ public class Detective {
         for (int y = 1; y <= 10; y++)
             for (int x = 1; x <= 20; x++)
                 if (Word.equals(file.getCellData(x, y))) return new Point(x, y);
-        throw new DetectiveException("Невозможно найти заданное слово Word. Word = " + Word);
+        throw new DetectiveException("Невозможно найти заданное слово Word. Word = " + Word, file);
     }
 
     /**
@@ -335,7 +335,7 @@ public class Detective {
     public static int[] GetTimes(Point CR, ExcelFileInterface file) throws  DetectiveException, IOException {
         int[] output = new int[2 * GetCountCoupleInDay(CR, file)];
         if(output.length == 0)
-            throw new DetectiveException("Ошибка при поиске время начала и конца пар -> Пока программа спускалась вниз по строкам, считая, сколько пар в одном дне, она прошла окола 100 строк и сказала идити вы все, я столько не хочу обрабатывать.");
+            throw new DetectiveException("Ошибка при поиске время начала и конца пар -> Пока программа спускалась вниз по строкам, считая, сколько пар в одном дне, она прошла окола 100 строк и сказала идити вы все, я столько не хочу обрабатывать.", file);
         // Ура, мы знаем количество. Это output.length. Теперь можно считывать времена.
         int indexArray = 0;
         for(int y = CR.y + 1; y < CR.y + 1 + output.length; y+=2)

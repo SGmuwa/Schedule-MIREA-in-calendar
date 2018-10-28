@@ -1,3 +1,4 @@
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import ru.mirea.xlsical.CouplesDetective.Couple;
 import ru.mirea.xlsical.CouplesDetective.Detective;
 import org.junit.Test;
@@ -46,94 +47,73 @@ public class DetectiveTest {
         String b = "b";
         ArrayList <String> list = new ArrayList <String>();
         list.add(a);
-        assertEquals(true, Detective.IsEqualsInList(list, a));;
-        assertEquals(false, Detective.IsEqualsInList(list, b));;
+        assertTrue(Detective.IsEqualsInList(list, a));
+        assertFalse(Detective.IsEqualsInList(list, b));
     }
 
     @Test
-    public void startAnInvestigationTest(){
-        ExcelFileInterface file = null;
-        try {
-            file = new OpenFile("tests/IIT-3k-18_19-osen.xlsx");
-        } catch (IOException e)
-        {
-            System.out.println(e.getLocalizedMessage());
-        }
-        assertNotNull(file);
-        try {
+    public void startAnInvestigationTest() throws IOException, InvalidFormatException {
+        Collection<? extends ExcelFileInterface> files = null;
+
+        files = OpenFile.newInstance("tests/IIT-3k-18_19-osen.xlsx");
+
+        assertNotNull(files);
+        assertEquals(1, files.size());
+        for(ExcelFileInterface file : files)
             file.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
 
     @Test
-    public void GetCouplesFromDayTest(){
+    public void GetCouplesFromDayTest() throws IOException, InvalidFormatException {
         List<Point> list = new ArrayList<>();
-        ExcelFileInterface file = null;
+        Collection<? extends ExcelFileInterface> files;
         Collection<? extends Couple> col;
         int[] times = {540,630,640,730,780,870,880,970,980,1070,1080,1170};
 
-        try{
-            file = new OpenFile("tests/test-01.xlsx");
-        }catch(IOException e){
-                System.out.println(e.getLocalizedMessage());
-        }
-
+        files = OpenFile.newInstance("tests/test-01.xlsx");
+        assertEquals(1, files.size());
+        ExcelFileInterface file = files.iterator().next();
         Seeker seeker = new Seeker("ИКБО-04-16", SeekerType.StudyGroup, LocalDate.of(2018,9,1), LocalDate.of(2018, 10,1), ZoneId.of("UTC+3"), "пр-т Вернадского, 78", 1);
-        try {
-            col = Detective.GetCouplesFromDay(6,3, "ИКБО-04-16",DayOfWeek.of(1), seeker, list, times, "пр-т Вернадского, 78", file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        //return col; Should be void.
 
+        col = Detective.GetCouplesFromDay(6,3, "ИКБО-04-16",DayOfWeek.of(1), seeker, list, times, "пр-т Вернадского, 78", file);
+
+        for(Couple couple : col)
+            System.out.println(couple.toString());
+
+        file.close();
     }
 
     @Test
-    public void openFirstXls() {
+    public void openFirstXls() throws IOException, InvalidFormatException {
 
-        ExcelFileInterface file = null;
-        try {
-            file = new OpenFile("tests/IIT-3k-18_19-osen.xlsx");
-        } catch (IOException e)
-        {
-            System.out.println(e.getLocalizedMessage());
-        }
-        assertNotNull(file);
+        List<? extends ExcelFileInterface> files = null;
+        files = OpenFile.newInstance("tests/IIT-3k-18_19-osen.xlsx");
+        assertNotNull(files);
+        assertEquals(1, files.size());
+        ExcelFileInterface file = files.get(0);
 
-        try {
-            System.out.println(file.getCellData(1, 1));
-            System.out.println(file.getCellData(2, 1));
-            System.out.println(file.getCellData(1, 2));
-            System.out.println(file.getCellData(2, 2));
+        System.out.println(file.getCellData(1, 1));
+        System.out.println(file.getCellData(2, 1));
+        System.out.println(file.getCellData(1, 2));
+        System.out.println(file.getCellData(2, 2));
 
-            file.close();
-
-        } catch (IOException e) {
-            System.out.println(e.getLocalizedMessage());
-        }
+        file.close();
     }
 
     @Test
-    public void GetTimesTest(){
+    public void GetTimesTest() throws IOException, InvalidFormatException, DetectiveException {
         Point point = new Point(5,3);
-        ExcelFileInterface file = null;
+        ArrayList<? extends ExcelFileInterface> files;
         int [] mas = {0,0};
-        try {
-            file = new OpenFile("tests/IIT-3k-18_19-osen.xlsx");
-        }catch (IOException e){
-            System.out.println(e.getLocalizedMessage());
-        }
-        assertNotNull(file);
 
-        try {
-            mas = GetTimes(point, file);
-        }catch (DetectiveException | IOException e){
-            System.out.println(e.getLocalizedMessage());
-        }
+        files = OpenFile.newInstance("tests/IIT-3k-18_19-osen.xlsx");
+        assertNotNull(files);
+        assertEquals(1, files.size());
+        ExcelFileInterface file = files.get(0);
+
+        mas = GetTimes(point, file);
 
     }
 }

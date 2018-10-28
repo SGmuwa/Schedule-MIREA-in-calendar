@@ -1,7 +1,13 @@
 package ru.mirea.xlsical.CouplesDetective;
 
+import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
+
 public class DetectiveException extends Exception {
-    DetectiveException(String message){
+
+    public final ExcelFileInterface excelFile;
+
+    DetectiveException(String message, ExcelFileInterface file){
         super(message);
+        excelFile = file;
     }
 }

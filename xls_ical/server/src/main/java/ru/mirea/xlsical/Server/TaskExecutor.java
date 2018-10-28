@@ -86,19 +86,27 @@ public class TaskExecutor implements Runnable {
      * чем обрабатываться, то нет гарантий на сохранность входных пакетов.
      */
     public static PackageToClient monoStep(PackageToServer pkg) {
-        List<Couple> couples;
+        List<Couple> couples = new LinkedList<>();
         if(pkg.excelsFiles == null) {
             return new PackageToClient(pkg.ctx, null, 0, "Ошибка внутри обработчика. Не было передано множество excel файлов.");
         }
         Collection<ExcelFileInterface> fs = null;
         try {
-            fs = openExcelFiles(pkg.excelsFiles);
-            couples = Detective.startAnInvestigations(pkg.queryCriteria, fs);
+            boolean needAgain = true;
+            do {
+                fs = openExcelFiles(pkg.excelsFiles);
+                try {
+                    couples = Detective.startAnInvestigations(pkg.queryCriteria, fs);
+                    needAgain = false;
+                } catch (DetectiveException exD) {
+                    // В случае, если один из файлов не правильно оформлен, то его игнорируем.
+                    System.out.println("DetectiveException");
+                    fs.remove(exD.excelFile);
+                }
+            } while (needAgain);
         } catch (IOException error) {
             error.printStackTrace();
             return new PackageToClient(pkg.ctx, null, 0, "Ошибка внутри сервера.");
-        } catch (DetectiveException error) {
-            return new PackageToClient(pkg.ctx, null, 0, error.getMessage());
         } finally {
             if(fs != null)
                 for(Closeable file : fs)
