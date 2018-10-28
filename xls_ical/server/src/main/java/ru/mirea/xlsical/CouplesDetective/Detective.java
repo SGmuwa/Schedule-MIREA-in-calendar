@@ -25,7 +25,9 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-// Класс, который занимается поиском расписания.
+/**
+ * Данный класс отвечает за получение календарных пар из Excel расписания.
+ */
 public class Detective {
 
     /**

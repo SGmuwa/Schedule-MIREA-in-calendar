@@ -116,7 +116,12 @@ public class TaskExecutor implements Runnable {
                 couples.size(),
                 "ok.");
     }
-    // TODO: написать описание перегруженных методов openExcelFiles
+
+    /**
+     * Открывает все excel файлы, которые были переданы из массива путей до файлов.
+     * @param filesStr Массив строк, который символизируют путь до файлов Excel.
+     * @return Массив-список открытых Excel файлов.
+     */
     private static ArrayList<ExcelFileInterface> openExcelFiles(String[] filesStr) {
         ArrayList<ExcelFileInterface> output = new ArrayList<>(filesStr.length);
         for(int index = filesStr.length - 1; index >= 0; index--) {
@@ -125,6 +130,11 @@ public class TaskExecutor implements Runnable {
         return output;
     }
 
+    /**
+     * Открывает все Excel файлы, которые были переданы в колекции путей до файлов.
+     * @param filesStr Коллекция строк, который символизируют путь до файлов Excel.
+     * @return Массив-список открытых Excel файлов.
+     */
     private static ArrayList<ExcelFileInterface> openExcelFiles(Collection<? extends String> filesStr) {
         int size = filesStr.size();
         ArrayList<ExcelFileInterface> output = new ArrayList<>(size);
@@ -134,6 +144,11 @@ public class TaskExecutor implements Runnable {
         return output;
     }
 
+    /**
+     * Открывает все Excel файлы, которые были переданы из получателя путей до файлов.
+     * @param filesStr Перечеслитель строк, который символизируют путь до файлов Excel.
+     * @return Связный-список открытых Excel файлов.
+     */
     private static LinkedList<ExcelFileInterface> openExcelFiles(Iterable<? extends String> filesStr) {
         LinkedList<ExcelFileInterface> output = new LinkedList<>();
         for(String str : filesStr) {
@@ -142,6 +157,11 @@ public class TaskExecutor implements Runnable {
         return output;
     }
 
+    /**
+     * Открывает Excel файл, который был передан по fileStr.
+     * @param fileStr Путь до файла Excel.
+     * @return Список открытых Excel файлов.
+     */
     private static ExcelFileInterface openExcelFiles(String fileStr) {
         File a = new File(fileStr);
         if(!a.canRead()) {
