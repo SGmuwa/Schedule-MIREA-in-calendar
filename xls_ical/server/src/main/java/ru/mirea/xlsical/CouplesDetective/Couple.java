@@ -168,15 +168,18 @@ public class Couple {
         ArrayList<Integer> goodWeeks = new ArrayList<>(limitWeek / 2 + 1); // Контейнер с хорошими неделями
         List<Integer> exc = getAllExceptionWeeks(itemTitle);
         List<Integer> onlyWeeks = null;
-        if (exc.size() == 0) {
-            onlyWeeks = getAllOnlyWeeks(itemTitle);
-        }
         // Изменение входных параметров в зависимости от itemTitle.
         {
-            Integer startWeekFromString = getFromStringStartWeek(itemTitle); // Получаем, с какой недели идут пары.
+            StringBuilder itemTitleBuilder = new StringBuilder(itemTitle);
+            Integer startWeekFromString = getFromStringStartWeek(itemTitleBuilder); // Получаем, с какой недели идут пары.
             if (startWeekFromString != null && startWeekFromString > startWeek) startWeek = startWeekFromString;
-            Integer finishWeekFromString = getFromStringFinishWeek(itemTitle); // Получаем, с какой недели идут пары.
+            Integer finishWeekFromString = getFromStringFinishWeek(itemTitleBuilder); // Получаем, с какой недели идут пары.
             if (finishWeekFromString != null && finishWeekFromString < limitWeek) limitWeek = finishWeekFromString;
+            itemTitle = itemTitleBuilder.toString();
+        }
+
+        if (exc.size() == 0) {
+            onlyWeeks = getAllOnlyWeeks(itemTitle);
         }
         if (onlyWeeks != null)
             for (Integer week : onlyWeeks) {
@@ -195,29 +198,42 @@ public class Couple {
 
     /**
      * Функция ищет, до какой недели идут пары. Ищет "До %d", где %d - целое число.
-     * @param itemTitle Заголовок названия предмета из таблицы расписания.
+     * @param itemTitle Заголовок названия предмета из таблицы расписания. Удаляет найденную группу.
      * @return Возвращает %d. В случае, если не найдено - возвращается {@code null}.
      */
-    private static Integer getFromStringFinishWeek(String itemTitle) {
+    private static Integer getFromStringFinishWeek(StringBuilder itemTitle) {
         Pattern p = Pattern.compile("(^| )[Дд]о ?+\\d+");
         Matcher m = p.matcher(itemTitle);
-        if(m.find())
-            return Integer.parseInt(m.group().substring(3));
-        else
-            return null;
+        if(m.find()) {
+            String gp = m.group();
+            List<Integer> a = getAllIntsFromString(gp);
+            if (a.size() > 0) {
+                int inx = itemTitle.indexOf(gp);
+                itemTitle.replace(inx, inx + gp.length(), "");
+                return a.get(0);
+            }
+        }
+        return null;
     }
 
     /**
      * Функция ищет, с какой недели идут пары. Ищет "C %d", где %d - целое число.
-     * @param itemTitle Заголовок названия предмета из таблицы расписания.
+     * @param itemTitle Заголовок названия предмета из таблицы расписания. Удаляет найденную группу.
      * @return Возвращает %d. В случае, если не найдено - возвращается {@code null}.
      */
-    private static Integer getFromStringStartWeek(String itemTitle) {
+    private static Integer getFromStringStartWeek(StringBuilder itemTitle) {
         Pattern p = Pattern.compile("(^| )[СсCc] ?+\\d+");
         Matcher m = p.matcher(itemTitle);
-        if(m.find())
-            return Integer.parseInt(m.group().substring(2));
-        else return null;
+        if(m.find()) {
+            String gp = m.group();
+            List<Integer> a = getAllIntsFromString(gp);
+            if(a.size() > 0) {
+                int inx = itemTitle.indexOf(gp);
+                itemTitle.replace(inx, inx + gp.length(), "");
+                return a.get(0);
+            }
+        }
+        return null;
     }
 
     /**
