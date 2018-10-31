@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  */
 public class Couple {
 
-    private Couple(ZonedDateTime dateAndTimeOfCouple, ZonedDateTime dateAndTimeFinishOfCouple, String nameOfGroup, String nameOfTeacher, String itemTitle, String audience, String address, String typeOfLesson) {
+    protected Couple(ZonedDateTime dateAndTimeOfCouple, ZonedDateTime dateAndTimeFinishOfCouple, String nameOfGroup, String nameOfTeacher, String itemTitle, String audience, String address, String typeOfLesson) {
         DateAndTimeOfCouple = dateAndTimeOfCouple;
         DateAndTimeFinishOfCouple = dateAndTimeFinishOfCouple;
         NameOfGroup = nameOfGroup;
