@@ -58,4 +58,13 @@ public class PackageToClient extends Package {
             return null;
         }
     }
+
+    @Override
+    public String toString() {
+        return "PackageToClient{" +
+                "CalFile='" + CalFile + '\'' +
+                ", Count=" + Count +
+                ", Messages='" + Messages + '\'' +
+                '}';
+    }
 }
