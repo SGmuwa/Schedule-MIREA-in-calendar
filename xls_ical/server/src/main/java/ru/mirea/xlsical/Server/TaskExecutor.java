@@ -5,7 +5,7 @@ import ru.mirea.xlsical.CouplesDetective.ExportCouplesToICal;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
 import ru.mirea.xlsical.CouplesDetective.Couple;
-import ru.mirea.xlsical.CouplesDetective.Detective;
+import ru.mirea.xlsical.CouplesDetective.DetectiveSemester;
 import ru.mirea.xlsical.CouplesDetective.DetectiveException;
 import ru.mirea.xlsical.interpreter.PackageToClient;
 import ru.mirea.xlsical.interpreter.PackageToServer;
@@ -96,7 +96,7 @@ public class TaskExecutor implements Runnable {
             do {
                 fs = openExcelFiles(pkg.excelsFiles);
                 try {
-                    couples = Detective.startAnInvestigations(pkg.queryCriteria, fs);
+                    couples = DetectiveSemester.startAnInvestigations(pkg.queryCriteria, fs);
                     needAgain = false;
                 } catch (DetectiveException exD) {
                     // В случае, если один из файлов не правильно оформлен, то его игнорируем.

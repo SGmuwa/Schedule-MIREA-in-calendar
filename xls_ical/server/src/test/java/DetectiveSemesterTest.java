@@ -1,6 +1,6 @@
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import ru.mirea.xlsical.CouplesDetective.Couple;
-import ru.mirea.xlsical.CouplesDetective.Detective;
+import ru.mirea.xlsical.CouplesDetective.DetectiveSemester;
 import org.junit.Test;
 import ru.mirea.xlsical.CouplesDetective.DetectiveException;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
@@ -9,7 +9,7 @@ import ru.mirea.xlsical.interpreter.Seeker;
 import ru.mirea.xlsical.interpreter.SeekerType;
 
 import static org.junit.Assert.*;
-import static ru.mirea.xlsical.CouplesDetective.Detective.GetTimes;
+import static ru.mirea.xlsical.CouplesDetective.DetectiveSemester.GetTimes;
 
 import java.io.IOException;
 import java.time.DayOfWeek;
@@ -19,26 +19,26 @@ import java.util.*;
 import java.awt.*;
 import java.util.List;
 
-public class DetectiveTest {
+public class DetectiveSemesterTest {
     @Test
     public void GetMinutesFromTimeStringTest(){
-        assertEquals(728, Detective.GetMinutesFromTimeString("12:08"));
-        assertEquals(13, Detective.GetMinutesFromTimeString("00-13"));
-        assertEquals(78, Detective.GetMinutesFromTimeString("01-18"));
-        assertEquals(860, Detective.GetMinutesFromTimeString("14:20"));
-        assertEquals(1230, Detective.GetMinutesFromTimeString("20-30"));
-        assertEquals(0, Detective.GetMinutesFromTimeString("00:00"));
+        assertEquals(728, DetectiveSemester.GetMinutesFromTimeString("12:08"));
+        assertEquals(13, DetectiveSemester.GetMinutesFromTimeString("00-13"));
+        assertEquals(78, DetectiveSemester.GetMinutesFromTimeString("01-18"));
+        assertEquals(860, DetectiveSemester.GetMinutesFromTimeString("14:20"));
+        assertEquals(1230, DetectiveSemester.GetMinutesFromTimeString("20-30"));
+        assertEquals(0, DetectiveSemester.GetMinutesFromTimeString("00:00"));
     }
 
     @Test
     public void IsStringNumberTest(){
-        assertTrue(Detective.IsStringNumber("8"));
-        assertFalse(Detective.IsStringNumber(""));
-        assertTrue(Detective.IsStringNumber("85"));
-        assertTrue(Detective.IsStringNumber("0"));
-        assertTrue(Detective.IsStringNumber("-3"));
-        assertFalse(Detective.IsStringNumber("f"));
-        assertFalse(Detective.IsStringNumber("."));
+        assertTrue(DetectiveSemester.IsStringNumber("8"));
+        assertFalse(DetectiveSemester.IsStringNumber(""));
+        assertTrue(DetectiveSemester.IsStringNumber("85"));
+        assertTrue(DetectiveSemester.IsStringNumber("0"));
+        assertTrue(DetectiveSemester.IsStringNumber("-3"));
+        assertFalse(DetectiveSemester.IsStringNumber("f"));
+        assertFalse(DetectiveSemester.IsStringNumber("."));
     }
 
     @Test
@@ -47,8 +47,8 @@ public class DetectiveTest {
         String b = "b";
         ArrayList <String> list = new ArrayList <String>();
         list.add(a);
-        assertTrue(Detective.IsEqualsInList(list, a));
-        assertFalse(Detective.IsEqualsInList(list, b));
+        assertTrue(DetectiveSemester.IsEqualsInList(list, a));
+        assertFalse(DetectiveSemester.IsEqualsInList(list, b));
     }
 
     @Test
@@ -77,7 +77,7 @@ public class DetectiveTest {
         Seeker seeker = new Seeker("ИКБО-04-16", SeekerType.StudyGroup, LocalDate.of(2018,9,1), LocalDate.of(2018, 10,1), ZoneId.of("UTC+3"), "пр-т Вернадского, 78", 1);
 
 
-        col = Detective.GetCouplesFromDay(6,3, "ИКБО-04-16",DayOfWeek.of(1), seeker, list, times, "пр-т Вернадского, 78", file);
+        col = DetectiveSemester.GetCouplesFromDay(6,3, "ИКБО-04-16",DayOfWeek.of(1), seeker, list, times, "пр-т Вернадского, 78", file);
 
         for(Couple couple : col)
             System.out.println(couple.toString());

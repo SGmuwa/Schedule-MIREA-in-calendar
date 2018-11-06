@@ -10,7 +10,12 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 
+/**
+ * Класс, который представляет из себя искателя.
+ * В этом классе содержатся все поля, которые запрашивает пользователь.
+ */
 public class Seeker implements Serializable {
     /**
      * Имя искателя.
@@ -104,7 +109,7 @@ public class Seeker implements Serializable {
     static {
         int startWeek = 0;
 
-        /**
+        /*
          * Для поддержки старых устройств необходим часовой пояс "UTC+03:00" [1],
          * так как не все устройства[2] приняли обновления от 26 октября 2014 [3].
          * Поменять на Europe/Moscow 15 августа 2020 году.
@@ -116,7 +121,7 @@ public class Seeker implements Serializable {
 
 
         ZonedDateTime start = ZonedDateTime.now(zoneId);
-        ZonedDateTime finish = ZonedDateTime.now(zoneId);
+        ZonedDateTime finish = start.plus(10, ChronoUnit.YEARS);
 
 
 
