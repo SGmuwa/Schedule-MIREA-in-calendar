@@ -1,13 +1,13 @@
 import org.junit.Test;
 import static org.junit.Assert.*;
-import ru.mirea.xlsical.CouplesDetective.Couple;
+import ru.mirea.xlsical.CouplesDetective.CoupleInCalendar;
 
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public class CoupleTest {
+public class CoupleInCalendarTest {
     /**
      * Тестирование, если у нас одна пара в один день.
      */
@@ -31,7 +31,7 @@ public class CoupleTest {
         String add = "Москва, проспект Вернадского 78, РТУ МИРЭА";
         String aud = "А-1";
 
-        List<Couple> out = Couple.getCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, false, nam, typ, nGr, tic, aud, add);
+        List<CoupleInCalendar> out = CoupleInCalendar.getCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, false, nam, typ, nGr, tic, aud, add);
 
         assertNotNull(out);
 
@@ -75,7 +75,7 @@ public class CoupleTest {
         String add = "Москва, проспект Вернадского 78, РТУ МИРЭА";
         String aud = "А-1";
 
-        List<Couple> out = Couple.getCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, false, nam, typ, nGr, tic, aud, add);
+        List<CoupleInCalendar> out = CoupleInCalendar.getCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, false, nam, typ, nGr, tic, aud, add);
 
         assertNotNull(out);
 
@@ -120,7 +120,7 @@ public class CoupleTest {
         String add = "Україна, Київ, Центральна 8";
         String aud = "202";
 
-        List<Couple> out = Couple.getCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, true, nam, typ, nGr, tic, aud, add);
+        List<CoupleInCalendar> out = CoupleInCalendar.getCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, true, nam, typ, nGr, tic, aud, add);
 
         assertNotNull(out);
 
@@ -165,7 +165,7 @@ public class CoupleTest {
         String add = "Москва, проспект Вернадского 78, РТУ МИРЭА";
         String aud = "А-1";
 
-        List<Couple> out = Couple.getCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, true, nam, typ, nGr, tic, aud, add);
+        List<CoupleInCalendar> out = CoupleInCalendar.getCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, true, nam, typ, nGr, tic, aud, add);
 
         assertNotNull(out);
 
@@ -177,7 +177,7 @@ public class CoupleTest {
         /* Время конца пары */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 2), time2), timezone), out.get(0).DateAndTimeFinishOfCouple);
         /* Время конца пары */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 2), time2), timezone).plus(2, ChronoUnit.WEEKS), out.get(1).DateAndTimeFinishOfCouple);
         /* Время конца пары */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 2), time2), timezone).plus(2*2, ChronoUnit.WEEKS), out.get(2).DateAndTimeFinishOfCouple);
-        for(Couple o : out)
+        for(CoupleInCalendar o : out)
         {
             /* Название группы */       assertEquals(nGr, o.NameOfGroup);
             /* Название предмета */     assertEquals(nam, o.ItemTitle);
@@ -211,7 +211,7 @@ public class CoupleTest {
         String add = "ВОдичка";
         String aud = "А-(-1) = А+1";
 
-        List<Couple> out = Couple.getCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, true, nam, typ, nGr, tic, aud, add);
+        List<CoupleInCalendar> out = CoupleInCalendar.getCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, true, nam, typ, nGr, tic, aud, add);
 
         assertNotNull(out);
 
@@ -237,7 +237,7 @@ public class CoupleTest {
         /* Время конца пары 9 */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 3).plus(8*2, ChronoUnit.WEEKS), time2), timezone), out.get(8).DateAndTimeFinishOfCouple);
 
 
-        for(Couple o : out)
+        for(CoupleInCalendar o : out)
         {
             /* Название группы */       assertEquals(nGr, o.NameOfGroup);
             /* Название предмета */     assertEquals(nam, o.ItemTitle);
@@ -271,7 +271,7 @@ public class CoupleTest {
         String add = "ВОдичка";
         String aud = "А-(-1) = А+1";
 
-        List<Couple> out = Couple.getCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, false, nam, typ, nGr, tic, aud, add);
+        List<CoupleInCalendar> out = CoupleInCalendar.getCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, false, nam, typ, nGr, tic, aud, add);
 
         /* Количество */            assertEquals(8, out.size());
 
@@ -294,7 +294,7 @@ public class CoupleTest {
         /* Время конца пары 6 */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(2*5, ChronoUnit.WEEKS), time2), timezone), out.get(5).DateAndTimeFinishOfCouple);
         /* Время конца пары 7 */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(2*6, ChronoUnit.WEEKS), time2), timezone), out.get(6).DateAndTimeFinishOfCouple);
         /* Время конца пары 8 */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(2*7, ChronoUnit.WEEKS), time2), timezone), out.get(7).DateAndTimeFinishOfCouple);
-        for(Couple o : out)
+        for(CoupleInCalendar o : out)
         {
             /* Название группы */       assertEquals(nGr, o.NameOfGroup);
             /* Название предмета */     assertEquals(nam, o.ItemTitle);
@@ -363,20 +363,20 @@ public class CoupleTest {
         // -------- ^J
 
 
-        assertArrayEquals(new Integer[]{1},             Couple.getAllOnlyWeeks("1 н. 1").toArray(new Integer[0]));
-        assertArrayEquals(new Integer[]{5},             Couple.getAllOnlyWeeks("кр 5 н Логика").toArray(new Integer[0]));
-        assertArrayEquals(new Integer[]{5},             Couple.getAllOnlyWeeks("кр. 5 н. Логика").toArray(new Integer[0]));
-        assertArrayEquals(new Integer[]{},              Couple.getAllOnlyWeeks("Внешний и внутренний PR").toArray(new Integer[0]));
-        assertArrayEquals(new Integer[]{},              Couple.getAllOnlyWeeks("Дискретная математика").toArray(new Integer[0]));
-        assertArrayEquals(new Integer[]{11, 13, 15, 17},Couple.getAllOnlyWeeks("11,13,15,17 н. Правоведение").toArray(new Integer[0]));
-        assertArrayEquals(new Integer[]{11, 13, 15, 17},Couple.getAllOnlyWeeks("11,13,15,17 н Правоведение").toArray(new Integer[0]));
-        assertArrayEquals(new Integer[]{},              Couple.getAllOnlyWeeks("История Неполита").toArray(new Integer[0]));
+        assertArrayEquals(new Integer[]{1},             CoupleInCalendar.getAllOnlyWeeks("1 н. 1").toArray(new Integer[0]));
+        assertArrayEquals(new Integer[]{5},             CoupleInCalendar.getAllOnlyWeeks("кр 5 н Логика").toArray(new Integer[0]));
+        assertArrayEquals(new Integer[]{5},             CoupleInCalendar.getAllOnlyWeeks("кр. 5 н. Логика").toArray(new Integer[0]));
+        assertArrayEquals(new Integer[]{},              CoupleInCalendar.getAllOnlyWeeks("Внешний и внутренний PR").toArray(new Integer[0]));
+        assertArrayEquals(new Integer[]{},              CoupleInCalendar.getAllOnlyWeeks("Дискретная математика").toArray(new Integer[0]));
+        assertArrayEquals(new Integer[]{11, 13, 15, 17}, CoupleInCalendar.getAllOnlyWeeks("11,13,15,17 н. Правоведение").toArray(new Integer[0]));
+        assertArrayEquals(new Integer[]{11, 13, 15, 17}, CoupleInCalendar.getAllOnlyWeeks("11,13,15,17 н Правоведение").toArray(new Integer[0]));
+        assertArrayEquals(new Integer[]{},              CoupleInCalendar.getAllOnlyWeeks("История Неполита").toArray(new Integer[0]));
 
-        assertArrayEquals(new Integer[]{5},     Couple.getAllExceptionWeeks("кр 5 н Логика").toArray(new Integer[0]));
-        assertArrayEquals(new Integer[]{5},     Couple.getAllExceptionWeeks("кр. 5 н. Логика").toArray(new Integer[0]));
-        assertArrayEquals(new Integer[]{},      Couple.getAllExceptionWeeks("Внешний и внутренний PR").toArray(new Integer[0]));
-        assertArrayEquals(new Integer[]{},      Couple.getAllExceptionWeeks("Дискретная математика").toArray(new Integer[0]));
-        assertArrayEquals(new Integer[]{},      Couple.getAllExceptionWeeks("11,13,15,17 н. Правоведение").toArray(new Integer[0]));
+        assertArrayEquals(new Integer[]{5},     CoupleInCalendar.getAllExceptionWeeks("кр 5 н Логика").toArray(new Integer[0]));
+        assertArrayEquals(new Integer[]{5},     CoupleInCalendar.getAllExceptionWeeks("кр. 5 н. Логика").toArray(new Integer[0]));
+        assertArrayEquals(new Integer[]{},      CoupleInCalendar.getAllExceptionWeeks("Внешний и внутренний PR").toArray(new Integer[0]));
+        assertArrayEquals(new Integer[]{},      CoupleInCalendar.getAllExceptionWeeks("Дискретная математика").toArray(new Integer[0]));
+        assertArrayEquals(new Integer[]{},      CoupleInCalendar.getAllExceptionWeeks("11,13,15,17 н. Правоведение").toArray(new Integer[0]));
 
 
     }
@@ -410,7 +410,7 @@ public class CoupleTest {
         // Аудитория.
         String aud = "А-(-1) = А+1";
 
-        List<Couple> out = Couple.getCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, false, nam, typ, nGr, tic, aud, add);
+        List<CoupleInCalendar> out = CoupleInCalendar.getCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, false, nam, typ, nGr, tic, aud, add);
 
         assertNotNull(out);
 
@@ -423,7 +423,7 @@ public class CoupleTest {
         /* Время конца пары 2*/    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY , 25), time2), timezone), out.get(1).DateAndTimeFinishOfCouple);
         /* Время конца пары 4*/    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.FEBRUARY, 22), time2), timezone), out.get(2).DateAndTimeFinishOfCouple);
 
-        for(Couple o : out)
+        for(CoupleInCalendar o : out)
         {
             /* Название группы */       assertEquals(nGr, o.NameOfGroup);
             /* Название предмета */     assertEquals(nam, o.ItemTitle);
@@ -465,7 +465,7 @@ public class CoupleTest {
         // Аудитория.
         String aud = "А-(-1) = А+1";
 
-        List<Couple> out = Couple.getCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, false, nam, typ, nGr, tic, aud, add);
+        List<CoupleInCalendar> out = CoupleInCalendar.getCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, false, nam, typ, nGr, tic, aud, add);
 
         /* Количество */            assertEquals(5, out.size());
         /* Время начала пары 3*/
@@ -492,7 +492,7 @@ public class CoupleTest {
         /* Время конца пары 6 */    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.MARCH, 22), time2), timezone), out.get(2).DateAndTimeFinishOfCouple);
         /* Время конца пары 7 */    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.APRIL, 5 ), time2), timezone), out.get(3).DateAndTimeFinishOfCouple);
         /* Время конца пары 8 */    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.APRIL, 19), time2), timezone), out.get(4).DateAndTimeFinishOfCouple);
-        for(Couple o : out)
+        for(CoupleInCalendar o : out)
         {
             /* Название группы */       assertEquals(nGr, o.NameOfGroup);
             /* Название предмета */     assertEquals(nam, o.ItemTitle);

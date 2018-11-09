@@ -4,13 +4,11 @@ import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.*;
 import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.component.VTimeZone;
 import net.fortuna.ical4j.model.property.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.time.temporal.ChronoField;
 import java.util.Random;
 
@@ -23,7 +21,7 @@ public class ExportCouplesToICal {
      * @param couples Перечисление пар, которые необходимо перевести в .ical.
      * @return Путь до .ical файла. Файл может быть удалён, если он старше 24 часов.
      */
-    public static String start(Iterable<Couple> couples) {
+    public static String start(Iterable<CoupleInCalendar> couples) {
         if(ran.nextInt() % 1000 == 0)
             clearCashOlder24H(); // Очистка кэша.
         Calendar cal = new Calendar();
@@ -33,7 +31,7 @@ public class ExportCouplesToICal {
         cal.getProperties().add(CalScale.GREGORIAN);
         boolean count = false;
 
-        for(Couple c : couples) {
+        for(CoupleInCalendar c : couples) {
             count = true;
             VEvent ev = new VEvent();
             ev.getProperties().add(new Summary((c.ItemTitle + " (" + c.TypeOfLesson + ")")));

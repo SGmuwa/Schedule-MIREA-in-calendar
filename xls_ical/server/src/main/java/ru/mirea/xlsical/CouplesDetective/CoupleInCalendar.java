@@ -18,9 +18,9 @@ import java.util.regex.Pattern;
  * Время начала и конца пары, название группы и имя преподавателя,
  * название предмета, аудитория, адрес, тип пары.
  */
-public class Couple {
+public class CoupleInCalendar {
 
-    private Couple(ZonedDateTime dateAndTimeOfCouple, ZonedDateTime dateAndTimeFinishOfCouple, String nameOfGroup, String nameOfTeacher, String itemTitle, String audience, String address, String typeOfLesson) {
+    private CoupleInCalendar(ZonedDateTime dateAndTimeOfCouple, ZonedDateTime dateAndTimeFinishOfCouple, String nameOfGroup, String nameOfTeacher, String itemTitle, String audience, String address, String typeOfLesson) {
         DateAndTimeOfCouple = dateAndTimeOfCouple;
         DateAndTimeFinishOfCouple = dateAndTimeFinishOfCouple;
         NameOfGroup = nameOfGroup;
@@ -79,7 +79,7 @@ public class Couple {
      * @param address Адрес корпуса.
      * @return Возвращает, в какие дни будут пары.
      */
-    public static List<Couple> getCouplesByPeriod(Seeker seeker, LocalTime timeStartOfCouple, LocalTime timeFinishOfCouple, DayOfWeek dayOfWeek, boolean isOdd, String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address) {
+    public static List<CoupleInCalendar> getCouplesByPeriod(Seeker seeker, LocalTime timeStartOfCouple, LocalTime timeFinishOfCouple, DayOfWeek dayOfWeek, boolean isOdd, String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address) {
         return getCouplesByPeriod(seeker.dateStart, seeker.dateFinish, seeker.timezoneStart, seeker.startWeek, timeStartOfCouple, timeFinishOfCouple, dayOfWeek, isOdd, itemTitle, typeOfLesson, nameOfGroup, nameOfTeacher, audience, address);
     }
 
@@ -111,8 +111,8 @@ public class Couple {
      * @param address Адрес корпуса.
      * @return Возвращает, в какие дни будут пары.
      */
-    public static List<Couple> getCouplesByPeriod(LocalDate start, LocalDate finish, ZoneId startZoneId, int startWeek, LocalTime timeStartOfCouple, LocalTime timeFinishOfCouple, DayOfWeek dayOfWeek, boolean isOdd, String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address) {
-        List<Couple> out;
+    public static List<CoupleInCalendar> getCouplesByPeriod(LocalDate start, LocalDate finish, ZoneId startZoneId, int startWeek, LocalTime timeStartOfCouple, LocalTime timeFinishOfCouple, DayOfWeek dayOfWeek, boolean isOdd, String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address) {
+        List<CoupleInCalendar> out;
         ZonedDateTime startT =  ZonedDateTime.of(LocalDateTime.of(start, LocalTime.of(0, 0)), startZoneId);
         ZonedDateTime finishT = ZonedDateTime.of(LocalDateTime.of(finish, LocalTime.of(23, 50)), startZoneId);
         ZonedDateTime current = startT;
@@ -141,7 +141,7 @@ public class Couple {
                             current.getLong(ChronoField.INSTANT_SECONDS) >= finishT.getLong(ChronoField.INSTANT_SECONDS)) {
                 continue;
             }
-            out.add(new Couple(
+            out.add(new CoupleInCalendar(
                     current,
                     current.plusNanos(durationBetweenStartAndFinish),
                     nameOfGroup,
@@ -287,7 +287,7 @@ public class Couple {
 
     @Override
     public String toString() {
-        return "Couple{" +
+        return "CoupleInCalendar{" +
                 "DateAndTimeOfCouple=" + DateAndTimeOfCouple +
                 ", DateAndTimeFinishOfCouple=" + DateAndTimeFinishOfCouple +
                 ", NameOfGroup='" + NameOfGroup + '\'' +

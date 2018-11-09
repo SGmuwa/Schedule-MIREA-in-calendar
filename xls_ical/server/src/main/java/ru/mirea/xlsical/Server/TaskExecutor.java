@@ -1,10 +1,10 @@
 package ru.mirea.xlsical.Server;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import ru.mirea.xlsical.CouplesDetective.CoupleInCalendar;
 import ru.mirea.xlsical.CouplesDetective.ExportCouplesToICal;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
-import ru.mirea.xlsical.CouplesDetective.Couple;
 import ru.mirea.xlsical.CouplesDetective.DetectiveSemester;
 import ru.mirea.xlsical.CouplesDetective.DetectiveException;
 import ru.mirea.xlsical.interpreter.PackageToClient;
@@ -86,7 +86,7 @@ public class TaskExecutor implements Runnable {
      * чем обрабатываться, то нет гарантий на сохранность входных пакетов.
      */
     public static PackageToClient monoStep(PackageToServer pkg) {
-        List<Couple> couples = new LinkedList<>();
+        List<CoupleInCalendar> couples = new LinkedList<>();
         if(pkg.excelsFiles == null) {
             return new PackageToClient(pkg.ctx, null, 0, "Ошибка внутри обработчика. Не было передано множество excel файлов.");
         }

@@ -33,41 +33,20 @@ import java.util.regex.Pattern;
 public class DetectiveSemester extends Detective {
 
     /**
-     * Функция ищет занятия для seeker в файлах files.
-     * @param seeker критерий поиска.
-     * @param files список файлов, в которых требуется искать пары занятий.
-     * @throws DetectiveException Появилась проблема, связанная с обработкой Excel файла
-     * @throws IOException Во время работы с Excel file - файл стал недоступен.
-     */
-    public static List<Couple> startAnInvestigations(Seeker seeker, Iterable<ExcelFileInterface> files) throws DetectiveException, IOException {
-        List<Couple> output = new LinkedList<>();
-        int index = 0;
-        for (ExcelFileInterface f : files)
-            try {
-                output.addAll(startAnInvestigation(seeker, f));
-                index++;
-            } catch (DetectiveException error) {
-                throw new DetectiveException("Ошибка в файле с индексом " + index + ":" + error.getMessage(), f);
-            }
-        return output;
-    }
-
-
-    /**
      * Функция ищет занятия для seeker в файле File.
      * @param seeker критерий поиска.
      * @param file файл, в котором требуется искать пары занятий.
      * @throws DetectiveException Появилась проблема, связанная с обработкой Excel файла
      * @throws IOException Во время работы с Excel file - файл стал недоступен.
      */
-    public static List<Couple> startAnInvestigation(Seeker seeker, ExcelFileInterface file) throws DetectiveException, IOException {
+    public List<CoupleInCalendar> startAnInvestigation(Seeker seeker, ExcelFileInterface file) throws DetectiveException, IOException {
         Point WeekPositionFirst = SeekEverythingInLeftUp("Неделя", file);
         List<Point> IgnoresCoupleTitle = new LinkedList<>();
         int[] Times = GetTimes(WeekPositionFirst, file); // Узнать время начала и конца пар.
         int CountCouples = Times.length / 2; // Узнать количество пар за день.
         Point basePos = SeekFirstCouple(file); // Позиция первой записи "Предмет". Обычно на R3C6.
         // Ура! Мы нашли базовую позицию! Это basePos.
-        List<Couple> out = new LinkedList<>();
+        List<CoupleInCalendar> out = new LinkedList<>();
         for(
                 int lastEC = 15, // Last entry count - Счётчик последней записи. Если долго не находим, то выходим из цикла.
                 posEntryX = basePos.x; // Это позиция записи. Указывает столбец, где есть запись "Предмет".
@@ -98,9 +77,9 @@ public class DetectiveSemester extends Detective {
      * @param seeker Критерий (Тип искателя и его название)
      * @return Отфильтрованный по критерию.
      */
-    private static List<Couple> FilterCouplesBySeekerType(Collection<? extends Couple> couples, final Seeker seeker) {
-        List<Couple> output = new LinkedList<>();
-        for (Couple i : couples) {
+    private static List<CoupleInCalendar> FilterCouplesBySeekerType(Collection<? extends CoupleInCalendar> couples, final Seeker seeker) {
+        List<CoupleInCalendar> output = new LinkedList<>();
+        for (CoupleInCalendar i : couples) {
             if (seeker.seekerType == SeekerType.StudyGroup) {
                 if (i.NameOfGroup.toLowerCase().equals(seeker.nameOfSeeker.toLowerCase())) {
                     output.add(i);
@@ -200,8 +179,8 @@ public class DetectiveSemester extends Detective {
      * @param file Файл, откуда надо производить чтение.
      * @return Множество занятий у группы.
      */
-    private static Collection<? extends Couple> GetCouplesFromAnchor(int column, int row, Seeker seeker, int[] times, List<Point> ignoresCoupleTitle, ExcelFileInterface file) throws IOException {
-        LinkedList<Couple> coupleOfWeek = new LinkedList<>();
+    private static Collection<? extends CoupleInCalendar> GetCouplesFromAnchor(int column, int row, Seeker seeker, int[] times, List<Point> ignoresCoupleTitle, ExcelFileInterface file) throws IOException {
+        LinkedList<CoupleInCalendar> coupleOfWeek = new LinkedList<>();
         int countOfCouples = times.length / 2;
         String nameOfGroup = file.getCellData(column, row - 1).trim();
         for(byte dayOfWeek = 1; dayOfWeek <= 7; dayOfWeek++)
@@ -241,8 +220,8 @@ public class DetectiveSemester extends Detective {
      * @param file Файл, откуда надо производить чтение.
      * @return Множество занятий у группы в конкретный день.
      */
-    public static Collection<? extends Couple> GetCouplesFromDay(int column, int row, String nameOfGroup, DayOfWeek dayOfWeek, Seeker seeker, List<Point> ignoresCoupleTitle, int[] times, String address, ExcelFileInterface file) throws IOException {
-        LinkedList<Couple> coupleOfDay = new LinkedList<>();
+    public static Collection<? extends CoupleInCalendar> GetCouplesFromDay(int column, int row, String nameOfGroup, DayOfWeek dayOfWeek, Seeker seeker, List<Point> ignoresCoupleTitle, int[] times, String address, ExcelFileInterface file) throws IOException {
+        LinkedList<CoupleInCalendar> coupleOfDay = new LinkedList<>();
         int countOfCouples = times.length / 2;
         for(Point cursor = new Point(column, row); cursor.y < row + countOfCouples*2; cursor.y++) { // Считываем каждую строчку
             if (IsEqualsInList(ignoresCoupleTitle, cursor))
@@ -253,7 +232,7 @@ public class DetectiveSemester extends Detective {
             String[] teachers = file.getCellData(cursor.x + 2, cursor.y).trim().split(("(\r\n)|\n"));
             String[] audiences = file.getCellData(cursor.x + 3, cursor.y).trim().split(("(\r\n)|\n"));
             for (int indexInLine = 0; indexInLine < titles.length; indexInLine++) {
-                Iterable<Couple> listCouplesOfLine = Couple.getCouplesByPeriod(
+                Iterable<CoupleInCalendar> listCouplesOfLine = CoupleInCalendar.getCouplesByPeriod(
                         seeker,
                         LocalTime.of(times[(cursor.y - row)/2*2] / 60, times[(cursor.y - row)/2*2] % 60),
                         LocalTime.of(times[(cursor.y - row)/2*2 + 1] / 60, times[(cursor.y - row)/2*2 + 1] % 60),
@@ -265,7 +244,7 @@ public class DetectiveSemester extends Detective {
                         indexInLine < teachers.length ? teachers[indexInLine] : teachers[0],
                         indexInLine < audiences.length ? audiences[indexInLine] : audiences[0],
                         address);
-                if(listCouplesOfLine != null) for (Couple coup : listCouplesOfLine)
+                if(listCouplesOfLine != null) for (CoupleInCalendar coup : listCouplesOfLine)
                     coupleOfDay.add(coup); // Все пары, которые вернусь с getCouplesByPeriod надо добавить в наш список.
             }
         }

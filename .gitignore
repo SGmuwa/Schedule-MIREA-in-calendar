@@ -30,3 +30,5 @@ xls_ical/interpreter/target/surefire-reports/TestPackage.txt
 xls_ical/interpreter/target/surefire-reports/TestSeeker.txt
 *.ics
 *~*.xls*
+
+*target*

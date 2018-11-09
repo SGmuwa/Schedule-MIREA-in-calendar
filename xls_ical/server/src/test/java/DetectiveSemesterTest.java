@@ -1,5 +1,5 @@
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import ru.mirea.xlsical.CouplesDetective.Couple;
+import ru.mirea.xlsical.CouplesDetective.CoupleInCalendar;
 import ru.mirea.xlsical.CouplesDetective.DetectiveSemester;
 import org.junit.Test;
 import ru.mirea.xlsical.CouplesDetective.DetectiveException;
@@ -68,7 +68,7 @@ public class DetectiveSemesterTest {
     public void GetCouplesFromDayTest() throws IOException, InvalidFormatException {
         List<Point> list = new ArrayList<>();
         Collection<? extends ExcelFileInterface> files;
-        Collection<? extends Couple> col;
+        Collection<? extends CoupleInCalendar> col;
         int[] times = {540,630,640,730,780,870,880,970,980,1070,1080,1170};
 
         files = OpenFile.newInstance("tests/test-01.xlsx");
@@ -79,7 +79,7 @@ public class DetectiveSemesterTest {
 
         col = DetectiveSemester.GetCouplesFromDay(6,3, "ИКБО-04-16",DayOfWeek.of(1), seeker, list, times, "пр-т Вернадского, 78", file);
 
-        for(Couple couple : col)
+        for(CoupleInCalendar couple : col)
             System.out.println(couple.toString());
 
         file.close();
