@@ -1,4 +1,4 @@
-package ru.mirea.xlsical.CouplesDetective;
+package ru.mirea.xlsical.CouplesDetective.Detective;
 
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 

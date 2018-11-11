@@ -1,4 +1,4 @@
-package ru.mirea.xlsical.CouplesDetective;
+package ru.mirea.xlsical.CouplesDetective.Detective;
 
 /*
 План детектива:
@@ -13,6 +13,7 @@ package ru.mirea.xlsical.CouplesDetective;
 
  */
 
+import ru.mirea.xlsical.CouplesDetective.CoupleInCalendar;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import ru.mirea.xlsical.interpreter.Seeker;
 import ru.mirea.xlsical.interpreter.SeekerType;
@@ -32,14 +33,17 @@ import java.util.regex.Pattern;
  */
 public class DetectiveSemester extends Detective {
 
+    protected DetectiveSemester(ExcelFileInterface file) {
+        super(file);
+    }
+
     /**
      * Функция ищет занятия для seeker в файле File.
      * @param seeker критерий поиска.
-     * @param file файл, в котором требуется искать пары занятий.
      * @throws DetectiveException Появилась проблема, связанная с обработкой Excel файла
      * @throws IOException Во время работы с Excel file - файл стал недоступен.
      */
-    public List<CoupleInCalendar> startAnInvestigation(Seeker seeker, ExcelFileInterface file) throws DetectiveException, IOException {
+    public List<CoupleInCalendar> startAnInvestigation(Seeker seeker) throws DetectiveException, IOException {
         Point WeekPositionFirst = SeekEverythingInLeftUp("Неделя", file);
         List<Point> IgnoresCoupleTitle = new LinkedList<>();
         int[] Times = GetTimes(WeekPositionFirst, file); // Узнать время начала и конца пар.

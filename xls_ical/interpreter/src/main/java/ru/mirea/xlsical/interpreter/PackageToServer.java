@@ -11,11 +11,13 @@ import java.io.ObjectInputStream;
 public class PackageToServer extends Package {
 
     /**
-    Тут содержатся пути до файлов .xls и .xlsx.
+     * Тут содержатся пути до файлов .xls и .xlsx.
+     * @deprecated Теперь excel файлы будут браться из другого места.
+     * Сторона Server будет сама контролировать список excel файлов.
      */
     public final String[] excelsFiles;
     /**
-    Тут содержатся критерии запроса.
+     * Тут содержатся критерии запроса.
      */
     public final Seeker queryCriteria;
 

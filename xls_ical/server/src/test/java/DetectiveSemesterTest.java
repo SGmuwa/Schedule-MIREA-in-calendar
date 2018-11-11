@@ -1,15 +1,15 @@
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import ru.mirea.xlsical.CouplesDetective.CoupleInCalendar;
-import ru.mirea.xlsical.CouplesDetective.DetectiveSemester;
+import ru.mirea.xlsical.CouplesDetective.Detective.DetectiveSemester;
 import org.junit.Test;
-import ru.mirea.xlsical.CouplesDetective.DetectiveException;
+import ru.mirea.xlsical.CouplesDetective.Detective.DetectiveException;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
 import ru.mirea.xlsical.interpreter.Seeker;
 import ru.mirea.xlsical.interpreter.SeekerType;
 
 import static org.junit.Assert.*;
-import static ru.mirea.xlsical.CouplesDetective.DetectiveSemester.GetTimes;
+import static ru.mirea.xlsical.CouplesDetective.Detective.DetectiveSemester.GetTimes;
 
 import java.io.IOException;
 import java.time.DayOfWeek;

@@ -5,8 +5,8 @@ import ru.mirea.xlsical.CouplesDetective.CoupleInCalendar;
 import ru.mirea.xlsical.CouplesDetective.ExportCouplesToICal;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
-import ru.mirea.xlsical.CouplesDetective.DetectiveSemester;
-import ru.mirea.xlsical.CouplesDetective.DetectiveException;
+import ru.mirea.xlsical.CouplesDetective.Detective.DetectiveSemester;
+import ru.mirea.xlsical.CouplesDetective.Detective.DetectiveException;
 import ru.mirea.xlsical.interpreter.PackageToClient;
 import ru.mirea.xlsical.interpreter.PackageToServer;
 
@@ -77,13 +77,13 @@ public class TaskExecutor implements Runnable {
     }
 
     /**
-     * Выполняет обработку пакета без использования очередей.
-     * @param pkg Пакет с требованиями к решению задачи.
-     * @return Пакет от обработчика.
-     * @deprecated Не рекомендуется использовать данный метод,
+     * Выполняет обработку пакета без использования очередей. <p/>
+     * Не рекомендуется использовать данный метод,
      * так как он заставляет ждать выполнения работы входной поток.
      * Если входящих пакетов из интернета будет приходить быстрее,
      * чем обрабатываться, то нет гарантий на сохранность входных пакетов.
+     * @param pkg Пакет с требованиями к решению задачи.
+     * @return Пакет от обработчика.
      */
     public static PackageToClient monoStep(PackageToServer pkg) {
         List<CoupleInCalendar> couples = new LinkedList<>();
@@ -96,7 +96,7 @@ public class TaskExecutor implements Runnable {
             do {
                 fs = openExcelFiles(pkg.excelsFiles);
                 try {
-                    couples = DetectiveSemester.startAnInvestigations(pkg.queryCriteria, fs);
+                    couples = DetectiveSemester.startAnInvestigations(pkg.queryCriteria);
                     needAgain = false;
                 } catch (DetectiveException exD) {
                     // В случае, если один из файлов не правильно оформлен, то его игнорируем.
