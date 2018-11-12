@@ -26,8 +26,8 @@ public class ExternalData {
      */
     public static Collection<? extends ExcelFileInterface> openTablesFromExternal() {
         if(isCacheFine()) {
-            updateCashe();
+            updateCache();
         }
-        return getCahse();
+        return getCache();
     }
 }
