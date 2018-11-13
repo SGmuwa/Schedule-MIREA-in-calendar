@@ -1,5 +1,6 @@
 package ru.mirea.xlsical.CouplesDetective;
 
+import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.ViewerExcelCouples;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 
 import java.io.*;
@@ -33,6 +34,15 @@ public class ExternalDataUpdater implements Runnable {
     public ExternalDataUpdater(File path) throws IOException {
         pathToCache = path;
         createCacheDir();
+    }
+
+    /**
+     * Функция, которая возвращает из кэша детективов.
+     * @return Возвращает из кэша детективов.
+     */
+    public Collection<? extends ViewerExcelCouples> getDetectives() {
+        // TODO
+        return null;
     }
 
     private void createCacheDir() throws IOException {

@@ -1,4 +1,4 @@
-package ru.mirea.xlsical.CouplesDetective.Detective;
+package ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples;
 
 import ru.mirea.xlsical.CouplesDetective.CoupleInCalendar;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
@@ -11,8 +11,8 @@ import java.util.List;
  * Данный класс отвечает за просмотр пар из Excel расписания.
  * Данный класс может видеть только экзаменационное расписание.
  */
-public class DetectiveExams extends Detective {
-    protected DetectiveExams(ExcelFileInterface file) {
+public class ViewerExcelCouplesExams extends ViewerExcelCouples {
+    protected ViewerExcelCouplesExams(ExcelFileInterface file) {
         super(file);
     }
 
@@ -21,11 +21,11 @@ public class DetectiveExams extends Detective {
      * // TODO: Данная функция ещё не разработана.
      *
      * @param seeker критерий поиска.
-     * @throws DetectiveException Появилась проблема, связанная с обработкой Excel файла
+     * @throws ViewerExcelCouplesException Появилась проблема, связанная с обработкой Excel файла
      * @throws IOException        Во время работы с Excel file - файл стал недоступен.
      */
     @Override
-    public List<CoupleInCalendar> startAnInvestigation(Seeker seeker) throws DetectiveException, IOException {
+    public List<CoupleInCalendar> startAnInvestigation(Seeker seeker) throws ViewerExcelCouplesException, IOException {
         return null;
     }
 }

@@ -2,21 +2,20 @@ package ru.mirea.xlsical.Server;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import ru.mirea.xlsical.CouplesDetective.CoupleInCalendar;
+import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.ViewerExcelCouples;
 import ru.mirea.xlsical.CouplesDetective.ExportCouplesToICal;
+import ru.mirea.xlsical.CouplesDetective.ExternalDataUpdater;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
-import ru.mirea.xlsical.CouplesDetective.Detective.DetectiveSemester;
-import ru.mirea.xlsical.CouplesDetective.Detective.DetectiveException;
+import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.ViewerExcelCouplesSemester;
+import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.ViewerExcelCouplesException;
 import ru.mirea.xlsical.interpreter.PackageToClient;
 import ru.mirea.xlsical.interpreter.PackageToServer;
 
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -24,15 +23,36 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Класс, который выступает в роле исполнителя обработчика.
  * Используйте {@code add} для добавления задания.
  * Используйте {@code take} для получения ответа.
+ *
+ * @see #add(PackageToServer)
+ * @see #take()
  */
 public class TaskExecutor implements Runnable {
 
     private final BlockingQueue<PackageToServer> qIn;
     private final BlockingQueue<PackageToClient> qOut;
+    private ExternalDataUpdater edUpdater = null;
 
     public TaskExecutor() {
         this.qIn = new LinkedBlockingQueue<>();
         this.qOut = new LinkedBlockingQueue<>();
+        try {
+            this.edUpdater = new ExternalDataUpdater();
+        } catch (IOException e) {
+            // Что делать, если не удаётся создать директорию кэша?
+            // Переносим ответственность на администратора сервера.
+            e.printStackTrace();
+            System.out.println(e.getLocalizedMessage());
+            Scanner sc = new Scanner(System.in);
+            do {
+                try {
+                    System.out.print("Write path cache dir: ");
+                    this.edUpdater = new ExternalDataUpdater(sc.nextLine());
+                } catch (IOException er) {
+                    System.out.println(er.getLocalizedMessage());
+                }
+            } while(edUpdater == null);
+        }
     }
 
     /**
@@ -85,7 +105,7 @@ public class TaskExecutor implements Runnable {
      * @param pkg Пакет с требованиями к решению задачи.
      * @return Пакет от обработчика.
      */
-    public static PackageToClient monoStep(PackageToServer pkg) {
+    public static PackageToClient monoStep(PackageToServer pkg, Collection<? extends ViewerExcelCouples> watchers) {
         List<CoupleInCalendar> couples = new LinkedList<>();
         if(pkg.excelsFiles == null) {
             return new PackageToClient(pkg.ctx, null, 0, "Ошибка внутри обработчика. Не было передано множество excel файлов.");
@@ -96,11 +116,11 @@ public class TaskExecutor implements Runnable {
             do {
                 fs = openExcelFiles(pkg.excelsFiles);
                 try {
-                    couples = DetectiveSemester.startAnInvestigations(pkg.queryCriteria);
+                    couples = ViewerExcelCouplesSemester.startAnInvestigations(pkg.queryCriteria);
                     needAgain = false;
-                } catch (DetectiveException exD) {
+                } catch (ViewerExcelCouplesException exD) {
                     // В случае, если один из файлов не правильно оформлен, то его игнорируем.
-                    System.out.println("DetectiveException");
+                    System.out.println("ViewerExcelCouplesException");
                     fs.remove(exD.excelFile);
                 }
             } while (needAgain);

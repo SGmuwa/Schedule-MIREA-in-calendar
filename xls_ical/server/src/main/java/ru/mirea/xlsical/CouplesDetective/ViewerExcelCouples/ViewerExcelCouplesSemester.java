@@ -1,4 +1,4 @@
-package ru.mirea.xlsical.CouplesDetective.Detective;
+package ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples;
 
 /*
 План детектива:
@@ -31,19 +31,19 @@ import java.util.regex.Pattern;
  * Данный класс отвечает за получение календарных пар из Excel расписания.
  * Умеет читать только семестровое расписание.
  */
-public class DetectiveSemester extends Detective {
+public class ViewerExcelCouplesSemester extends ViewerExcelCouples {
 
-    protected DetectiveSemester(ExcelFileInterface file) {
+    protected ViewerExcelCouplesSemester(ExcelFileInterface file) {
         super(file);
     }
 
     /**
      * Функция ищет занятия для seeker в файле File.
      * @param seeker критерий поиска.
-     * @throws DetectiveException Появилась проблема, связанная с обработкой Excel файла
+     * @throws ViewerExcelCouplesException Появилась проблема, связанная с обработкой Excel файла
      * @throws IOException Во время работы с Excel file - файл стал недоступен.
      */
-    public List<CoupleInCalendar> startAnInvestigation(Seeker seeker) throws DetectiveException, IOException {
+    public List<CoupleInCalendar> startAnInvestigation(Seeker seeker) throws ViewerExcelCouplesException, IOException {
         Point WeekPositionFirst = SeekEverythingInLeftUp("Неделя", file);
         List<Point> IgnoresCoupleTitle = new LinkedList<>();
         int[] Times = GetTimes(WeekPositionFirst, file); // Узнать время начала и конца пар.
@@ -150,12 +150,12 @@ public class DetectiveSemester extends Detective {
      * @param file Файл, в котором следует искать.
      * @return Координаты первого найденного слова "Предмет".
      */
-    private static Point SeekFirstCouple(ExcelFileInterface file) throws DetectiveException, IOException {
+    private static Point SeekFirstCouple(ExcelFileInterface file) throws ViewerExcelCouplesException, IOException {
         try {
             return SeekEverythingInLeftUp("Предмет", file);
         }
-        catch (DetectiveException e){
-            throw new DetectiveException(e.getMessage() + "\nНевозможно найти хотя бы один предмет в таблице Excel.", file);
+        catch (ViewerExcelCouplesException e){
+            throw new ViewerExcelCouplesException(e.getMessage() + "\nНевозможно найти хотя бы один предмет в таблице Excel.", file);
         }
     }
 
@@ -164,13 +164,13 @@ public class DetectiveSemester extends Detective {
      * @param Word Слово, которое следует искать.
      * @param file Файл, в котором требуется искать.
      * @return Координаты первого найденного слова.
-     * @throws DetectiveException Упс! Не нашёл!
+     * @throws ViewerExcelCouplesException Упс! Не нашёл!
      */
-    private static Point SeekEverythingInLeftUp(String Word, ExcelFileInterface file) throws DetectiveException, IOException {
+    private static Point SeekEverythingInLeftUp(String Word, ExcelFileInterface file) throws ViewerExcelCouplesException, IOException {
         for (int y = 1; y <= 10; y++)
             for (int x = 1; x <= 20; x++)
                 if (Word.equals(file.getCellData(x, y))) return new Point(x, y);
-        throw new DetectiveException("Невозможно найти заданное слово Word. Word = " + Word, file);
+        throw new ViewerExcelCouplesException("Невозможно найти заданное слово Word. Word = " + Word, file);
     }
 
     /**
@@ -281,10 +281,10 @@ public class DetectiveSemester extends Detective {
      * @param CR Координаты (столбец (x) и строка (y)), где находится фраза "Неделя".
      * @param file Файл, в котором надо подсчитать количество пар.
      * @return Максимальное количество пар в одном дне недели.
-     * @throws DetectiveException Ошибка при поиске порядковых номеров пар.
+     * @throws ViewerExcelCouplesException Ошибка при поиске порядковых номеров пар.
      * @throws IOException Файл excel стал недоступным.
      */
-    private static int GetCountCoupleInDay(Point CR, ExcelFileInterface file) throws DetectiveException, IOException {
+    private static int GetCountCoupleInDay(Point CR, ExcelFileInterface file) throws ViewerExcelCouplesException, IOException {
         int OldNumber = Integer.MIN_VALUE; // Последнее число, которое было прочитано.
         int x = CR.x - 3; // Остаёмся на одном и том же столбце!
         for (int y = CR.y + 1; y < CR.y + 100; y++) { // Движемся вниз по строкам!
@@ -306,10 +306,10 @@ public class DetectiveSemester extends Detective {
      * @param file Excel файл.
      * @return Возвращает список времён в формате минут: {начало пары, конец пары}.
      */
-    public static int[] GetTimes(Point CR, ExcelFileInterface file) throws  DetectiveException, IOException {
+    public static int[] GetTimes(Point CR, ExcelFileInterface file) throws ViewerExcelCouplesException, IOException {
         int[] output = new int[2 * GetCountCoupleInDay(CR, file)];
         if(output.length == 0)
-            throw new DetectiveException("Ошибка при поиске время начала и конца пар -> Пока программа спускалась вниз по строкам, считая, сколько пар в одном дне, она прошла окола 100 строк и сказала идити вы все, я столько не хочу обрабатывать.", file);
+            throw new ViewerExcelCouplesException("Ошибка при поиске время начала и конца пар -> Пока программа спускалась вниз по строкам, считая, сколько пар в одном дне, она прошла окола 100 строк и сказала идити вы все, я столько не хочу обрабатывать.", file);
         // Ура, мы знаем количество. Это output.length. Теперь можно считывать времена.
         int indexArray = 0;
         for(int y = CR.y + 1; y < CR.y + 1 + output.length; y+=2)

@@ -1,4 +1,4 @@
-package ru.mirea.xlsical.CouplesDetective.Detective;
+package ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples;
 
 import ru.mirea.xlsical.interpreter.Seeker;
 import ru.mirea.xlsical.interpreter.SeekerType;
@@ -13,8 +13,8 @@ import java.time.ZoneId;
  * системы принятия решения: то ли нужно построить расписание семестра,
  * то ли зачётов, то ли экзаменов.
  */
-public class DetectiveParams extends Seeker {
-    public DetectiveParams(String nameOfSeeker, SeekerType seekerType, LocalDate dateStart, LocalDate dateFinish, ZoneId timezoneStart, int startWeek) {
+public class ViewerExcelCouplesParams extends Seeker {
+    public ViewerExcelCouplesParams(String nameOfSeeker, SeekerType seekerType, LocalDate dateStart, LocalDate dateFinish, ZoneId timezoneStart, int startWeek) {
         super(nameOfSeeker, seekerType, dateStart, dateFinish, timezoneStart, startWeek);
     }
 }
