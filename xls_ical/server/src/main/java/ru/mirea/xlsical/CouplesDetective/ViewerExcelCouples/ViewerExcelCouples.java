@@ -1,6 +1,7 @@
 package ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples;
 
 import ru.mirea.xlsical.CouplesDetective.CoupleInCalendar;
+import ru.mirea.xlsical.CouplesDetective.CoupleInExcel;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import ru.mirea.xlsical.interpreter.Seeker;
 
@@ -35,6 +36,7 @@ public abstract class ViewerExcelCouples implements Closeable {
      * @param seeker критерий поиска.
      * @throws ViewerExcelCouplesException Появилась проблема, связанная с обработкой Excel файла
      * @throws IOException Во время работы с Excel file - файл стал недоступен.
+     * @deprecated Лучше делать через экземпляр.
      */
     public static List<CoupleInCalendar> startAnInvestigations(Seeker seeker, Iterable<ViewerExcelCouples> detectives) throws ViewerExcelCouplesException, IOException {
         List<CoupleInCalendar> output = new LinkedList<>();
@@ -49,7 +51,7 @@ public abstract class ViewerExcelCouples implements Closeable {
      * @throws ViewerExcelCouplesException Появилась проблема, связанная с обработкой Excel файла.
      * @throws IOException Во время работы с Excel file - файл стал недоступен.
      */
-    public abstract List<CoupleInCalendar> startAnInvestigation(Seeker seeker) throws ViewerExcelCouplesException, IOException;
+    public abstract List<CoupleInExcel> startAnInvestigation(Seeker seeker) throws ViewerExcelCouplesException, IOException;
 
     /**
      * Функция решает, какой именно требуется способ просмотра Excel таблицы.

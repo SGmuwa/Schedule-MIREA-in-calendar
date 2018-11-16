@@ -17,52 +17,24 @@ import java.util.regex.Pattern;
  * Сокращённо: "Календарная пара".
  * Время начала и конца пары, название группы и имя преподавателя,
  * название предмета, аудитория, адрес, тип пары.
+ * Также данный класс занимается преобразованием из {@link CoupleInExcel} в {@link CoupleInCalendar}.
  */
-public class CoupleInCalendar {
+public class CoupleInCalendar extends Couple {
 
-    private CoupleInCalendar(ZonedDateTime dateAndTimeOfCouple, ZonedDateTime dateAndTimeFinishOfCouple, String nameOfGroup, String nameOfTeacher, String itemTitle, String audience, String address, String typeOfLesson) {
+    private CoupleInCalendar(String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address, ZonedDateTime dateAndTimeOfCouple, ZonedDateTime dateAndTimeFinishOfCouple) {
+        super(itemTitle, typeOfLesson, nameOfGroup, nameOfTeacher, audience, address);
         DateAndTimeOfCouple = dateAndTimeOfCouple;
         DateAndTimeFinishOfCouple = dateAndTimeFinishOfCouple;
-        NameOfGroup = nameOfGroup;
-        NameOfTeacher = nameOfTeacher;
-        ItemTitle = itemTitle;
-        Audience = audience;
-        Address = address;
-        TypeOfLesson = typeOfLesson;
     }
 
     /**
      * Дата и время пары.
      */
-    public ZonedDateTime DateAndTimeOfCouple;
+    public final ZonedDateTime DateAndTimeOfCouple;
     /**
      * Количество времени, сколько длится пара.
      */
-    public ZonedDateTime DateAndTimeFinishOfCouple;
-    /**
-     * Название группы.
-     */
-    public String NameOfGroup; 
-    /**
-     * Имя преподавателя.
-     */
-    public String NameOfTeacher;
-    /**
-     * Название пары.
-     */
-    public String ItemTitle;
-    /**
-     * Номер аудитории.
-     */
-    public String Audience;
-    /**
-     * Адрес корпуса.
-     */
-    public String Address;
-    /**
-     * Тип занятия (лекция, практика, лабораторная работа)
-     */
-    public String TypeOfLesson;
+    public final ZonedDateTime DateAndTimeFinishOfCouple;
 
     /**
      * Получает на входе данные про одну строку. Принимает решение, в какие дни будут пары. Не делает выборку данных.
