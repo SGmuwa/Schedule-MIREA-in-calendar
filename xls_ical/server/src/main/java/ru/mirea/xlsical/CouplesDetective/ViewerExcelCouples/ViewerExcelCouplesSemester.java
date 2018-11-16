@@ -20,8 +20,9 @@ import ru.mirea.xlsical.interpreter.SeekerType;
 
 import java.awt.*;
 import java.io.IOException;
-import java.time.DayOfWeek;
-import java.time.LocalTime;
+import java.time.*;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -43,7 +44,7 @@ public class ViewerExcelCouplesSemester extends ViewerExcelCouples {
      * @throws ViewerExcelCouplesException Появилась проблема, связанная с обработкой Excel файла
      * @throws IOException Во время работы с Excel file - файл стал недоступен.
      */
-    public List<CoupleInCalendar> startAnInvestigation(Seeker seeker) throws ViewerExcelCouplesException, IOException {
+    public List<CoupleInCalendar> startAnInvestigation() throws ViewerExcelCouplesException, IOException {
         Point WeekPositionFirst = SeekEverythingInLeftUp("Неделя", file);
         List<Point> IgnoresCoupleTitle = new LinkedList<>();
         int[] Times = GetTimes(WeekPositionFirst, file); // Узнать время начала и конца пар.
@@ -63,13 +64,18 @@ public class ViewerExcelCouplesSemester extends ViewerExcelCouples {
             if("Предмет".equals(file.getCellData(posEntryX, basePos.y)) && file.getCellData(posEntryX, basePos.y - 1).length() > 0) {
                 lastEC = 15;
                 System.out.println("R" + basePos.y + "C" + posEntryX);
-                if (seeker.seekerType != SeekerType.StudyGroup || seeker.nameOfSeeker.toLowerCase().trim().equals(file.getCellData(posEntryX, basePos.y - 1).toLowerCase().trim())) {
-                    // Выставляем курсор на название первой пары дня.
-                    out.addAll(FilterCouplesBySeekerType(
-                            GetCouplesFromAnchor(posEntryX, basePos.y, seeker, Times, IgnoresCoupleTitle, file) /* Хорошо! Мы получили список занятий у группы. Если это группа - то просто добавить, если это преподаватель - то отфильтровать. */,
-                            seeker
-                    ));
-                }
+                // Выставляем курсор на название первой пары дня.
+                out.addAll(
+                        GetCouplesFromAnchor(
+                                posEntryX,
+                                basePos.y,
+                                Times,
+                                IgnoresCoupleTitle,
+                                file)
+                        /* Хорошо! Мы получили список занятий у группы.
+                        Если это группа - то просто добавить,
+                        если это преподаватель - то отфильтровать. */
+                );
             }
         }
         return out;
@@ -126,15 +132,17 @@ public class ViewerExcelCouplesSemester extends ViewerExcelCouples {
     /**
      * Функция узнаёт, по какому адресу занимаются.
      * @param titleOfDay Позиция названия первой пары дня.
-     * @param CountCouples Количество пар в дне.
+     * @param pointToGroupName Позиция, которая указывает на название группы.
+     *                         Требуется для того, чтобы правее узнать адрес по-умолчанию.
+     * @param countCouples Количество пар в дне.
      * @param DefaultAddress Адрес по-умолчанию за день.
      * @param IgnoresCoupleTitle Список адресов заголовков, которые следует игнорировать. Идёт только добавление элементов в список.
      * @param file Файл, откуда надо считывать данные.
      * @return Адрес местоположения пары.
      */
-    private static String GetAddressOfDay(Point titleOfDay, int CountCouples, String DefaultAddress, List<Point> IgnoresCoupleTitle, ExcelFileInterface file) throws IOException {
+    private static String GetAddressOfDay(Point titleOfDay, Point pointToGroupName, HashMap<Color, String> addresses, int countCouples, List<Point> IgnoresCoupleTitle, ExcelFileInterface file) throws IOException {
         String output = DefaultAddress; // Если никакой не найдётся, будет defaultAddress.
-        for(int y = titleOfDay.y; y < titleOfDay.y + CountCouples*2; y++)
+        for(int y = titleOfDay.y; y < titleOfDay.y + countCouples*2; y++)
             if(file.getCellData(titleOfDay.x, y).trim().equals("Занятия по адресу:")) {
                 output = file.getCellData(titleOfDay.x, y + 1);
                 IgnoresCoupleTitle.add(new Point(titleOfDay.x, y));
@@ -183,10 +191,11 @@ public class ViewerExcelCouplesSemester extends ViewerExcelCouples {
      * @param file Файл, откуда надо производить чтение.
      * @return Множество занятий у группы.
      */
-    private static Collection<? extends CoupleInCalendar> GetCouplesFromAnchor(int column, int row, Seeker seeker, int[] times, List<Point> ignoresCoupleTitle, ExcelFileInterface file) throws IOException {
+    private static Collection<? extends CoupleInCalendar> GetCouplesFromAnchor(int column, int row, int[] times, List<Point> ignoresCoupleTitle, ExcelFileInterface file) throws IOException {
         LinkedList<CoupleInCalendar> coupleOfWeek = new LinkedList<>();
         int countOfCouples = times.length / 2;
         String nameOfGroup = file.getCellData(column, row - 1).trim();
+        // TODO: С чего решил, что дней в неделе семь? И что сначала идёт понедельник?
         for(byte dayOfWeek = 1; dayOfWeek <= 7; dayOfWeek++)
         {
             //int c = column;
@@ -195,7 +204,7 @@ public class ViewerExcelCouplesSemester extends ViewerExcelCouples {
                 continue; // Если день свободен, то ничего не добавляем.
             coupleOfWeek.addAll(
                     GetCouplesFromDay
-                            (column, r, nameOfGroup, DayOfWeek.of(dayOfWeek), seeker, ignoresCoupleTitle, times,
+                            (column, r, nameOfGroup, DayOfWeek.of(dayOfWeek), ignoresCoupleTitle, times,
                                     GetAddressOfDay
                                             (
                                                     new Point(column, r),
@@ -340,5 +349,211 @@ public class ViewerExcelCouplesSemester extends ViewerExcelCouples {
         Pattern p = Pattern.compile("-?\\d+");
         Matcher m = p.matcher(input);
         return m.matches();
+    }
+
+    private static class SetterCouplesInCalendar {
+
+        /**
+         * Получает на входе данные про одну строку. Принимает решение, в какие дни будут пары. Не делает выборку данных.
+         *
+         * @param start              Дата и время начала сессии. Расписание будет составлено с этого дня и времени.
+         * @param finish             Дата и время окончания сессии. Расписание будет составлено до этого дня и времени.
+         * @param startZoneId        Часовой пояс, в котором начинается учебный план.
+         * @param startWeek          С какого номера недели начать построение расписания?
+         * @param timeStartOfCouple  Время начала пары.
+         * @param timeFinishOfCouple Время окончания пары.
+         * @param dayOfWeek          Рассматриваемый день недели. Использование: Напрмер, Calendar.MUNDAY.
+         * @param isOdd              True, если это для нечётной недели. False, если эта строка для чётной недели.
+         * @param itemTitle          Первая строка данных названия предмета. Сюда может входить и номера недель.
+         * @param typeOfLesson       Первая строка типа занятия.
+         * @param nameOfGroup        Рассматриваемая группа.
+         * @param nameOfTeacher      Первая строка данных преподавателя.
+         * @param audience           Первая строка аудитории.
+         * @param address            Адрес корпуса.
+         * @return Возвращает, в какие дни будут пары.
+         */
+        public static List<CoupleInCalendar> getCouplesByPeriod(LocalDate start, LocalDate finish, ZoneId startZoneId, int startWeek, LocalTime timeStartOfCouple, LocalTime timeFinishOfCouple, DayOfWeek dayOfWeek, boolean isOdd, String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address) {
+            List<CoupleInCalendar> out;
+            ZonedDateTime startT = ZonedDateTime.of(LocalDateTime.of(start, LocalTime.of(0, 0)), startZoneId);
+            ZonedDateTime finishT = ZonedDateTime.of(LocalDateTime.of(finish, LocalTime.of(23, 50)), startZoneId);
+            ZonedDateTime current = startT;
+            long durationBetweenStartAndFinish = Duration.between(timeStartOfCouple, timeFinishOfCouple).toNanos();
+
+            itemTitle = normalizeString(itemTitle);
+            typeOfLesson = normalizeString(typeOfLesson);
+            nameOfGroup = normalizeString(nameOfGroup);
+            nameOfTeacher = normalizeString(nameOfTeacher);
+            audience = normalizeString(audience);
+            address = normalizeString(address);
+
+            List<Integer> weeks = getWeeks(itemTitle, startWeek, (int) ((Duration.between(startT, finishT).toDays() / 7L) + 2L), isOdd);
+            itemTitle = clearFromWeeks(itemTitle);
+            out = new ArrayList<>(weeks.size() + 1);
+            for (Integer numberOfWeek /*Номер недели*/ : weeks) {
+                // Передвигаемся на неделю.
+                current = startT.plus(numberOfWeek - startWeek, ChronoUnit.WEEKS);
+                // Двигаемся к 00:00 dayOfWeek.
+                current = current.minusNanos(current.getNano()).minusSeconds(current.getSecond()).minusMinutes(current.getMinute()).minusHours(current.getHour());
+                int needAddDayOfWeek = dayOfWeek.getValue() - current.getDayOfWeek().getValue();
+                current = current.plusDays(needAddDayOfWeek);
+                current = current.plusNanos(timeStartOfCouple.getNano()).plusSeconds(timeStartOfCouple.getSecond()).plusMinutes(timeStartOfCouple.getMinute()).plusHours(timeStartOfCouple.getHour());
+                if (
+                        current.getLong(ChronoField.INSTANT_SECONDS) < startT.getLong(ChronoField.INSTANT_SECONDS) ||  // Использование LocalTime.MAX не безопасно: в дне может и не быть максимального локального времени. Использовано вместо этого прибавление одного дня и время 00:00.
+                                current.getLong(ChronoField.INSTANT_SECONDS) >= finishT.getLong(ChronoField.INSTANT_SECONDS)) {
+                    continue;
+                }
+                out.add(new CoupleInCalendar(
+                        current,
+                        current.plusNanos(durationBetweenStartAndFinish),
+                        nameOfGroup,
+                        nameOfTeacher,
+                        itemTitle,
+                        audience,
+                        address,
+                        typeOfLesson
+                ));
+            }
+            return out;
+        }
+
+        /**
+         * Функция убирает из названия предмета заметки о неделях.
+         * @param itemTitle Первая строка данных названия предмета. Сюда может входить и номера недель.
+         * @return Строка без цифр, "н.", "недель".
+         * @deprecated TODO: Данная функция ещё не реализована.
+         */
+        private static String clearFromWeeks(String itemTitle) {
+            return itemTitle;
+        }
+
+        /**
+         * Данная функция вернёт, на каких неделях пара есть.
+         * @param itemTitle Заголовок названия предмета из таблицы расписания.
+         * @param startWeek С какой недели начинается учёба?
+         * @param limitWeek Максимальный доступный номер недели.
+         * @param isOdd True, если это для нечётной недели. False, если эта строка для чётной недели.
+         * @return Список необходимых недель.
+         */
+        private static List<Integer> getWeeks(String itemTitle, int startWeek, int limitWeek, boolean isOdd) {
+            if (limitWeek < startWeek) return new ArrayList<>(1);
+            ArrayList<Integer> goodWeeks = new ArrayList<>(limitWeek / 2 + 1); // Контейнер с хорошими неделями
+            List<Integer> exc = getAllExceptionWeeks(itemTitle);
+            List<Integer> onlyWeeks = null;
+            if (exc.size() == 0) {
+                onlyWeeks = getAllOnlyWeeks(itemTitle);
+            }
+            // Изменение входных параметров в зависимости от itemTitle.
+            {
+                Integer startWeekFromString = getFromStringStartWeek(itemTitle); // Получаем, с какой недели идут пары.
+                if (startWeekFromString != null && startWeekFromString > startWeek) startWeek = startWeekFromString;
+                Integer finishWeekFromString = getFromStringFinishWeek(itemTitle); // Получаем, с какой недели идут пары.
+                if (finishWeekFromString != null && finishWeekFromString < limitWeek) limitWeek = finishWeekFromString;
+            }
+            if (onlyWeeks != null)
+                for (Integer week : onlyWeeks) {
+                    if (week < startWeek || week > limitWeek)
+                        continue;
+                    goodWeeks.add(week);
+                }
+            if (goodWeeks.size() == 0)
+                for (int i = startWeek % 2 == 0 ? isOdd ? startWeek + 1 : startWeek : isOdd ? startWeek : startWeek + 1;
+                     i < limitWeek + 1; i += 2) {
+                    if (!exc.contains(i)) // Если это не исключение
+                        goodWeeks.add(i); // Пусть все недели - хорошие.
+                }
+            return goodWeeks;
+        }
+
+        /**
+         * Функция ищет, до какой недели идут пары. Ищет "До %d", где %d - целое число.
+         * @param itemTitle Заголовок названия предмета из таблицы расписания.
+         * @return Возвращает %d. В случае, если не найдено - возвращается {@code null}.
+         */
+        private static Integer getFromStringFinishWeek(String itemTitle) {
+            Pattern p = Pattern.compile("(^| )[Дд]о ?+\\d+");
+            Matcher m = p.matcher(itemTitle);
+            if(m.find())
+                return Integer.parseInt(m.group().substring(3));
+            else
+                return null;
+        }
+
+        /**
+         * Функция ищет, с какой недели идут пары. Ищет "C %d", где %d - целое число.
+         * @param itemTitle Заголовок названия предмета из таблицы расписания.
+         * @return Возвращает %d. В случае, если не найдено - возвращается {@code null}.
+         */
+        private static Integer getFromStringStartWeek(String itemTitle) {
+            Pattern p = Pattern.compile("(^| )[СсCc] ?+\\d+");
+            Matcher m = p.matcher(itemTitle);
+            if(m.find())
+                return Integer.parseInt(m.group().substring(2));
+            else return null;
+        }
+
+        /**
+         * Функция ищет, в каких неделях есть исключения. Ищет "Кроме %d" или "кр. %d", где %d - целое число.
+         * @param itemTitle Заголовок названия предмета из таблицы расписания.
+         * @return Возвращает %d. В случае, если не найдено - возвращается пустой список.
+         */
+        public static List<Integer> getAllExceptionWeeks(String itemTitle) {
+            // [Кк]р(\.|(оме))?.((((\d(, ?| и | )?)+) ?(нед([а-яА-Я]+)?\.?|н( |\.|$)))|((нед([а-яА-Я]+)?\.?|н( |\.|$)) ?((\d(, ?| и | )?)+)))
+
+            Pattern p = Pattern.compile("[Кк]р(\\.|(оме))?.((((\\d(, ?| и | )?)+) ?(нед([а-яА-Я]+)?\\.?|н( |\\.|$)))|((нед([а-яА-Я]+)?\\.?|н( |\\.|$)) ?((\\d(, ?| и | )?)+)))");
+            Matcher m = p.matcher(itemTitle);
+            if(m.find())
+                return getAllIntsFromString(m.group());
+            else
+                return new LinkedList<>();
+        }
+
+        /**
+         * Функция пытается найти такие выражения, как "%d, %d и %d н." и их вариации. Возвращает список недель.
+         * Pattern: {@code (((\d(, ?| и | )?)+) ?(нед|н( |\.|$)))|((нед|н( |\.|$)) ?((\d(, ?| и | )?)+))}
+         * @param itemTitle Заголовок названия предмета из таблицы расписания.
+         * @return Возвращает %d. В случае, если не найдено - возвращается пустой список.
+         */
+        public static List<Integer> getAllOnlyWeeks(String itemTitle) {
+            // ((\d(, ?| и | )?)+) ?(нед([а-яА-Я]+)?\.?|н( |\.|$))
+            // (((\d(, ?| и | )?)+) ?(нед([а-яА-Я]+)?\.?|н( |\.|$)))|((нед([а-яА-Я]+)?\.?|н( |\.)) ?((\d(, ?| и | )?)+))
+            Pattern p = Pattern.compile("(((\\d(, ?| и | )?)+) ?(нед([а-яА-Я]+)?\\.?|н( |\\.|$)))|((нед([а-яА-Я]+)?\\.?|н( |\\.)) ?((\\d(, ?| и | )?)+))");
+            Matcher m = p.matcher(itemTitle);
+            if(m.find())
+                return getAllIntsFromString(m.group());
+            else
+                return new LinkedList<>();
+        }
+
+        /**
+         * Находит отрицательные и положительные целые числа в строке и выдаёт их список.
+         * @param input Входная строка, где следует проводить поиск целых чисел.
+         * @return Перечень найденных целых чисел. Если не найдено - пустой список.
+         */
+        private static List<Integer> getAllIntsFromString(String input) {
+            LinkedList<Integer> numbers = new LinkedList<Integer>();
+            Pattern p = Pattern.compile("-?\\d+");
+            Matcher m = p.matcher(input);
+            while (m.find()) {
+                numbers.add(Integer.parseInt(m.group()));
+            }
+            return numbers;
+        }
+
+        /**
+         * Удаляет символы 0..0x1F, заменяя на пробелы. Удаляет пробелы слева и справа.
+         * @param input Входная строка, из которой необходимо удалить управляющие символы.
+         * @return Новый экземпляр строки без управляющих символов и левых-правых пробелов.
+         */
+        private static String normalizeString(String input) {
+            if(input == null)
+                return null;
+            StringBuilder in = new StringBuilder(input);
+            for(int i = in.length() - 1; i >= 0; i--) {
+                if(in.charAt(i) < 32) {
+                    in.replace(i, i, " ");
+                }
+            }
+            return in.toString().trim();
+        }
     }
 }

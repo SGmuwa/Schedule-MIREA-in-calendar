@@ -7,7 +7,6 @@ package ru.mirea.xlsical.CouplesDetective;
  * @version 16.11.2018
  * @author <a href="https://github.com/SGmuwa/">[SG]Muwa</a>
  * @see CoupleInCalendar Пара для календаря
- * @see CoupleInExcel Пара для Excel
  */
 public class Couple {
 
