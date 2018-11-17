@@ -10,7 +10,7 @@
         <module>server</module>
 		<module>interpreter</module>
         <module>console-interface</module>
-        <module>backend</module>
+        <module>backend_1</module>
     </modules>
 
 
