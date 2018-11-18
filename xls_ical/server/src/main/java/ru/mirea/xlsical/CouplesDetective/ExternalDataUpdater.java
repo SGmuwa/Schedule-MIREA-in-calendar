@@ -105,6 +105,7 @@ public class ExternalDataUpdater implements Runnable {
                 System.out.println(e.getLocalizedMessage() + "\nfile: " + path);
             }
         }
+        return files;
     }
 
     /**

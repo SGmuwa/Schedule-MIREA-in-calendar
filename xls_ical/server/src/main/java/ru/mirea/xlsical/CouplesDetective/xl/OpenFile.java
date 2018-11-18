@@ -3,6 +3,7 @@ package ru.mirea.xlsical.CouplesDetective.xl;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,27 +47,51 @@ public class OpenFile implements ExcelFileInterface {
 
     /**
      * Получение данных в текстовом виде из указанной ячейки Excel файла.
-     * @param Column Порядковый номер столбца. Отсчёт начинается с 1.
-     * @param Row Порядковый номер строки. Отсчёт начинается с 1.
+     * @param column Порядковый номер столбца. Отсчёт начинается с 1.
+     * @param row Порядковый номер строки. Отсчёт начинается с 1.
      * @return Текстовые данные в ячейке. Не NULL.
      */
     @Override
-    public String getCellData(int Column, int Row) {
-        String name = "";
-        if(Column < 0 || Row < 0)
-            return name;
+    public String getCellData(int column, int row) {
+        if (column < 1 || row < 1)
+            throw new IllegalArgumentException("column and row must be more 0.");
         Sheet myExcelSheet = wb.getSheetAt(numberSheet);
-        org.apache.poi.ss.usermodel.Row row = myExcelSheet.getRow(Row - 1);
-        if(row == null)
-            return name;
-        Cell cell = row.getCell(Column - 1);
-        if (cell != null)
-            if (cell.getCellType() == Cell.CELL_TYPE_STRING)
-                name = row.getCell(Column - 1).getStringCellValue();
-            else if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC)
-                name = "" + (long) row.getCell(Column - 1).getNumericCellValue();
+        org.apache.poi.ss.usermodel.Row rowModel = myExcelSheet.getRow(row - 1);
+        if (rowModel == null)
+            return "";
+        Cell columnModel = rowModel.getCell(column - 1);
+        if (columnModel == null)
+            return "";
+        switch (columnModel.getCellType()) {
+            case Cell.CELL_TYPE_STRING:
+                return rowModel.getCell(column - 1).getStringCellValue();
+            case Cell.CELL_TYPE_NUMERIC:
+                return Long.toString((long) rowModel.getCell(column - 1).getNumericCellValue());
+            default:
+                return "";
+        }
+    }
 
-        return name;
+    /**
+     * Узнаёт фоновый цвет ячейки.
+     *
+     * @param column Порядковый номер столбца. Отсчёт начинается с 1.
+     * @param row    Порядковый номер строки. Отсчёт начинается с 1.
+     * @return Цвет фона ячейки.
+     * @throws IOException Потерян доступ к файлу.
+     */
+    @Override
+    public org.apache.poi.ss.usermodel.Color getBackgroundColor(int column, int row) throws IOException {
+        if (column < 1 || row < 1)
+            throw new IllegalArgumentException("column and row must be more 0.");
+        Sheet myExcelSheet = wb.getSheetAt(numberSheet);
+        org.apache.poi.ss.usermodel.Row rowModel = myExcelSheet.getRow(row - 1);
+        if (rowModel == null)
+            return null;
+        Cell columnModel = rowModel.getCell(column - 1);
+        if (columnModel == null)
+            return null;
+        return columnModel.getCellStyle().getFillBackgroundColorColor();
     }
 
     /**
