@@ -28,12 +28,13 @@ public class PackageToClient extends Package {
     /**
     Строит данные отправляемые на клиент.
      @param ctx Уникальный идентификатор сообщения.
+     @param percentReady Ссылка на поле float, куда надо отправить % готовности задачи.
      @param CalFile Тут содержатся файл .iCal.
      @param Count Тут содержится количество созданных мероприятий.
      @param Messages Сообщение от обработчика пользователю клиента.
      */
-    public PackageToClient(Object ctx, String CalFile, int Count, String Messages) {
-        super(ctx);
+    public PackageToClient(Object ctx, PercentReady percentReady, String CalFile, int Count, String Messages) {
+        super(ctx, percentReady);
         this.CalFile = CalFile;
         this.Count = Count;
         this.Messages = Messages;

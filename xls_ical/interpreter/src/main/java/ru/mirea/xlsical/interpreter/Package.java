@@ -4,14 +4,25 @@ import java.io.*;
 
 public abstract class Package implements Serializable {
 
-    public Package(Object ctx) {
+    /**
+     * Создание экземпляра пакета
+     * @param ctx Контекст задачи.
+     * @param percentReady Ссылка на поле float, куда надо отправить % готовности задачи.
+     */
+    public Package(Object ctx, PercentReady percentReady) {
         this.ctx = ctx;
+        this.percentReady = percentReady;
     }
 
     /**
      * Уникальный индентификатор сообщения.
      */
     public final Object ctx;
+
+    /**
+     * Содержится процент готовности пакета
+     */
+    public final PercentReady percentReady;
 
     /**
      * Преобразует текущий класс в поток байтов.
