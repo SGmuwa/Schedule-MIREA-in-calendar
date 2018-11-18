@@ -32,7 +32,15 @@ public class PackageToServer extends Package {
         this.queryCriteria = queryCriteria;
     }
 
-
+    /**
+     Строит данные отправляемые на сервер.
+     @param ctx Уникальный идентификатор сообщения.
+     @param excelsFiles Тут содержатся пути до файлов .xls и .xlsx.
+     @param queryCriteria Тут содержатся критерии запроса.
+     */
+    public PackageToServer(Object ctx, String[] excelsFiles, Seeker queryCriteria) {
+        this(ctx, null, excelsFiles, queryCriteria);
+    }
 
     /**
      * Преобразует входящий массив байтов в текущее хранилище.

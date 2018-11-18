@@ -11,7 +11,20 @@ public abstract class Package implements Serializable {
      */
     public Package(Object ctx, PercentReady percentReady) {
         this.ctx = ctx;
-        this.percentReady = percentReady;
+        if(percentReady != null)
+            this.percentReady = percentReady;
+        else
+            this.percentReady = new PercentReady();
+    }
+
+    /**
+     * Создание экземпляра пакета
+     * @param ctx Контекст задачи.
+     * @see Package#Package(Object, PercentReady)
+     */
+    public Package(Object ctx) {
+        this.ctx = ctx;
+        this.percentReady = new PercentReady();
     }
 
     /**

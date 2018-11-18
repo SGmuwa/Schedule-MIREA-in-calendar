@@ -40,6 +40,17 @@ public class PackageToClient extends Package {
         this.Messages = Messages;
     }
 
+    /**
+     Строит данные отправляемые на клиент.
+     @param ctx Уникальный идентификатор сообщения.
+     @param CalFile Тут содержатся файл .iCal.
+     @param Count Тут содержится количество созданных мероприятий.
+     @param Messages Сообщение от обработчика пользователю клиента.
+     */
+    public PackageToClient(Object ctx, String CalFile, int Count, String Messages) {
+        this(ctx, null, CalFile, Count, Messages);
+    }
+
 
 
     /**
