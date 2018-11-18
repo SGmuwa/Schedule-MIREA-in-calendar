@@ -200,7 +200,7 @@ public class TaskExecutor implements Runnable {
             return new ArrayList<>();
         }
         try {
-            return OpenFile.newInstance(a.getAbsolutePath());
+            return OpenFile.newInstances(a.getAbsolutePath());
         } catch (IOException | InvalidFormatException error) {
             error.printStackTrace();
             return new ArrayList<>();

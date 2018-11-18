@@ -34,7 +34,7 @@ public class OpenFileTest {
         }
 
 
-        ExcelFileInterface openFile = OpenFile.newInstance("delete1.xls").get(0);
+        ExcelFileInterface openFile = OpenFile.newInstances("delete1.xls").get(0);
         assertEquals("Error 1:1(AA)", "АА", openFile.getCellData(1,1));
         assertEquals("Error 1:2(AБ)", "АБ", openFile.getCellData(1,2));
         assertEquals("Error 2:1(БА)", "БА", openFile.getCellData(2,1));

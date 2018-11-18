@@ -55,7 +55,7 @@ public class DetectiveSemesterTest {
     public void startAnInvestigationTest() throws IOException, InvalidFormatException {
         Collection<? extends ExcelFileInterface> files = null;
 
-        files = OpenFile.newInstance("tests/IIT-3k-18_19-osen.xlsx");
+        files = OpenFile.newInstances("tests/IIT-3k-18_19-osen.xlsx");
 
         assertNotNull(files);
         assertEquals(1, files.size());
@@ -71,7 +71,7 @@ public class DetectiveSemesterTest {
         Collection<? extends CoupleInCalendar> col;
         int[] times = {540,630,640,730,780,870,880,970,980,1070,1080,1170};
 
-        files = OpenFile.newInstance("tests/test-01.xlsx");
+        files = OpenFile.newInstances("tests/test-01.xlsx");
         assertEquals(1, files.size());
         ExcelFileInterface file = files.iterator().next();
         Seeker seeker = new Seeker("ИКБО-04-16", SeekerType.StudyGroup, LocalDate.of(2018,9,1), LocalDate.of(2018, 10,1), ZoneId.of("UTC+3"), "пр-т Вернадского, 78", 1);
@@ -89,7 +89,7 @@ public class DetectiveSemesterTest {
     public void openFirstXls() throws IOException, InvalidFormatException {
 
         List<? extends ExcelFileInterface> files = null;
-        files = OpenFile.newInstance("tests/IIT-3k-18_19-osen.xlsx");
+        files = OpenFile.newInstances("tests/IIT-3k-18_19-osen.xlsx");
         assertNotNull(files);
         assertEquals(1, files.size());
         ExcelFileInterface file = files.get(0);
@@ -108,7 +108,7 @@ public class DetectiveSemesterTest {
         ArrayList<? extends ExcelFileInterface> files;
         int [] mas = {0,0};
 
-        files = OpenFile.newInstance("tests/IIT-3k-18_19-osen.xlsx");
+        files = OpenFile.newInstances("tests/IIT-3k-18_19-osen.xlsx");
         assertNotNull(files);
         assertEquals(1, files.size());
         ExcelFileInterface file = files.get(0);

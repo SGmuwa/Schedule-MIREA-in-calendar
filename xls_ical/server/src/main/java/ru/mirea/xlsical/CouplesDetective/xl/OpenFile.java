@@ -13,6 +13,14 @@ public class OpenFile implements ExcelFileInterface {
     private Workbook wb;
     private int numberSheet;
 
+    /**
+     * Создаёт экземпляр открытия файла.
+     * Для открытия всех листов Excel файла используйте {@link #newInstances(String)}.
+     * @param fileName Имя файла, который необходимо открыть.
+     * @throws IOException Ошибка доступа к файлу.
+     * @throws InvalidFormatException Ошибка распознования файла.
+     * @see #newInstances(String)
+     */
     private OpenFile(String fileName) throws IOException, InvalidFormatException {
         wb = WorkbookFactory.create(new File(fileName));
     }
@@ -24,7 +32,7 @@ public class OpenFile implements ExcelFileInterface {
      * @throws IOException Ошибка доступа к файлу.
      * @throws InvalidFormatException Ошибка распознования .xls или .xlsx файла.
      */
-    public static ArrayList<OpenFile> newInstance(String fileName) throws IOException, InvalidFormatException {
+    public static ArrayList<OpenFile> newInstances(String fileName) throws IOException, InvalidFormatException {
         OpenFile first = new OpenFile(fileName);
         int size = first.wb.getNumberOfSheets();
         ArrayList<OpenFile> out = new ArrayList<>(size + 1);

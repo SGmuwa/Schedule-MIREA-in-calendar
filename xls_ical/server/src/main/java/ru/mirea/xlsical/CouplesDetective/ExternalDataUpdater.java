@@ -2,6 +2,7 @@ package ru.mirea.xlsical.CouplesDetective;
 
 import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.Detective;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
+import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
 
 import java.io.*;
 import java.net.URL;
@@ -10,11 +11,11 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 import java.util.stream.Stream;
 
 /**
  * Класс, который отвечает за синхронизацию с <a href="https://www.mirea.ru/education/">mirea.ru</a>.
+ * Данный класс потокобезопасный.
  * @since 17.11.2018
  * @version 18.11.2018
  * @author <a href="https://github.com/SGmuwa/">[SG]Muwa</a>
@@ -43,15 +44,6 @@ public class ExternalDataUpdater implements Runnable {
         createCacheDir();
     }
 
-    /**
-     * Функция, которая возвращает из кэша детективов.
-     * @return Возвращает из кэша детективов.
-     */
-    public Collection<? extends Detective> getDetectives() {
-        // TODO
-        return null;
-    }
-
     private void createCacheDir() throws IOException {
         if(!pathToCache.exists()) {
             if (!pathToCache.mkdirs()) {
@@ -73,7 +65,12 @@ public class ExternalDataUpdater implements Runnable {
     /**
      * Данный монитор выступает в роли синхронизации потоков.
      */
-    private final Object monitorCacheIsRady = new Object();
+    private final Object monitorCacheIsReady = new Object();
+
+    /**
+     * Отвечает на вопрос, нужно ли ждать вообще. Идёт ли какой-то процесс?
+     */
+    private boolean isNeedWait = false;
 
     /**
      * Генератор случайных значений
@@ -83,12 +80,12 @@ public class ExternalDataUpdater implements Runnable {
     /**
      * Расположение доступных файлов Excel
      */
-    private Collection<File> excelFiles;
+    private ArrayList<File> excelFiles;
 
     /**
      * Список преподавателей.
      */
-    private Collection<Teacher> teachers;
+    private ArrayList<Teacher> teachers;
 
     /**
      * Функция отвечает за то, чтобы получить таблицы из сайта <a href="https://www.mirea.ru/education/schedule-main/schedule/">mirea.ru</a>.
@@ -98,12 +95,35 @@ public class ExternalDataUpdater implements Runnable {
      */
     public Collection<? extends ExcelFileInterface> openTablesFromExternal() {
         waitCache();
-        // TODO!
-        return null;//getCache();
+        ArrayList<ExcelFileInterface> files = new ArrayList<>(excelFiles.size());
+        for (File path :
+                excelFiles) {
+            try {
+                files.addAll(OpenFile.newInstances(path.getPath()));
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println(e.getLocalizedMessage() + "\nfile: " + path);
+            }
+        }
+    }
+
+    /**
+     * Функция ведёт поиск полного имени преподавателя.
+     * @param nameInExcel Краткое имя преподавателя.
+     * @return Полное имя и должность преподавателя.
+     */
+    public String findTeacher(String nameInExcel) {
+        // TODO: Необходимо реализовать функционал.
+        return nameInExcel;
     }
 
     private void waitCache() {
-        // TODO!
+        if (isNeedWait)
+            try {
+                monitorCacheIsReady.wait();
+            } catch (InterruptedException e) {
+                // ignore.
+            }
     }
 
     /**
@@ -127,15 +147,22 @@ public class ExternalDataUpdater implements Runnable {
     /**
      * Функция скачивает необходимый контент в папку кэша.
      */
-    private void download() {
+    private synchronized void download() {
+        isNeedWait = true;
         Stream<String> htmlExcels = downloadHTML("https://www.mirea.ru/education/schedule-main/schedule/");
 
         Collection<String> excelUrls = FindAllExcelURLs(htmlExcels);
-        excelFiles = downloadHTMLsToPath(excelUrls);
+        try {
+            excelFiles = downloadHTMLsToPath(excelUrls);
 
-        Stream<String> htmlNames = downloadHTML("https://www.mirea.ru/sveden/employees/");
-        teachers = getTeachers(htmlNames);
-        // TODO: Что теперь делать с HTML?
+            Stream<String> htmlNames = downloadHTML("https://www.mirea.ru/sveden/employees/");
+            teachers = getTeachers(htmlNames);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getLocalizedMessage());
+        }
+        isNeedWait = false;
+        monitorCacheIsReady.notifyAll();
     }
 
     /**
@@ -143,7 +170,9 @@ public class ExternalDataUpdater implements Runnable {
      * @param htmlNames HTML код, где преподаватели.
      * @return Список преподавателей.
      */
-    private Collection<Teacher> getTeachers(Stream<String> htmlNames) throws Exception {
+    private ArrayList<Teacher> getTeachers(Stream<String> htmlNames) throws Exception {
+        if(htmlNames == null)
+            return null;
         StringBuilder html = new StringBuilder();
         Pattern pFio = Pattern.compile("<td itemprop=\"fio\">");
         Pattern pPost = Pattern.compile("<td itemprop=\"post\">");
