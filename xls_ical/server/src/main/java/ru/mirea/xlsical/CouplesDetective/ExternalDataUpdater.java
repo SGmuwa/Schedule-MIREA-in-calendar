@@ -1,6 +1,6 @@
 package ru.mirea.xlsical.CouplesDetective;
 
-import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.ViewerExcelCouples;
+import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.Detective;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 
 import java.io.*;
@@ -40,7 +40,7 @@ public class ExternalDataUpdater implements Runnable {
      * Функция, которая возвращает из кэша детективов.
      * @return Возвращает из кэша детективов.
      */
-    public Collection<? extends ViewerExcelCouples> getDetectives() {
+    public Collection<? extends Detective> getDetectives() {
         // TODO
         return null;
     }

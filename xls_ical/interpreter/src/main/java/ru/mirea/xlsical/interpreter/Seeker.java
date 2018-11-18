@@ -23,6 +23,8 @@ public class Seeker implements Serializable {
     public final String nameOfSeeker;
     /**
      * Тип искателя. Преподаватель или студент группы?
+     * @deprecated Не используется, так как выборка идёт
+     * как и по преподавателям, так и по группам.
      */
     public final SeekerType seekerType;
     /**
@@ -44,6 +46,7 @@ public class Seeker implements Serializable {
     public final String defaultAddress;
     /**
      * Первоначальный номер недели. По-умолчанию указывать = 1.
+     * @deprecated Не используется. Вместо этого идёт выборка данных.
      */
     public final int startWeek;
 

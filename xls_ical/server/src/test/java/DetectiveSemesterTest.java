@@ -1,15 +1,15 @@
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import ru.mirea.xlsical.CouplesDetective.CoupleInCalendar;
-import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.ViewerExcelCouplesSemester;
+import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveSemester;
 import org.junit.Test;
-import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.ViewerExcelCouplesException;
+import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveException;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
 import ru.mirea.xlsical.interpreter.Seeker;
 import ru.mirea.xlsical.interpreter.SeekerType;
 
 import static org.junit.Assert.*;
-import static ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.ViewerExcelCouplesSemester.GetTimes;
+import static ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveSemester.GetTimes;
 
 import java.io.IOException;
 import java.time.DayOfWeek;
@@ -19,26 +19,26 @@ import java.util.*;
 import java.awt.*;
 import java.util.List;
 
-public class ViewerExcelCouplesSemesterTest {
+public class DetectiveSemesterTest {
     @Test
     public void GetMinutesFromTimeStringTest(){
-        assertEquals(728, ViewerExcelCouplesSemester.GetMinutesFromTimeString("12:08"));
-        assertEquals(13, ViewerExcelCouplesSemester.GetMinutesFromTimeString("00-13"));
-        assertEquals(78, ViewerExcelCouplesSemester.GetMinutesFromTimeString("01-18"));
-        assertEquals(860, ViewerExcelCouplesSemester.GetMinutesFromTimeString("14:20"));
-        assertEquals(1230, ViewerExcelCouplesSemester.GetMinutesFromTimeString("20-30"));
-        assertEquals(0, ViewerExcelCouplesSemester.GetMinutesFromTimeString("00:00"));
+        assertEquals(728, DetectiveSemester.GetMinutesFromTimeString("12:08"));
+        assertEquals(13, DetectiveSemester.GetMinutesFromTimeString("00-13"));
+        assertEquals(78, DetectiveSemester.GetMinutesFromTimeString("01-18"));
+        assertEquals(860, DetectiveSemester.GetMinutesFromTimeString("14:20"));
+        assertEquals(1230, DetectiveSemester.GetMinutesFromTimeString("20-30"));
+        assertEquals(0, DetectiveSemester.GetMinutesFromTimeString("00:00"));
     }
 
     @Test
     public void IsStringNumberTest(){
-        assertTrue(ViewerExcelCouplesSemester.IsStringNumber("8"));
-        assertFalse(ViewerExcelCouplesSemester.IsStringNumber(""));
-        assertTrue(ViewerExcelCouplesSemester.IsStringNumber("85"));
-        assertTrue(ViewerExcelCouplesSemester.IsStringNumber("0"));
-        assertTrue(ViewerExcelCouplesSemester.IsStringNumber("-3"));
-        assertFalse(ViewerExcelCouplesSemester.IsStringNumber("f"));
-        assertFalse(ViewerExcelCouplesSemester.IsStringNumber("."));
+        assertTrue(DetectiveSemester.IsStringNumber("8"));
+        assertFalse(DetectiveSemester.IsStringNumber(""));
+        assertTrue(DetectiveSemester.IsStringNumber("85"));
+        assertTrue(DetectiveSemester.IsStringNumber("0"));
+        assertTrue(DetectiveSemester.IsStringNumber("-3"));
+        assertFalse(DetectiveSemester.IsStringNumber("f"));
+        assertFalse(DetectiveSemester.IsStringNumber("."));
     }
 
     @Test
@@ -47,8 +47,8 @@ public class ViewerExcelCouplesSemesterTest {
         String b = "b";
         ArrayList <String> list = new ArrayList <String>();
         list.add(a);
-        assertTrue(ViewerExcelCouplesSemester.IsEqualsInList(list, a));
-        assertFalse(ViewerExcelCouplesSemester.IsEqualsInList(list, b));
+        assertTrue(DetectiveSemester.IsEqualsInList(list, a));
+        assertFalse(DetectiveSemester.IsEqualsInList(list, b));
     }
 
     @Test
@@ -77,7 +77,7 @@ public class ViewerExcelCouplesSemesterTest {
         Seeker seeker = new Seeker("ИКБО-04-16", SeekerType.StudyGroup, LocalDate.of(2018,9,1), LocalDate.of(2018, 10,1), ZoneId.of("UTC+3"), "пр-т Вернадского, 78", 1);
 
 
-        col = ViewerExcelCouplesSemester.GetCouplesFromDay(6,3, "ИКБО-04-16",DayOfWeek.of(1), seeker, list, times, "пр-т Вернадского, 78", file);
+        col = DetectiveSemester.GetCouplesFromDay(6,3, "ИКБО-04-16",DayOfWeek.of(1), seeker, list, times, "пр-т Вернадского, 78", file);
 
         for(CoupleInCalendar couple : col)
             System.out.println(couple.toString());
@@ -103,7 +103,7 @@ public class ViewerExcelCouplesSemesterTest {
     }
 
     @Test
-    public void GetTimesTest() throws IOException, InvalidFormatException, ViewerExcelCouplesException {
+    public void GetTimesTest() throws IOException, InvalidFormatException, DetectiveException {
         Point point = new Point(5,3);
         ArrayList<? extends ExcelFileInterface> files;
         int [] mas = {0,0};
