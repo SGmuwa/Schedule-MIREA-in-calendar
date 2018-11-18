@@ -1,10 +1,11 @@
 package ru.mirea.xlsical.CouplesDetective.xl;
 
-import java.awt.*;
 import java.io.Closeable;
 import java.io.IOException;
 
-// Интерфейс по работе с Excel файлами. Экземпляр такого интерфейса должен хранит в себе дескриптор файла.
+/**
+ * Интерфейс по работе с Excel файлами. Экземпляр такого интерфейса должен хранит в себе дескриптор файла.
+ */
 public interface ExcelFileInterface extends Closeable {
 
     /**
@@ -17,12 +18,14 @@ public interface ExcelFileInterface extends Closeable {
     String getCellData(int column, int row) throws IOException;
 
     /**
-     * Узнаёт фоновый цвет ячейки.
-     * @param column Порядковый номер столбца. Отсчёт начинается с 1.
-     * @param row Порядковый номер строки. Отсчёт начинается с 1.
-     * @return Цвет фона ячейки.
+     * Узнаёт фоновый цвет двух ячеек и отвечает на вопрос, одинаковый ли у них фоновый цвет.
+     * @param column1 Первая сравниваемая ячейка. Порядковый номер столбца. Отсчёт начинается с 1.
+     * @param row1 Первая сравниваемая ячейка. Порядковый номер строки. Отсчёт начинается с 1.
+     * @param column2 Вторая сравниваемая ячейка. Порядковый номер столбца. Отсчёт начинается с 1.
+     * @param row2 Вторая сравниваемая ячейка. Порядковый номер строки. Отсчёт начинается с 1.
+     * @return {@code True}, если цвета совпадают. Иначе - {@code false}.
      * @throws IOException Потерян доступ к файлу.
      */
-    org.apache.poi.ss.usermodel.Color getBackgroundColor(int column, int row) throws IOException;
+    boolean isBackgroundColorsEquals(int column1, int row1, int column2, int row2) throws IOException;
 
 }

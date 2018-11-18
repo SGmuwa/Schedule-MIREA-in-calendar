@@ -134,21 +134,33 @@ public class DetectiveSemester extends Detective {
      * @param titleOfDay Позиция названия первой пары дня.
      * @param pointToGroupName Позиция, которая указывает на название группы.
      *                         Требуется для того, чтобы правее узнать адрес по-умолчанию.
+     * @param addresses Местоположение адресов филиалов.
      * @param countCouples Количество пар в дне.
-     * @param DefaultAddress Адрес по-умолчанию за день.
-     * @param IgnoresCoupleTitle Список адресов заголовков, которые следует игнорировать. Идёт только добавление элементов в список.
-     * @param file Файл, откуда надо считывать данные.
+     * @param IgnoresCoupleTitle Список адресов заголовков, которые следует игнорировать.
+     *                           Идёт только добавление элементов в список.
      * @return Адрес местоположения пары.
      */
-    private static String GetAddressOfDay(Point titleOfDay, Point pointToGroupName, HashMap<Color, String> addresses, int countCouples, List<Point> IgnoresCoupleTitle, ExcelFileInterface file) throws IOException {
-        String output = DefaultAddress; // Если никакой не найдётся, будет defaultAddress.
-        for(int y = titleOfDay.y; y < titleOfDay.y + countCouples*2; y++)
-            if(file.getCellData(titleOfDay.x, y).trim().equals("Занятия по адресу:")) {
-                output = file.getCellData(titleOfDay.x, y + 1);
+    private String GetAddressOfDay(Point titleOfDay, Point pointToGroupName,
+                                          List<Point> addresses, int countCouples,
+                                          Collection<Point> IgnoresCoupleTitle
+    ) throws IOException {
+        for (int y = titleOfDay.y; y < titleOfDay.y + countCouples * 2; y++)
+            if (file.getCellData(titleOfDay.x, y).trim().equals("Занятия по адресу:")) {
                 IgnoresCoupleTitle.add(new Point(titleOfDay.x, y));
                 IgnoresCoupleTitle.add(new Point(titleOfDay.x, y + 1));
+                return file.getCellData(titleOfDay.x, y + 1);
             }
-        return output;
+        // Если никакой адресс не найден, надо искать defaultAddress группы. Чаще всего java попадает в эту ветку кода.
+        pointToGroupName = new Point(pointToGroupName.x + 3, pointToGroupName.y);
+        for (Point c : addresses)
+            if (file.isBackgroundColorsEquals(pointToGroupName.x, pointToGroupName.y, c.x, c.y))
+                return file.getCellData(c.x, c.y);
+        // Не получилось что-то найти... Влепим тогда хоть какой-нибудь. Сюда лучше не заходить java.
+        System.out.println("Warning: address not found.\n");
+        for(StackTraceElement ste : Thread.currentThread().getStackTrace())
+            System.out.printf("at %s/n", ste.getMethodName());
+        Point def = addresses.iterator().next();
+        return file.getCellData(def.x, def.y) + "?";
     }
 
     /**
