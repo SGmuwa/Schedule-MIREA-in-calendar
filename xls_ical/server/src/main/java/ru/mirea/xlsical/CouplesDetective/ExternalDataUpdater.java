@@ -4,13 +4,20 @@ import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.Detective;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collection;
+import java.nio.file.Files;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Stream;
 
 /**
  * Класс, который отвечает за синхронизацию с <a href="https://www.mirea.ru/education/">mirea.ru</a>.
+ * @since 17.11.2018
+ * @version 18.11.2018
+ * @author <a href="https://github.com/SGmuwa/">[SG]Muwa</a>
  */
 public class ExternalDataUpdater implements Runnable {
 
@@ -51,7 +58,7 @@ public class ExternalDataUpdater implements Runnable {
                 throw new IOException("Can't create dir cache excel.");
             }
         }
-        else if(!pathToCache.isDirectory())
+        if(!pathToCache.isDirectory())
             throw new IOException("Path " + pathToCache.toString() + " is not directory.");
         else if(!pathToCache.canWrite())
             throw new IOException("I can't write in path " + pathToCache.toString() + " directory.");
@@ -67,6 +74,21 @@ public class ExternalDataUpdater implements Runnable {
      * Данный монитор выступает в роли синхронизации потоков.
      */
     private final Object monitorCacheIsRady = new Object();
+
+    /**
+     * Генератор случайных значений
+     */
+    private static final Random random = new Random();
+
+    /**
+     * Расположение доступных файлов Excel
+     */
+    private Collection<File> excelFiles;
+
+    /**
+     * Список преподавателей.
+     */
+    private Collection<Teacher> teachers;
 
     /**
      * Функция отвечает за то, чтобы получить таблицы из сайта <a href="https://www.mirea.ru/education/schedule-main/schedule/">mirea.ru</a>.
@@ -102,10 +124,110 @@ public class ExternalDataUpdater implements Runnable {
         }
     }
 
+    /**
+     * Функция скачивает необходимый контент в папку кэша.
+     */
     private void download() {
         Stream<String> htmlExcels = downloadHTML("https://www.mirea.ru/education/schedule-main/schedule/");
+
+        Collection<String> excelUrls = FindAllExcelURLs(htmlExcels);
+        excelFiles = downloadHTMLsToPath(excelUrls);
+
         Stream<String> htmlNames = downloadHTML("https://www.mirea.ru/sveden/employees/");
+        teachers = getTeachers(htmlNames);
         // TODO: Что теперь делать с HTML?
+    }
+
+    /**
+     * Функция получает преподавателей из HTML потока.
+     * @param htmlNames HTML код, где преподаватели.
+     * @return Список преподавателей.
+     */
+    private Collection<Teacher> getTeachers(Stream<String> htmlNames) throws Exception {
+        StringBuilder html = new StringBuilder();
+        Pattern pFio = Pattern.compile("<td itemprop=\"fio\">");
+        Pattern pPost = Pattern.compile("<td itemprop=\"post\">");
+        Pattern pEnd = Pattern.compile("</td>");
+        boolean needEnd = false;
+        Iterator<String> iteratorHtmlNames = htmlNames.iterator();
+        while (iteratorHtmlNames.hasNext()) {
+            String str = iteratorHtmlNames.next();
+            Matcher mFio = pFio.matcher(str);
+            Matcher mPost = pPost.matcher(str);
+            Matcher mEnd = pEnd.matcher(str);
+            boolean isAdd = false; // Необходимо, чтобы дважды не добавить одну и ту же строку.
+            if (mFio.find() || mPost.find() || needEnd) {
+                html.append(' ');
+                html.append(str);
+                isAdd = true;
+                needEnd = true;
+            }
+            if (mEnd.find()) {
+                if (!isAdd) html.append(str);
+                needEnd = false;
+            }
+        }
+        Matcher mFio = pFio.matcher(html);
+        List<String> namesOfTeachers = new ArrayList<>();
+        while(mFio.find()) {
+            int indexStart = mFio.end() + 1;
+            int indexFinish = html.indexOf("</td", indexStart) - 1;
+            namesOfTeachers.add(html.substring(indexStart, indexFinish));
+        }
+        Matcher mPost = pPost.matcher(html);
+        List<String> posts = new ArrayList<>();
+        while(mPost.find()) {
+            int indexStart = mPost.end() + 1;
+            int indexFinish = html.indexOf("</td", indexStart) - 1;
+            posts.add(html.substring(indexStart, indexFinish));
+        }
+        if(namesOfTeachers.size() != posts.size())
+            throw new Exception("size of Teachers " + namesOfTeachers.size() + " not equals size Posts " + posts.size() + " .");
+
+        ArrayList<Teacher> teachers = new ArrayList<>(posts.size());
+        Iterator<String> iPost = posts.iterator();
+        Iterator<String> iName = namesOfTeachers.iterator();
+        while (iPost.hasNext() && iName.hasNext()) {
+            teachers.add(new Teacher(iName.next(), iPost.next()));
+        }
+        return teachers;
+    }
+
+    /**
+     * Загружает все файлы по URL и помещает в дерикторию кэша.
+     * @param excelUrls Коллекция ссылок на скачивание.
+     */
+    private ArrayList<File> downloadHTMLsToPath(Collection<String> excelUrls) throws IOException {
+        ArrayList<File> excelFilesPaths = new ArrayList<>();
+        for(String url : excelUrls) {
+            Stream<String> fStream = downloadHTML(url);
+            if(fStream != null) {
+                File newFile = new File(this.pathToCache, LocalDateTime.now().toString() + "_" + url.substring(url.lastIndexOf("/")));
+                Files.write(newFile.toPath(), (Iterable<String>) fStream::iterator);
+                excelFilesPaths.add(newFile);
+            }
+            else
+                throw new IOException("ExcelUrls can't download.");
+        }
+        return excelFilesPaths;
+    }
+
+    /**
+     * Находит все ссылки на файлы excel из потока текста.
+     * @param htmlExcels Поток текста html.
+     * @return Лист на ссылки excel файлов.
+     */
+    private List<String> FindAllExcelURLs(Stream<String> htmlExcels) {
+        // href ?= ?"http.+?\.[xX][lL][sS][xX]?"
+        ArrayList<String> excelsUrls = new ArrayList<>();
+        Pattern p = Pattern.compile("href ?= ?\"http.+?\\.[xX][lL][sS][xX]?\"");
+        htmlExcels.forEach((str) -> {
+            Matcher m = p.matcher(str);
+            if(m.find())
+                excelsUrls.add(m.group());
+
+        });
+        return excelsUrls;
     }
 
     private Stream<String> downloadHTML(String s) {
@@ -118,10 +240,7 @@ public class ExternalDataUpdater implements Runnable {
             url = new URL(s);
             is = url.openStream();  // throws an IOException
             br = new BufferedReader(new InputStreamReader(is));
-
             return br.lines();
-        } catch (MalformedURLException mue) {
-            mue.printStackTrace();
         } catch (IOException ioe) {
             ioe.printStackTrace();
         } finally {

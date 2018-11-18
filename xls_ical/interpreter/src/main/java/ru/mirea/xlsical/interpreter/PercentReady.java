@@ -32,8 +32,9 @@ public class PercentReady {
      */
     public void setReady(float ready) {
         synchronized (sc) {
-            if(0 <= ready && ready <= 1)
+            if (0.0f <= ready && ready <= 1.0f)
                 this.ready = ready;
+            throw new IllegalArgumentException("float ready can be only 0.0f ... 1.0f!");
         }
     }
 }

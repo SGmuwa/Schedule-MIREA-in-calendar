@@ -20,7 +20,7 @@ public abstract class Detective implements Closeable {
     /**
      * Файл, в котором требуется искать пары занятий.
      */
-    protected ExcelFileInterface file;
+    protected final ExcelFileInterface file;
 
     /**
      * Создаёт экземпляр просмоторщика excel таблицы.
@@ -38,6 +38,7 @@ public abstract class Detective implements Closeable {
      * @param finish Время конца составления.
      * @throws DetectiveException Появилась проблема, связанная с обработкой Excel файла
      * @throws IOException Во время работы с Excel file - файл стал недоступен.
+     * @see Detective#chooseDetective(ExcelFileInterface)
      */
     public static List<CoupleInCalendar> startAnInvestigations(Iterable<? extends Detective> detectives, ZonedDateTime start, ZonedDateTime finish) throws DetectiveException, IOException {
         List<CoupleInCalendar> output = new LinkedList<>();
