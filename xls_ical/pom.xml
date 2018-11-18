@@ -9,6 +9,7 @@
     <modules>
         <module>server</module>
 		<module>interpreter</module>
+        <module>console-interface</module>
     </modules>
 
 

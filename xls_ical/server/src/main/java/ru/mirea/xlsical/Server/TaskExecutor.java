@@ -108,7 +108,8 @@ public class TaskExecutor implements Runnable {
     public static PackageToClient monoStep(PackageToServer pkg, Collection<? extends ViewerExcelCouples> watchers) {
         List<CoupleInCalendar> couples = new LinkedList<>();
         if(pkg.excelsFiles == null) {
-            return new PackageToClient(pkg.ctx, null, 0, "Ошибка внутри обработчика. Не было передано множество excel файлов.");
+            pkg.percentReady.setReady(1);
+            return new PackageToClient(pkg.ctx, pkg.percentReady, null, 0, "Ошибка внутри обработчика. Не было передано множество excel файлов.");
         }
         Collection<ExcelFileInterface> fs = null;
         try {
@@ -126,7 +127,8 @@ public class TaskExecutor implements Runnable {
             } while (needAgain);
         } catch (IOException error) {
             error.printStackTrace();
-            return new PackageToClient(pkg.ctx, null, 0, "Ошибка внутри сервера.");
+            pkg.percentReady.setReady(1);
+            return new PackageToClient(pkg.ctx, pkg.percentReady, null, 0, "Ошибка внутри сервера.");
         } finally {
             if(fs != null)
                 for(Closeable file : fs)
@@ -141,6 +143,7 @@ public class TaskExecutor implements Runnable {
         }
         return new PackageToClient(
                 pkg.ctx,
+                pkg.percentReady,
                 ExportCouplesToICal.start(couples),
                 couples.size(),
                 "ok.");

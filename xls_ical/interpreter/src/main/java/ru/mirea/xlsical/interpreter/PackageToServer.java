@@ -24,16 +24,25 @@ public class PackageToServer extends Package {
     /**
     Строит данные отправляемые на сервер.
      @param ctx Уникальный идентификатор сообщения.
+     @param percentReady Ссылка на поле float, куда надо отправить % готовности задачи.
      @param excelsFiles Тут содержатся пути до файлов .xls и .xlsx.
      @param queryCriteria Тут содержатся критерии запроса.
      */
-    public PackageToServer(Object ctx, String[] excelsFiles, Seeker queryCriteria) {
-        super(ctx);
+    public PackageToServer(Object ctx, PercentReady percentReady, String[] excelsFiles, Seeker queryCriteria) {
+        super(ctx, percentReady);
         this.excelsFiles = excelsFiles;
         this.queryCriteria = queryCriteria;
     }
 
-
+    /**
+     Строит данные отправляемые на сервер.
+     @param ctx Уникальный идентификатор сообщения.
+     @param excelsFiles Тут содержатся пути до файлов .xls и .xlsx.
+     @param queryCriteria Тут содержатся критерии запроса.
+     */
+    public PackageToServer(Object ctx, String[] excelsFiles, Seeker queryCriteria) {
+        this(ctx, null, excelsFiles, queryCriteria);
+    }
 
     /**
      * Преобразует входящий массив байтов в текущее хранилище.
