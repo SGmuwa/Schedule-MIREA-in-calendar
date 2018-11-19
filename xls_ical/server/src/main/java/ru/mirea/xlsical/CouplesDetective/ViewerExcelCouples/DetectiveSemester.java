@@ -41,18 +41,67 @@ public class DetectiveSemester extends Detective {
 
     /**
      * Функция ищет занятия для seeker в файле File.
-     * @param seeker критерий поиска.
+     *
+     * @param start  Дата и время начала составления расписания.
+     * @param finish Дата и время конца составления раписания.
+     * @param startWeek Номер недели в день {@code start}.
+     * @throws DetectiveException Появилась проблема, связанная с обработкой Excel файла.
+     * @throws IOException        Во время работы с Excel file - файл стал недоступен.
+     */
+    public LinkedList<CoupleInCalendar> startAnInvestigation(ZonedDateTime start, ZonedDateTime finish, int startWeek) throws DetectiveException, IOException {
+        LinkedList<CoupleInExcel> couplesInExcel = startViewer();
+        LinkedList<CoupleInCalendar> out = new LinkedList<>();
+        for (CoupleInExcel line : couplesInExcel) {
+            out.addAll(SetterCouplesInCalendar.getCouplesByPeriod(
+                    start.toLocalDate(),
+                    finish.toLocalDate(),
+                    start.getZone(),
+                    startWeek,
+                    line.start,
+                    line.finish,
+                    line.dayOfWeek,
+                    line.isOdd,
+                    line.ItemTitle,
+                    line.TypeOfLesson,
+                    line.NameOfGroup,
+                    line.NameOfTeacher,
+                    line.Audience,
+                    line.Address
+            ));
+        }
+        return out;
+    }
+
+        /**
+         * Функция ищет занятия для seeker в файле File.
+         *
+         * @param start  Дата и время начала составления расписания.
+         *               Стоит отметить, что если указать день начала с воскресенья,
+         *               то в понедельник будет номер недели равный двум.
+         * @param finish Дата и время конца составления раписания.
+         * @throws DetectiveException Появилась проблема, связанная с обработкой Excel файла.
+         * @throws IOException        Во время работы с Excel file - файл стал недоступен.
+         * @see #startAnInvestigation(ZonedDateTime, ZonedDateTime, int) 
+         */
+    @Override
+    public LinkedList<CoupleInCalendar> startAnInvestigation(ZonedDateTime start, ZonedDateTime finish) throws DetectiveException, IOException {
+        return startAnInvestigation(start, finish, 1);
+    }
+
+
+    /**
+     * Функция ищет занятия для seeker в файле File.
      * @throws DetectiveException Появилась проблема, связанная с обработкой Excel файла
      * @throws IOException Во время работы с Excel file - файл стал недоступен.
      */
-    public List<CoupleInCalendar> startAnInvestigation() throws DetectiveException, IOException {
+    protected LinkedList<CoupleInExcel> startViewer() throws DetectiveException, IOException {
         Point WeekPositionFirst = SeekEverythingInLeftUp("Неделя", file);
-        List<Point> IgnoresCoupleTitle = new LinkedList<>();
+        LinkedList<Point> IgnoresCoupleTitle = new LinkedList<>();
         int[] Times = GetTimes(WeekPositionFirst, file); // Узнать время начала и конца пар.
         int CountCouples = Times.length / 2; // Узнать количество пар за день.
         Point basePos = SeekFirstCouple(file); // Позиция первой записи "Предмет". Обычно на R3C6.
         // Ура! Мы нашли базовую позицию! Это basePos.
-        List<CoupleInCalendar> out = new LinkedList<>();
+        LinkedList<CoupleInExcel> out = new LinkedList<>();
         for(
                 int lastEC = 15, // Last entry count - Счётчик последней записи. Если долго не находим, то выходим из цикла.
                 posEntryX = basePos.x; // Это позиция записи. Указывает столбец, где есть запись "Предмет".
@@ -72,7 +121,8 @@ public class DetectiveSemester extends Detective {
                                 basePos.y,
                                 Times,
                                 IgnoresCoupleTitle,
-                                file)
+                                getDefaultAddressesPoints()
+                        )
                         /* Хорошо! Мы получили список занятий у группы.
                         Если это группа - то просто добавить,
                         если это преподаватель - то отфильтровать. */
@@ -80,6 +130,10 @@ public class DetectiveSemester extends Detective {
             }
         }
         return out;
+    }
+
+    private ArrayList<Point> getDefaultAddressesPoints() {
+        
     }
 
     /**
@@ -200,10 +254,10 @@ public class DetectiveSemester extends Detective {
      * @param row Строка, где находится "Якорь" то есть ячейка с записью "Предмет".
      * @param times Отсюда берётся расписание времени в формате началок - конец. На все пары.
      * @param ignoresCoupleTitle Лист занятий, который надо игнорировать.
-     * @param addresses
+     * @param addresses Точки, на которых распологается адреса филиалов.
      * @return Множество занятий у группы.
      */
-    private Collection<? extends CoupleInExcel> GetCouplesFromAnchor(int column, int row, int[] times, List<Point> ignoresCoupleTitle, List<Point> addresses) throws IOException {
+    private LinkedList<CoupleInExcel> GetCouplesFromAnchor(int column, int row, int[] times, List<Point> ignoresCoupleTitle, List<Point> addresses) throws IOException {
         LinkedList<CoupleInExcel> coupleOfWeek = new LinkedList<>();
         int countOfCouples = times.length / 2;
         Point pointToNameOfGroup = new Point(column, row - 1);
@@ -243,7 +297,7 @@ public class DetectiveSemester extends Detective {
      * @param address Адрес, где находятся пары
      * @return Множество занятий у группы в конкретный день.
      */
-    public Collection<? extends CoupleInExcel> GetCouplesFromDay(int column, int row, String nameOfGroup, DayOfWeek dayOfWeek, List<Point> ignoresCoupleTitle, int[] times, String address) throws IOException {
+    public LinkedList<CoupleInExcel> GetCouplesFromDay(int column, int row, String nameOfGroup, DayOfWeek dayOfWeek, List<Point> ignoresCoupleTitle, int[] times, String address) throws IOException {
         LinkedList<CoupleInExcel> coupleOfDay = new LinkedList<>();
         int countOfCouples = times.length / 2;
         for(Point cursor = new Point(column, row); cursor.y < row + countOfCouples*2; cursor.y++) { // Считываем каждую строчку
@@ -255,20 +309,18 @@ public class DetectiveSemester extends Detective {
             String[] teachers = file.getCellData(cursor.x + 2, cursor.y).trim().split(("(\r\n)|\n"));
             String[] audiences = file.getCellData(cursor.x + 3, cursor.y).trim().split(("(\r\n)|\n"));
             for (int indexInLine = 0; indexInLine < titles.length; indexInLine++) {
-                Iterable<CoupleInCalendar> listCouplesOfLine = CoupleInCalendar.getCouplesByPeriod(
-                        seeker,
-                        LocalTime.of(times[(cursor.y - row)/2*2] / 60, times[(cursor.y - row)/2*2] % 60),
-                        LocalTime.of(times[(cursor.y - row)/2*2 + 1] / 60, times[(cursor.y - row)/2*2 + 1] % 60),
-                        dayOfWeek,
-                        (cursor.y - row) % 2 == 0,
+                coupleOfDay.add(new CoupleInExcel(
                         titles[indexInLine],
                         indexInLine < typeOfLessons.length ? typeOfLessons[indexInLine] : typeOfLessons[0],
                         nameOfGroup,
                         indexInLine < teachers.length ? teachers[indexInLine] : teachers[0],
                         indexInLine < audiences.length ? audiences[indexInLine] : audiences[0],
-                        address);
-                if(listCouplesOfLine != null) for (CoupleInCalendar coup : listCouplesOfLine)
-                    coupleOfDay.add(coup); // Все пары, которые вернусь с getCouplesByPeriod надо добавить в наш список.
+                        address,
+                        LocalTime.of(times[(cursor.y - row)/2*2] / 60, times[(cursor.y - row)/2*2] % 60),
+                        LocalTime.of(times[(cursor.y - row)/2*2 + 1] / 60, times[(cursor.y - row)/2*2 + 1] % 60),
+                        dayOfWeek,
+                        (cursor.y - row) % 2 == 0
+                ));
             }
         }
         return coupleOfDay;
@@ -364,11 +416,15 @@ public class DetectiveSemester extends Detective {
     private class CoupleInExcel extends Couple {
         public final LocalTime start;
         public final LocalTime finish;
+        public final DayOfWeek dayOfWeek;
+        public final boolean isOdd;
 
-        public CoupleInExcel(String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address, LocalTime start, LocalTime finish) {
+        public CoupleInExcel(String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address, LocalTime start, LocalTime finish, DayOfWeek dayOfWeek, boolean isOdd) {
             super(itemTitle, typeOfLesson, nameOfGroup, nameOfTeacher, audience, address);
             this.start = start;
             this.finish = finish;
+            this.dayOfWeek = dayOfWeek;
+            this.isOdd = isOdd;
         }
     }
 
