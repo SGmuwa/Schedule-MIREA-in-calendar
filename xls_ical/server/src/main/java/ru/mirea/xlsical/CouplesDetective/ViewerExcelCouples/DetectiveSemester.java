@@ -13,6 +13,7 @@ package ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples;
 
  */
 
+import ru.mirea.xlsical.CouplesDetective.Couple;
 import ru.mirea.xlsical.CouplesDetective.CoupleInCalendar;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import ru.mirea.xlsical.interpreter.Seeker;
@@ -197,16 +198,16 @@ public class DetectiveSemester extends Detective {
      * Идёт считывание данных о предметах с определённого положения "Предмет".
      * @param column Столбец, где находится "Якорь" то есть ячейка с записью "Предмет".
      * @param row Строка, где находится "Якорь" то есть ячейка с записью "Предмет".
-     * @param seeker Отсюда берётся начало и конец семестра.
      * @param times Отсюда берётся расписание времени в формате началок - конец. На все пары.
      * @param ignoresCoupleTitle Лист занятий, который надо игнорировать.
-     * @param file Файл, откуда надо производить чтение.
+     * @param addresses
      * @return Множество занятий у группы.
      */
-    private static Collection<? extends CoupleInCalendar> GetCouplesFromAnchor(int column, int row, int[] times, List<Point> ignoresCoupleTitle, ExcelFileInterface file) throws IOException {
-        LinkedList<CoupleInCalendar> coupleOfWeek = new LinkedList<>();
+    private Collection<? extends CoupleInExcel> GetCouplesFromAnchor(int column, int row, int[] times, List<Point> ignoresCoupleTitle, List<Point> addresses) throws IOException {
+        LinkedList<CoupleInExcel> coupleOfWeek = new LinkedList<>();
         int countOfCouples = times.length / 2;
-        String nameOfGroup = file.getCellData(column, row - 1).trim();
+        Point pointToNameOfGroup = new Point(column, row - 1);
+        String nameOfGroup = file.getCellData(pointToNameOfGroup.x, pointToNameOfGroup.y).trim();
         // TODO: С чего решил, что дней в неделе семь? И что сначала идёт понедельник?
         for(byte dayOfWeek = 1; dayOfWeek <= 7; dayOfWeek++)
         {
@@ -220,12 +221,11 @@ public class DetectiveSemester extends Detective {
                                     GetAddressOfDay
                                             (
                                                     new Point(column, r),
+                                                    pointToNameOfGroup,
+                                                    addresses,
                                                     countOfCouples,
-                                                    seeker.defaultAddress,
-                                                    ignoresCoupleTitle,
-                                                    file
-                                            ),
-                                    file
+                                                    ignoresCoupleTitle
+                                            )
                             )
             );
         }
@@ -234,19 +234,17 @@ public class DetectiveSemester extends Detective {
 
     /**
      * Идёт считывание данных в список о предметах с определённого положения: первая пара в дне.
-     * @param column Столбец, где находится "Якорь" то есть ячейка с записью "Предмет".
-     * @param row Строка, где находится "Якорь" то есть ячейка с записью "Предмет".
+     * @param column Столбец, который указывает на первую пару дня.
+     * @param row Строка, которая указывает на перву пару дня.
      * @param nameOfGroup Имя группы.
      * @param dayOfWeek День недели. 1 - понедельник. 7 - воскресенье.
-     * @param seeker Отсюда берётся начало и конец семестра.
      * @param ignoresCoupleTitle Лист занятий, который надо игнорировать.
      * @param times Лист с началом и окончанием пары. {Начало1пары, конец1пары, начало2пары, конец2пары, ...}. Указывается в минутах.
      * @param address Адрес, где находятся пары
-     * @param file Файл, откуда надо производить чтение.
      * @return Множество занятий у группы в конкретный день.
      */
-    public static Collection<? extends CoupleInCalendar> GetCouplesFromDay(int column, int row, String nameOfGroup, DayOfWeek dayOfWeek, Seeker seeker, List<Point> ignoresCoupleTitle, int[] times, String address, ExcelFileInterface file) throws IOException {
-        LinkedList<CoupleInCalendar> coupleOfDay = new LinkedList<>();
+    public Collection<? extends CoupleInExcel> GetCouplesFromDay(int column, int row, String nameOfGroup, DayOfWeek dayOfWeek, List<Point> ignoresCoupleTitle, int[] times, String address) throws IOException {
+        LinkedList<CoupleInExcel> coupleOfDay = new LinkedList<>();
         int countOfCouples = times.length / 2;
         for(Point cursor = new Point(column, row); cursor.y < row + countOfCouples*2; cursor.y++) { // Считываем каждую строчку
             if (IsEqualsInList(ignoresCoupleTitle, cursor))
@@ -361,6 +359,17 @@ public class DetectiveSemester extends Detective {
         Pattern p = Pattern.compile("-?\\d+");
         Matcher m = p.matcher(input);
         return m.matches();
+    }
+
+    private class CoupleInExcel extends Couple {
+        public final LocalTime start;
+        public final LocalTime finish;
+
+        public CoupleInExcel(String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address, LocalTime start, LocalTime finish) {
+            super(itemTitle, typeOfLesson, nameOfGroup, nameOfTeacher, audience, address);
+            this.start = start;
+            this.finish = finish;
+        }
     }
 
     private static class SetterCouplesInCalendar {
