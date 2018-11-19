@@ -1,6 +1,7 @@
 package ru.mirea.xlsical.Server;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import ru.mirea.xlsical.CoupleHistorian;
 import ru.mirea.xlsical.CouplesDetective.CoupleInCalendar;
 import ru.mirea.xlsical.CouplesDetective.ExportCouplesToICal;
 import ru.mirea.xlsical.CouplesDetective.ExternalDataUpdater;
@@ -30,28 +31,12 @@ public class TaskExecutor implements Runnable {
 
     private final BlockingQueue<PackageToServer> qIn;
     private final BlockingQueue<PackageToClient> qOut;
-    private ExternalDataUpdater edUpdater = null;
+    private final CoupleHistorian coupleHistorian;
 
     public TaskExecutor() {
         this.qIn = new LinkedBlockingQueue<>();
         this.qOut = new LinkedBlockingQueue<>();
-        try {
-            this.edUpdater = new ExternalDataUpdater();
-        } catch (IOException e) {
-            // Что делать, если не удаётся создать директорию кэша?
-            // Переносим ответственность на администратора сервера.
-            e.printStackTrace();
-            System.out.println(e.getLocalizedMessage());
-            Scanner sc = new Scanner(System.in);
-            do {
-                try {
-                    System.out.print("Write path cache dir: ");
-                    this.edUpdater = new ExternalDataUpdater(sc.nextLine());
-                } catch (IOException er) {
-                    System.out.println(er.getLocalizedMessage());
-                }
-            } while(edUpdater == null);
-        }
+        this.coupleHistorian = new CoupleHistorian();
     }
 
     /**
@@ -104,42 +89,8 @@ public class TaskExecutor implements Runnable {
      * @param pkg Пакет с требованиями к решению задачи.
      * @return Пакет от обработчика.
      */
-    public static PackageToClient monoStep(PackageToServer pkg) {
-        List<CoupleInCalendar> couples = new LinkedList<>();
-        if(pkg.excelsFiles == null) {
-            pkg.percentReady.setReady(1);
-            return new PackageToClient(pkg.ctx, pkg.percentReady, null, 0, "Ошибка внутри обработчика. Не было передано множество excel файлов.");
-        }
-        Collection<ExcelFileInterface> fs = null;
-        try {
-            boolean needAgain = true;
-            do {
-                fs = openExcelFiles(pkg.excelsFiles);
-                try {
-                    couples = DetectiveSemester.startAnInvestigations(pkg.queryCriteria);
-                    needAgain = false;
-                } catch (DetectiveException exD) {
-                    // В случае, если один из файлов не правильно оформлен, то его игнорируем.
-                    System.out.println("DetectiveException");
-                    fs.remove(exD.excelFile);
-                }
-            } while (needAgain);
-        } catch (IOException error) {
-            error.printStackTrace();
-            pkg.percentReady.setReady(1);
-            return new PackageToClient(pkg.ctx, pkg.percentReady, null, 0, "Ошибка внутри сервера.");
-        } finally {
-            if(fs != null)
-                for(Closeable file : fs)
-                    if(file != null)
-                        try {
-                            file.close();
-                        }
-                        catch (IOException err) {
-                            //err.printStackTrace();
-                            System.out.println("Can't close file into error.");
-                        }
-        }
+    public PackageToClient monoStep(PackageToServer pkg) {
+        List<CoupleInCalendar> couples = coupleHistorian.getCouples(pkg.queryCriteria);
         return new PackageToClient(
                 pkg.ctx,
                 pkg.percentReady,

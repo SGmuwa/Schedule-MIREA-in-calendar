@@ -10,7 +10,9 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 
 /**
  * Класс, который представляет из себя искателя.
@@ -59,7 +61,7 @@ public class Seeker implements Serializable {
      * @param timezoneStart Часовой пояс, где будут пары. Это значение в начале семестра.
      * @param defaultAddress Какой адрес корпуса по-умолчанию?
      * @param startWeek Первоначальный номер недели. По-умолчанию указывать = 1.
-     * @deprecated Поле this.defaultAddress уже не используется.
+     * @deprecated Поля {@link #defaultAddress}, {@link #seekerType} и {@link #startWeek} уже не используется.
      */
     public Seeker(String nameOfSeeker, SeekerType seekerType, LocalDate dateStart, LocalDate dateFinish, ZoneId timezoneStart, String defaultAddress, int startWeek) {
         this.nameOfSeeker = nameOfSeeker;
@@ -74,20 +76,18 @@ public class Seeker implements Serializable {
     /**
      * Создаёт экземпляр запроса.
      * @param nameOfSeeker Имя искателя. Это либо имя преподавателя, либо название группы студента.
-     * @param seekerType Тип искателя. Это либо преподаватель, либо студент.
      * @param dateStart Дата начала составления расписания. С какого календарного дня надо составлять расписание? Дата указывается по местному времени.
      * @param dateFinish Дата конца составления расписания. До какого календарного дня надо составлять расписание? Дата указывается по местному времени.
      * @param timezoneStart Часовой пояс, где будут пары. Это значение в начале семестра.
-     * @param startWeek Первоначальный номер недели. По-умолчанию указывать = 1.
      */
-    public Seeker(String nameOfSeeker, SeekerType seekerType, LocalDate dateStart, LocalDate dateFinish, ZoneId timezoneStart, int startWeek) {
+    public Seeker(String nameOfSeeker, LocalDate dateStart, LocalDate dateFinish, ZoneId timezoneStart) {
         this.nameOfSeeker = nameOfSeeker;
-        this.seekerType = seekerType;
+        this.seekerType = SeekerType.NaN;
         this.dateStart = dateStart;
         this.dateFinish = dateFinish;
         this.timezoneStart = timezoneStart;
         this.defaultAddress = null;
-        this.startWeek = startWeek;
+        this.startWeek = 1;
     }
 
     @Override
@@ -124,22 +124,26 @@ public class Seeker implements Serializable {
 
 
         ZonedDateTime start = ZonedDateTime.now(zoneId);
-        ZonedDateTime finish = start.plus(10, ChronoUnit.YEARS);
+        // Дольше же восьми лет не может учиться студент?
+        ZonedDateTime finish = start.plus(8, ChronoUnit.YEARS);
 
 
 
         instance = new Seeker(
-                "ИКБО-04-16",
-                SeekerType.StudyGroup,
+                // Штука, которая расчитывает группу по-умолчанию.
+                "ИКБО-04-" + start.minus(6L, ChronoUnit.MONTHS).getLong(ChronoField.YEAR) % 100,
                 start.toLocalDate(),
                 finish.toLocalDate(),
-                zoneId,
-                startWeek
+                zoneId
         );
     }
 
     private static Seeker instance;
 
+    /**
+     * Возвращает искателя по-умолчанию.
+     * @return Искатель по-умолчанию.
+     */
     public static Seeker getInstance() {
         return instance;
     }

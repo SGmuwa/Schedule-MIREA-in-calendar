@@ -16,20 +16,17 @@ public class TestSeeker {
 
         System.out.println("Test Seeker start.");
 
-        Seeker test = new Seeker("name",
-                SeekerType.Teacher,
+        Seeker test = new Seeker(
+                "name",
                 LocalDate.of(2000, 5, 5),
                 LocalDate.of(2000, 5, 10),
-                ZoneId.systemDefault(),
-                "Москва, проспект Вернадского, 78, РТУ МИРЭА", 1);
+                ZoneId.systemDefault()
+        );
 
         assertEquals("name", test.nameOfSeeker);
-        assertEquals(SeekerType.Teacher, test.seekerType);
         assertEquals(LocalDate.of(2000, 5, 5), test.dateStart);
         assertEquals(LocalDate.of(2000, 5, 10), test.dateFinish);
         assertEquals(ZoneId.systemDefault(), test.timezoneStart);
-        assertEquals("Москва, проспект Вернадского, 78, РТУ МИРЭА", test.defaultAddress);
-        assertEquals(1, test.startWeek);
 
         PackageToClient cl = new PackageToClient(0, "", 0, "Всё ок");
         assertEquals("", cl.CalFile);

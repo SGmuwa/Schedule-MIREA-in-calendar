@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
  */
 public class DetectiveSemester extends Detective {
 
-    protected DetectiveSemester(ExcelFileInterface file) {
+    public DetectiveSemester(ExcelFileInterface file) {
         super(file);
     }
 
@@ -469,7 +469,7 @@ public class DetectiveSemester extends Detective {
         return m.matches();
     }
 
-    private class CoupleInExcel extends Couple {
+    public class CoupleInExcel extends Couple {
         public final LocalTime start;
         public final LocalTime finish;
         public final DayOfWeek dayOfWeek;
@@ -484,7 +484,7 @@ public class DetectiveSemester extends Detective {
         }
     }
 
-    private static class SetterCouplesInCalendar {
+    public static class SetterCouplesInCalendar {
 
         /**
          * Получает на входе данные про одну строку. Принимает решение, в какие дни будут пары. Не делает выборку данных.

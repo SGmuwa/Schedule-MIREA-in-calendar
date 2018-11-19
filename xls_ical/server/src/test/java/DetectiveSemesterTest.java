@@ -68,7 +68,7 @@ public class DetectiveSemesterTest {
     public void GetCouplesFromDayTest() throws IOException, InvalidFormatException {
         List<Point> list = new ArrayList<>();
         Collection<? extends ExcelFileInterface> files;
-        Collection<? extends CoupleInCalendar> col;
+        Collection<? extends DetectiveSemester.CoupleInExcel> col;
         int[] times = {540,630,640,730,780,870,880,970,980,1070,1080,1170};
 
         files = OpenFile.newInstances("tests/test-01.xlsx");
@@ -76,10 +76,17 @@ public class DetectiveSemesterTest {
         ExcelFileInterface file = files.iterator().next();
         Seeker seeker = new Seeker("ИКБО-04-16", SeekerType.StudyGroup, LocalDate.of(2018,9,1), LocalDate.of(2018, 10,1), ZoneId.of("UTC+3"), "пр-т Вернадского, 78", 1);
 
+        col = new DetectiveSemester(files.iterator().next()).GetCouplesFromDay(
+                6,
+                3,
+                "ИКБО-04-16",
+                DayOfWeek.of(1),
+                list,
+                times,
+                "пр-т Вернадского, 78"
+        );
 
-        col = DetectiveSemester.GetCouplesFromDay(6,3, "ИКБО-04-16",DayOfWeek.of(1), seeker, list, times, "пр-т Вернадского, 78", file);
-
-        for(CoupleInCalendar couple : col)
+        for(Object couple : col)
             System.out.println(couple.toString());
 
         file.close();

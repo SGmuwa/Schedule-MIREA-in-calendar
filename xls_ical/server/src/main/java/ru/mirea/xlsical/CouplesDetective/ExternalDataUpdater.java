@@ -93,7 +93,7 @@ public class ExternalDataUpdater implements Runnable {
      * вернёт таблицы из кэша.
      * @return Возвращает все таблицы из сайта <a href="https://www.mirea.ru/education/schedule-main/schedule/">mirea.ru</a>.
      */
-    public Collection<? extends ExcelFileInterface> openTablesFromExternal() {
+    public ArrayList<ExcelFileInterface> openTablesFromExternal() {
         waitCache();
         ArrayList<ExcelFileInterface> files = new ArrayList<>(excelFiles.size());
         for (File path :

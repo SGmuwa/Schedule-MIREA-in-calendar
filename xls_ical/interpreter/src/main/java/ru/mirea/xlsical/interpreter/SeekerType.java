@@ -8,5 +8,9 @@ public enum SeekerType {
     /**
      * Искатель-студент группы.
      */
-    StudyGroup
+    StudyGroup,
+    /**
+     * Не определено.
+     */
+    NaN
 }

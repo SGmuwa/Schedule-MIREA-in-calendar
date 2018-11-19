@@ -5,6 +5,7 @@ import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import ru.mirea.xlsical.interpreter.Seeker;
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
@@ -20,12 +21,15 @@ public class DetectiveExams extends Detective {
      * Функция ищет занятия для seeker в файле File.
      * // TODO: Данная функция ещё не разработана.
      *
-     * @param seeker критерий поиска.
-     * @throws DetectiveException Появилась проблема, связанная с обработкой Excel файла
+     * @param start  Дата и время начала составления расписания.
+     * @param finish Дата и время конца составления раписания.
+     * @throws DetectiveException Появилась проблема, связанная с обработкой Excel файла.
      * @throws IOException        Во время работы с Excel file - файл стал недоступен.
+     * @deprecated Не разработана ещё функция.
      */
     @Override
-    public List<CoupleInCalendar> startAnInvestigation(Seeker seeker) throws DetectiveException, IOException {
+    public List<CoupleInCalendar> startAnInvestigation(ZonedDateTime start, ZonedDateTime finish) throws DetectiveException, IOException {
         return null;
     }
+
 }
