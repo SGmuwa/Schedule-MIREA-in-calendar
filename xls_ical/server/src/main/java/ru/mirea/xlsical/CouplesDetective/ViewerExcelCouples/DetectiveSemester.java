@@ -95,11 +95,11 @@ public class DetectiveSemester extends Detective {
      * @throws IOException Во время работы с Excel file - файл стал недоступен.
      */
     protected LinkedList<CoupleInExcel> startViewer() throws DetectiveException, IOException {
-        Point WeekPositionFirst = SeekEverythingInLeftUp("Неделя", file);
+        Point WeekPositionFirst = SeekInLeftUp("[Нн]еделя", 5*2, 3*2);
         LinkedList<Point> IgnoresCoupleTitle = new LinkedList<>();
         int[] Times = GetTimes(WeekPositionFirst, file); // Узнать время начала и конца пар.
         int CountCouples = Times.length / 2; // Узнать количество пар за день.
-        Point basePos = SeekFirstCouple(file); // Позиция первой записи "Предмет". Обычно на R3C6.
+        Point basePos = SeekFirstCouple(); // Позиция первой записи "Предмет". Обычно на R3C6.
         // Ура! Мы нашли базовую позицию! Это basePos.
         LinkedList<CoupleInExcel> out = new LinkedList<>();
         for(
@@ -111,7 +111,10 @@ public class DetectiveSemester extends Detective {
                 lastEC--, posEntryX++
                 )
         {
-            if("Предмет".equals(file.getCellData(posEntryX, basePos.y)) && file.getCellData(posEntryX, basePos.y - 1).length() > 0) {
+            if(
+                    "Предмет".equals(file.getCellData(posEntryX, basePos.y))
+                            && file.getCellData(posEntryX, basePos.y - 1).length() > 0
+            ) {
                 lastEC = 15;
                 System.out.println("R" + basePos.y + "C" + posEntryX);
                 // Выставляем курсор на название первой пары дня.
@@ -132,8 +135,23 @@ public class DetectiveSemester extends Detective {
         return out;
     }
 
-    private ArrayList<Point> getDefaultAddressesPoints() {
-        
+    /**
+     * Функция ищет список адресов, которые используются для негласного поля
+     * {@code группа.адрес_по_умолчанию}. Это поле находится чуть правее от
+     * названия группы и обозначается цветом.
+     * @return Возвращает таблицу типа ключ-значение. Ключом является точка в
+     * excel таблице, где находится ячейка с адресом. Это может быть
+     * {@code R79C3}. Если обратиться к этому ключу, данная таблица вернёт
+     * нормализованный адрес из этой ячейки.
+     * Пример: "пр-т Вернадского, д.78".
+     * @throws IOException Файл excel не доступен.
+     */
+    private HashMap<Point, String> getDefaultAddressesPoints() throws IOException {
+        ArrayList<Point> points = seekInLeftUpAll("занятия в капусе по адресу", 3*2, 82*2);
+        HashMap<Point, String> out = new HashMap<>();
+        for(Point p : points)
+            out.put(p, getNormalAddressFromCell(p));
+        return out;
     }
 
     /**
@@ -196,7 +214,7 @@ public class DetectiveSemester extends Detective {
      * @return Адрес местоположения пары.
      */
     private String GetAddressOfDay(Point titleOfDay, Point pointToGroupName,
-                                          List<Point> addresses, int countCouples,
+                                          HashMap<Point, String> addresses, int countCouples,
                                           Collection<Point> IgnoresCoupleTitle
     ) throws IOException {
         for (int y = titleOfDay.y; y < titleOfDay.y + countCouples * 2; y++)
@@ -207,27 +225,25 @@ public class DetectiveSemester extends Detective {
             }
         // Если никакой адресс не найден, надо искать defaultAddress группы. Чаще всего java попадает в эту ветку кода.
         pointToGroupName = new Point(pointToGroupName.x + 3, pointToGroupName.y);
-        for (Point c : addresses)
+        for (Point c : addresses.keySet())
             if (file.isBackgroundColorsEquals(pointToGroupName.x, pointToGroupName.y, c.x, c.y))
-                return file.getCellData(c.x, c.y);
+                return addresses.get(c);
         // Не получилось что-то найти... Влепим тогда хоть какой-нибудь. Сюда лучше не заходить java.
         System.out.println("Warning: address not found.\n");
         for(StackTraceElement ste : Thread.currentThread().getStackTrace())
             System.out.printf("at %s/n", ste.getMethodName());
-        Point def = addresses.iterator().next();
-        return file.getCellData(def.x, def.y) + "?";
+        return addresses.values().iterator().next() + "?";
     }
 
     /**
      * Ищет в регионе 20x10 слово "Предмет" и возвращает его координаты.
      * Слово "Предмет" символизирует единицу расписания для группы.
      * Если слово "Предмет" не найдено, то фунуция вернёт {@code null}.
-     * @param file Файл, в котором следует искать.
      * @return Координаты первого найденного слова "Предмет".
      */
-    private static Point SeekFirstCouple(ExcelFileInterface file) throws DetectiveException, IOException {
+    private Point SeekFirstCouple() throws DetectiveException, IOException {
         try {
-            return SeekEverythingInLeftUp("Предмет", file);
+            return SeekInLeftUp("Предмет", 6*2, 3*2);
         }
         catch (DetectiveException e){
             throw new DetectiveException(e.getMessage() + "\nНевозможно найти хотя бы один предмет в таблице Excel.", file);
@@ -235,17 +251,57 @@ public class DetectiveSemester extends Detective {
     }
 
     /**
-     * Ищет в регионе 20x10 заданную фразу и возвращает координаты.
-     * @param Word Слово, которое следует искать.
-     * @param file Файл, в котором требуется искать.
+     * Ищет в заданном регионе заданную фразу и возвращает координаты.
+     * @param regex Регулярное выражение того того, что надо искать.
+     * @param sizeX Количество колонок, в которых будет вестись поиск.
+     * @param sizeY Количество строк, в которых будет вестись поиск.
      * @return Координаты первого найденного слова.
      * @throws DetectiveException Упс! Не нашёл!
      */
-    private static Point SeekEverythingInLeftUp(String Word, ExcelFileInterface file) throws DetectiveException, IOException {
-        for (int y = 1; y <= 10; y++)
-            for (int x = 1; x <= 20; x++)
-                if (Word.equals(file.getCellData(x, y))) return new Point(x, y);
-        throw new DetectiveException("Невозможно найти заданное слово Word. Word = " + Word, file);
+    private Point SeekInLeftUp(String regex, int sizeX, int sizeY) throws DetectiveException, IOException {
+        if (sizeX < 0 || sizeY < 0)
+            throw new IllegalArgumentException("sizeX and sizeY must be equals or more 0!\nX = " + sizeX + ", Y = " + sizeY + '.');
+        if (regex != null) {
+            Pattern p = Pattern.compile(regex);
+            for (int y = 1; y <= sizeY; y++)
+                for (int x = 1; x <= sizeX; x++)
+                    if (p.matcher(file.getCellData(x, y)).find())
+                        return new Point(x, y);
+        }
+        throw new DetectiveException("Невозможно найти заданное слово Word. Word = " + regex, file);
+    }
+
+    /**
+     * Ищет в заданном регионе заданную фразу и возвращает лист координат на ячейки с подходящим текстом.
+     * @param regex Регулярное выражение того того, что надо искать.
+     * @param sizeX Количество колонок, в которых будет вестись поиск.
+     * @param sizeY Количество строк, в которых будет вестись поиск.
+     * @return Координаты первого найденного слова.
+     */
+    private ArrayList<Point> seekInLeftUpAll(String regex, int sizeX, int sizeY) throws IOException {
+        ArrayList<Point> out = new ArrayList<>();
+        if (sizeX < 0 || sizeY < 0)
+            throw new IllegalArgumentException("sizeX and sizeY must be equals or more 0!\nX = " + sizeX + ", Y = " + sizeY + '.');
+        if (regex != null) {
+            Pattern p = Pattern.compile(regex);
+            for (int y = 1; y <= sizeY; y++)
+                for (int x = 1; x <= sizeX; x++)
+                    if (p.matcher(file.getCellData(x, y)).find())
+                        out.add(new Point(x, y));
+        }
+        return out;
+    }
+
+    /**
+     * Извлекает адрес из ячейки. В ячейке может быть и другой текст, но забирается только адрес.
+     * @param target Координаты ячейки, в которой находится адрес.
+     *               Пример текста: "В-78 - занятия в кампусе по адресу пр-т Вернадского, д.78"
+     * @return Текстовое представление адреса. Пример: "пр-т Вернадского, д.78"
+     */
+    private String getNormalAddressFromCell(Point target) throws IOException {
+        String text = file.getCellData(target.x, target.y);
+        int needIndex = text.lastIndexOf("адресу ") + 1;
+        return text.substring(needIndex);
     }
 
     /**
@@ -257,7 +313,7 @@ public class DetectiveSemester extends Detective {
      * @param addresses Точки, на которых распологается адреса филиалов.
      * @return Множество занятий у группы.
      */
-    private LinkedList<CoupleInExcel> GetCouplesFromAnchor(int column, int row, int[] times, List<Point> ignoresCoupleTitle, List<Point> addresses) throws IOException {
+    private LinkedList<CoupleInExcel> GetCouplesFromAnchor(int column, int row, int[] times, List<Point> ignoresCoupleTitle, HashMap<Point, String> addresses) throws IOException {
         LinkedList<CoupleInExcel> coupleOfWeek = new LinkedList<>();
         int countOfCouples = times.length / 2;
         Point pointToNameOfGroup = new Point(column, row - 1);
@@ -480,14 +536,14 @@ public class DetectiveSemester extends Detective {
                     continue;
                 }
                 out.add(new CoupleInCalendar(
-                        current,
-                        current.plusNanos(durationBetweenStartAndFinish),
+                        itemTitle,
+                        typeOfLesson,
                         nameOfGroup,
                         nameOfTeacher,
-                        itemTitle,
                         audience,
                         address,
-                        typeOfLesson
+                        current,
+                        current.plusNanos(durationBetweenStartAndFinish)
                 ));
             }
             return out;
