@@ -74,7 +74,9 @@ public class OpenFile implements ExcelFileInterface {
         Cell cellB = getCell(column2, row2);
         if (cellA == null || cellB == null)
             return false;
-        return cellA.getCellStyle().getFillBackgroundColor() == cellB.getCellStyle().getFillBackgroundColor();
+        // need test!
+        return cellA.getCellStyle().getFillBackgroundColorColor().equals(cellB.getCellStyle().getFillBackgroundColorColor());
+        //return cellA.getCellStyle().getFillBackgroundColor() == cellB.getCellStyle().getFillBackgroundColor(); // XSSF only work.
     }
 
     /**
