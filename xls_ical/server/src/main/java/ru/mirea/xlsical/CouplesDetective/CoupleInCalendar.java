@@ -1,15 +1,6 @@
 package ru.mirea.xlsical.CouplesDetective;
 
-import ru.mirea.xlsical.interpreter.Seeker;
-
 import java.time.*;
-import java.time.temporal.ChronoField;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
 /**
@@ -40,12 +31,12 @@ public class CoupleInCalendar extends Couple {
         return "CoupleInCalendar{" +
                 "DateAndTimeOfCouple=" + DateAndTimeOfCouple +
                 ", DateAndTimeFinishOfCouple=" + DateAndTimeFinishOfCouple +
-                ", NameOfGroup='" + NameOfGroup + '\'' +
-                ", NameOfTeacher='" + NameOfTeacher + '\'' +
-                ", ItemTitle='" + ItemTitle + '\'' +
-                ", Audience='" + Audience + '\'' +
-                ", Address='" + Address + '\'' +
-                ", TypeOfLesson='" + TypeOfLesson + '\'' +
+                ", nameOfGroup='" + nameOfGroup + '\'' +
+                ", nameOfTeacher='" + nameOfTeacher + '\'' +
+                ", itemTitle='" + itemTitle + '\'' +
+                ", audience='" + audience + '\'' +
+                ", address='" + address + '\'' +
+                ", typeOfLesson='" + typeOfLesson + '\'' +
                 '}';
     }
 }

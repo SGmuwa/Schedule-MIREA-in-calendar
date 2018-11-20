@@ -45,12 +45,12 @@ public class CoupleInCalendarTest {
                 ZoneId.systemDefault());
         /* Время начала пары */     assertEquals(zonedDateTimeDateTime1, out.get(0).DateAndTimeOfCouple);
         /* Время конца пары */      assertEquals(zonedDateTimeDateTime2, out.get(0).DateAndTimeFinishOfCouple);
-        /* Название группы */       assertEquals(nGr, out.get(0).NameOfGroup);
-        /* Название предмета */     assertEquals(nam, out.get(0).ItemTitle);
-        /* Тип пары */              assertEquals(typ, out.get(0).TypeOfLesson);
-        /* Имя преподавателя*/      assertEquals(tic, out.get(0).NameOfTeacher);
-        /* Адрес кампуса */         assertEquals(add, out.get(0).Address);
-        /* Аудитория */             assertEquals(aud, out.get(0).Audience);
+        /* Название группы */       assertEquals(nGr, out.get(0).nameOfGroup);
+        /* Название предмета */     assertEquals(nam, out.get(0).itemTitle);
+        /* Тип пары */              assertEquals(typ, out.get(0).typeOfLesson);
+        /* Имя преподавателя*/      assertEquals(tic, out.get(0).nameOfTeacher);
+        /* Адрес кампуса */         assertEquals(add, out.get(0).address);
+        /* Аудитория */             assertEquals(aud, out.get(0).audience);
     }
 
     /**
@@ -90,12 +90,12 @@ public class CoupleInCalendarTest {
                 timezone);
         /* Время начала пары */     assertEquals(zonedDateTime, out.get(0).DateAndTimeOfCouple);
         /* Время конца пары */      assertEquals(zonedDateTimeDateTime2, out.get(0).DateAndTimeFinishOfCouple);
-        /* Название группы */       assertEquals(nGr, out.get(0).NameOfGroup);
-        /* Название предмета */     assertEquals(nam, out.get(0).ItemTitle);
-        /* Тип пары */              assertEquals(typ, out.get(0).TypeOfLesson);
-        /* Имя преподавателя*/      assertEquals(tic, out.get(0).NameOfTeacher);
-        /* Адрес кампуса */         assertEquals(add, out.get(0).Address);
-        /* Аудитория */             assertEquals(aud, out.get(0).Audience);
+        /* Название группы */       assertEquals(nGr, out.get(0).nameOfGroup);
+        /* Название предмета */     assertEquals(nam, out.get(0).itemTitle);
+        /* Тип пары */              assertEquals(typ, out.get(0).typeOfLesson);
+        /* Имя преподавателя*/      assertEquals(tic, out.get(0).nameOfTeacher);
+        /* Адрес кампуса */         assertEquals(add, out.get(0).address);
+        /* Аудитория */             assertEquals(aud, out.get(0).audience);
     }
 
     /**
@@ -135,12 +135,12 @@ public class CoupleInCalendarTest {
                 timezone);
         /* Время начала пары */     assertEquals(zonedDateTime, out.get(0).DateAndTimeOfCouple);
         /* Время конца пары */      assertEquals(zonedDateTimeDateTime2, out.get(0).DateAndTimeFinishOfCouple);
-        /* Название группы */       assertEquals(nGr, out.get(0).NameOfGroup);
-        /* Название предмета */     assertEquals(nam, out.get(0).ItemTitle);
-        /* Тип пары */              assertEquals(typ, out.get(0).TypeOfLesson);
-        /* Имя преподавателя*/      assertEquals(tic, out.get(0).NameOfTeacher);
-        /* Адрес кампуса */         assertEquals(add, out.get(0).Address);
-        /* Аудитория */             assertEquals(aud, out.get(0).Audience);
+        /* Название группы */       assertEquals(nGr, out.get(0).nameOfGroup);
+        /* Название предмета */     assertEquals(nam, out.get(0).itemTitle);
+        /* Тип пары */              assertEquals(typ, out.get(0).typeOfLesson);
+        /* Имя преподавателя*/      assertEquals(tic, out.get(0).nameOfTeacher);
+        /* Адрес кампуса */         assertEquals(add, out.get(0).address);
+        /* Аудитория */             assertEquals(aud, out.get(0).audience);
     }
 
     /**
@@ -180,12 +180,12 @@ public class CoupleInCalendarTest {
         /* Время конца пары */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 2), time2), timezone).plus(2*2, ChronoUnit.WEEKS), out.get(2).DateAndTimeFinishOfCouple);
         for(CoupleInCalendar o : out)
         {
-            /* Название группы */       assertEquals(nGr, o.NameOfGroup);
-            /* Название предмета */     assertEquals(nam, o.ItemTitle);
-            /* Тип пары */              assertEquals(typ, o.TypeOfLesson);
-            /* Имя преподавателя*/      assertEquals(tic, o.NameOfTeacher);
-            /* Адрес кампуса */         assertEquals(add, o.Address);
-            /* Аудитория */             assertEquals(aud, o.Audience);
+            /* Название группы */       assertEquals(nGr, o.nameOfGroup);
+            /* Название предмета */     assertEquals(nam, o.itemTitle);
+            /* Тип пары */              assertEquals(typ, o.typeOfLesson);
+            /* Имя преподавателя*/      assertEquals(tic, o.nameOfTeacher);
+            /* Адрес кампуса */         assertEquals(add, o.address);
+            /* Аудитория */             assertEquals(aud, o.audience);
         }
     }
 
@@ -240,12 +240,12 @@ public class CoupleInCalendarTest {
 
         for(CoupleInCalendar o : out)
         {
-            /* Название группы */       assertEquals(nGr, o.NameOfGroup);
-            /* Название предмета */     assertEquals(nam, o.ItemTitle);
-            /* Тип пары */              assertEquals(typ, o.TypeOfLesson);
-            /* Имя преподавателя*/      assertEquals(tic, o.NameOfTeacher);
-            /* Адрес кампуса */         assertEquals(add, o.Address);
-            /* Аудитория */             assertEquals(aud, o.Audience);
+            /* Название группы */       assertEquals(nGr, o.nameOfGroup);
+            /* Название предмета */     assertEquals(nam, o.itemTitle);
+            /* Тип пары */              assertEquals(typ, o.typeOfLesson);
+            /* Имя преподавателя*/      assertEquals(tic, o.nameOfTeacher);
+            /* Адрес кампуса */         assertEquals(add, o.address);
+            /* Аудитория */             assertEquals(aud, o.audience);
         }
     }
 
@@ -297,12 +297,12 @@ public class CoupleInCalendarTest {
         /* Время конца пары 8 */      assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.JANUARY, 11).plus(2*7, ChronoUnit.WEEKS), time2), timezone), out.get(7).DateAndTimeFinishOfCouple);
         for(CoupleInCalendar o : out)
         {
-            /* Название группы */       assertEquals(nGr, o.NameOfGroup);
-            /* Название предмета */     assertEquals(nam, o.ItemTitle);
-            /* Тип пары */              assertEquals(typ, o.TypeOfLesson);
-            /* Имя преподавателя*/      assertEquals(tic, o.NameOfTeacher);
-            /* Адрес кампуса */         assertEquals(add, o.Address);
-            /* Аудитория */             assertEquals(aud, o.Audience);
+            /* Название группы */       assertEquals(nGr, o.nameOfGroup);
+            /* Название предмета */     assertEquals(nam, o.itemTitle);
+            /* Тип пары */              assertEquals(typ, o.typeOfLesson);
+            /* Имя преподавателя*/      assertEquals(tic, o.nameOfTeacher);
+            /* Адрес кампуса */         assertEquals(add, o.address);
+            /* Аудитория */             assertEquals(aud, o.audience);
         }
     }
 
@@ -426,12 +426,12 @@ public class CoupleInCalendarTest {
 
         for(CoupleInCalendar o : out)
         {
-            /* Название группы */       assertEquals(nGr, o.NameOfGroup);
-            /* Название предмета */     assertEquals(nam, o.ItemTitle);
-            /* Тип пары */              assertEquals(typ, o.TypeOfLesson);
-            /* Имя преподавателя*/      assertEquals(tic, o.NameOfTeacher);
-            /* Адрес кампуса */         assertEquals(add, o.Address);
-            /* Аудитория */             assertEquals(aud, o.Audience);
+            /* Название группы */       assertEquals(nGr, o.nameOfGroup);
+            /* Название предмета */     assertEquals(nam, o.itemTitle);
+            /* Тип пары */              assertEquals(typ, o.typeOfLesson);
+            /* Имя преподавателя*/      assertEquals(tic, o.nameOfTeacher);
+            /* Адрес кампуса */         assertEquals(add, o.address);
+            /* Аудитория */             assertEquals(aud, o.audience);
         }
     }
 
@@ -495,12 +495,12 @@ public class CoupleInCalendarTest {
         /* Время конца пары 8 */    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.APRIL, 19), time2), timezone), out.get(4).DateAndTimeFinishOfCouple);
         for(CoupleInCalendar o : out)
         {
-            /* Название группы */       assertEquals(nGr, o.NameOfGroup);
-            /* Название предмета */     assertEquals(nam, o.ItemTitle);
-            /* Тип пары */              assertEquals(typ, o.TypeOfLesson);
-            /* Имя преподавателя*/      assertEquals(tic, o.NameOfTeacher);
-            /* Адрес кампуса */         assertEquals(add, o.Address);
-            /* Аудитория */             assertEquals(aud, o.Audience);
+            /* Название группы */       assertEquals(nGr, o.nameOfGroup);
+            /* Название предмета */     assertEquals(nam, o.itemTitle);
+            /* Тип пары */              assertEquals(typ, o.typeOfLesson);
+            /* Имя преподавателя*/      assertEquals(tic, o.nameOfTeacher);
+            /* Адрес кампуса */         assertEquals(add, o.address);
+            /* Аудитория */             assertEquals(aud, o.audience);
         }
     }
 
@@ -555,12 +555,12 @@ public class CoupleInCalendarTest {
         /* Время конца пары 6 */    assertEquals(ZonedDateTime.of(LocalDateTime.of(LocalDate.of(2018, Month.FEBRUARY, 15), timeFinishCouple), timezone), out.get(1).DateAndTimeFinishOfCouple);
         for(CoupleInCalendar o : out)
         {
-            /* Название группы */       assertEquals(nGr, o.NameOfGroup);
-            /* Название предмета */     assertEquals(nam, o.ItemTitle);
-            /* Тип пары */              assertEquals(typ, o.TypeOfLesson);
-            /* Имя преподавателя*/      assertEquals(tic, o.NameOfTeacher);
-            /* Адрес кампуса */         assertEquals(add, o.Address);
-            /* Аудитория */             assertEquals(aud, o.Audience);
+            /* Название группы */       assertEquals(nGr, o.nameOfGroup);
+            /* Название предмета */     assertEquals(nam, o.itemTitle);
+            /* Тип пары */              assertEquals(typ, o.typeOfLesson);
+            /* Имя преподавателя*/      assertEquals(tic, o.nameOfTeacher);
+            /* Адрес кампуса */         assertEquals(add, o.address);
+            /* Аудитория */             assertEquals(aud, o.audience);
         }
     }
 }

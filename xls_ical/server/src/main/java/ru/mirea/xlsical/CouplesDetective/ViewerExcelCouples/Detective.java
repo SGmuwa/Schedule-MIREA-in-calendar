@@ -57,6 +57,22 @@ public abstract class Detective implements Closeable {
     public abstract List<CoupleInCalendar> startAnInvestigation(ZonedDateTime start, ZonedDateTime finish) throws DetectiveException, IOException;
 
     /**
+     * Функция расчитывает рекомендуемое время начала построения текущего расписания.
+     * @param now Момент времени, который считается настоящим.
+     * @return Время начала занятий.
+     * @see #getFinishTime(ZonedDateTime)
+     */
+    public abstract ZonedDateTime getStartTime(ZonedDateTime now);
+
+    /**
+     * Функция расчитывает рекомендуемое время конца построения текущего расписания.
+     * @param now Момент времени, который считается настоящим.
+     * @return Время конца занятий.
+     * @see #getStartTime(ZonedDateTime)
+     */
+    public abstract ZonedDateTime getFinishTime(ZonedDateTime now);
+
+    /**
      * Функция решает, какой именно требуется способ просмотра Excel таблицы.
      * TODO: Данная функция ещё не разработана.
      * @param file Входящий файл, к которому необходимо применить правило.

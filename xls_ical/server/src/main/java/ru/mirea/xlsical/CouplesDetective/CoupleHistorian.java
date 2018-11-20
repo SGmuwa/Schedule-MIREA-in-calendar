@@ -1,8 +1,8 @@
-package ru.mirea.xlsical;
+package ru.mirea.xlsical.CouplesDetective;
 
-import ru.mirea.xlsical.CouplesDetective.CoupleInCalendar;
-import ru.mirea.xlsical.CouplesDetective.ExternalDataUpdater;
 import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.Detective;
+import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveException;
+import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveSemester;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import ru.mirea.xlsical.interpreter.Seeker;
 
@@ -11,10 +11,9 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Класс реализует защиту от записи прошедших пар.
@@ -47,22 +46,38 @@ public class CoupleHistorian {
     }
 
     /**
+     * Фильтрует пары по типу запроса.
+     * @param seeker Критерий. Регулярное выражение искателя.
+     * @return Отфильтрованный по критерию.
+     */
+    private List<CoupleInCalendar> filterCouplesBySeekerType(Seeker seeker) throws PatternSyntaxException {
+        List<CoupleInCalendar> output = new LinkedList<>();
+        Pattern p = Pattern.compile(seeker.nameOfSeeker);
+        for (CoupleInCalendar couple : cache) {
+            if(p.matcher(couple.nameOfGroup).find() || p.matcher(couple.nameOfTeacher).find())
+                output.add(couple);
+        }
+        return output;
+    }
+
+    /**
      * Скачивает с сайта МИРЭА расписание.
      * Анализирует будущие пары.
      * Сохраняет на диск.
      */
-    private void updateCashe() {
+    private void updateCashe() throws IOException, DetectiveException {
         LinkedList<CoupleInCalendar> outCache = new LinkedList<>(); // Итоговый кэш
         LinkedList<CoupleInCalendar> newCache = new LinkedList<>(); // То, что получили из МИРЭА
+        ZonedDateTime now = ZonedDateTime.now();
         for(ExcelFileInterface file : edUpdater.openTablesFromExternal()) {
             Detective detective = Detective.chooseDetective(file);
             newCache.addAll(detective.startAnInvestigation(
-                    getDateStart(detective),
-                    getDateFinish(detective)
+                    detective.getStartTime(now),
+                    detective.getFinishTime(now)
             ));
         }
         // Всё, что позже этой метки - можно менять. Всё, что раньше - нелья.
-        ZonedDateTime deadLine = ZonedDateTime.now().minus(1, ChronoUnit.DAYS);
+        ZonedDateTime deadLine = now.minus(1, ChronoUnit.DAYS);
         // Добавим то, что было раньше.
         for(CoupleInCalendar couple : cache) {
             if (deadLine.compareTo(couple.DateAndTimeOfCouple) < 0) { // Раньше
@@ -77,6 +92,28 @@ public class CoupleHistorian {
         }
         cache = outCache;
         saveCache();
+    }
+
+    /**
+     * Расчитывает время начала составления пар по данному детективу.
+     * @param detective Используется для определения, является ли это
+     *                  расследователь для семестрового расписания
+     *                  или для экзаменационного расписания. <p/>
+     *                  Правила реализации такие:
+     *                  Если семестровое расписание:
+     *                      Контрольные точки для перехода являются:
+     *                          1 июля и 1 декабря
+     *                      Разметка составления расписания:
+     *
+     * @return Время начала составления расписания для данного детектива.
+     * @throws IllegalArgumentException Возникает в случае, если метод
+     * не поддерживает данного расследователя.
+     */
+    private ZonedDateTime getDateStart(Detective detective) {
+        if(detective instanceof DetectiveSemester) {
+
+        }
+        throw new IllegalArgumentException("Not support Detective: " + detective.getClass().getName());
     }
 
     private void saveCache() {

@@ -13,27 +13,27 @@ public class Couple {
     /**
      * Название пары.
      */
-    public final String ItemTitle;
+    public final String itemTitle;
     /**
      * Тип занятия (лекция, практика, лабораторная работа)
      */
-    public final String TypeOfLesson;
+    public final String typeOfLesson;
     /**
      * Название группы.
      */
-    public final String NameOfGroup;
+    public final String nameOfGroup;
     /**
      * Имя преподавателя.
      */
-    public final String NameOfTeacher;
+    public final String nameOfTeacher;
     /**
      * Номер аудитории.
      */
-    public final String Audience;
+    public final String audience;
     /**
      * Адрес корпуса.
      */
-    public final String Address;
+    public final String address;
 
     /**
      * Создание в памяти экземпляров параметров вне-временых параметров пары.
@@ -45,12 +45,12 @@ public class Couple {
      * @param address Адрес корпуса.
      */
     protected Couple(String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address) {
-        ItemTitle = itemTitle;
-        TypeOfLesson = typeOfLesson;
-        NameOfGroup = nameOfGroup;
-        NameOfTeacher = nameOfTeacher;
-        Audience = audience;
-        Address = address;
+        this.itemTitle = itemTitle;
+        this.typeOfLesson = typeOfLesson;
+        this.nameOfGroup = nameOfGroup;
+        this.nameOfTeacher = nameOfTeacher;
+        this.audience = audience;
+        this.address = address;
 
     }
 }

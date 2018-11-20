@@ -1,23 +1,8 @@
 package ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples;
 
-/*
-План детектива:
-0. Узнаю список времён: Начала и окончания пар.
-
-Цикл:
-1. Получаю список за день.
-2. Анализирую, является ли день днём самостоятельных занятий.
-3. Узнаю, по какому адресу занимаются в этот день.
-4. Добавляю в исключения строки с адресами.
-5. Разбиваю по двум строкам в getCouplesByPeriod. Исключающие строки отправляются как "".
-
- */
-
 import ru.mirea.xlsical.CouplesDetective.Couple;
 import ru.mirea.xlsical.CouplesDetective.CoupleInCalendar;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
-import ru.mirea.xlsical.interpreter.Seeker;
-import ru.mirea.xlsical.interpreter.SeekerType;
 
 import java.awt.*;
 import java.io.IOException;
@@ -32,6 +17,7 @@ import java.util.regex.Pattern;
 /**
  * Данный класс отвечает за получение календарных пар из Excel расписания.
  * Умеет читать только семестровое расписание.
+ * @author <a href="https://github.com/SGmuwa/">[SG]Muwa</a>.
  */
 public class DetectiveSemester extends Detective {
 
@@ -61,12 +47,12 @@ public class DetectiveSemester extends Detective {
                     line.finish,
                     line.dayOfWeek,
                     line.isOdd,
-                    line.ItemTitle,
-                    line.TypeOfLesson,
-                    line.NameOfGroup,
-                    line.NameOfTeacher,
-                    line.Audience,
-                    line.Address
+                    line.itemTitle,
+                    line.typeOfLesson,
+                    line.nameOfGroup,
+                    line.nameOfTeacher,
+                    line.audience,
+                    line.address
             ));
         }
         return out;
@@ -86,6 +72,34 @@ public class DetectiveSemester extends Detective {
     @Override
     public LinkedList<CoupleInCalendar> startAnInvestigation(ZonedDateTime start, ZonedDateTime finish) throws DetectiveException, IOException {
         return startAnInvestigation(start, finish, 1);
+    }
+
+    /**
+     * Функция расчитывает рекомендуемое время начала построения текущего расписания.
+     *
+     * @param now Момент времени, который считается настоящим.
+     * @return Время начала занятий.
+     * @see #getFinishTime(ZonedDateTime)
+     */
+    @Override
+    public ZonedDateTime getStartTime(ZonedDateTime now) {
+        if (Month.JANUARY.getValue() <= now.getMonth().getValue()
+                && now.getMonth().getValue() <= Month.JUNE.getValue()
+        ) {
+
+        } else if ()
+    }
+
+    /**
+     * Функция расчитывает рекомендуемое время конца построения текущего расписания.
+     *
+     * @param now Момент времени, который считается настоящим.
+     * @return Время конца занятий.
+     * @see #getStartTime(ZonedDateTime)
+     */
+    @Override
+    public ZonedDateTime getFinishTime(ZonedDateTime now) {
+
     }
 
 
@@ -152,28 +166,6 @@ public class DetectiveSemester extends Detective {
         for(Point p : points)
             out.put(p, getNormalAddressFromCell(p));
         return out;
-    }
-
-    /**
-     * Фильтрует пары по типу запроса.
-     * @param couples Список пар.
-     * @param seeker Критерий (Тип искателя и его название)
-     * @return Отфильтрованный по критерию.
-     */
-    private static List<CoupleInCalendar> FilterCouplesBySeekerType(Collection<? extends CoupleInCalendar> couples, final Seeker seeker) {
-        List<CoupleInCalendar> output = new LinkedList<>();
-        for (CoupleInCalendar i : couples) {
-            if (seeker.seekerType == SeekerType.StudyGroup) {
-                if (i.NameOfGroup.toLowerCase().equals(seeker.nameOfSeeker.toLowerCase())) {
-                    output.add(i);
-                }
-            } else {
-                if (i.NameOfTeacher.toLowerCase().equals(seeker.nameOfSeeker.toLowerCase())) {
-                    output.add(i);
-                }
-            }
-        }
-        return output;
     }
 
     /**
