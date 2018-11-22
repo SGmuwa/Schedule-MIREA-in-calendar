@@ -41,6 +41,27 @@ public class CoupleInCalendar extends Couple {
                 '}';
     }
 
+    /**
+     * Отвечат на вопрос, эквивалентен ли этот объект с сравниваемым объектом.
+     * Для сравнения используется:
+     * <ul type="disc">
+     *     <li>{@link #itemTitle},</li>
+     *     <li>{@link #typeOfLesson},</li>
+     *     <li>{@link #audience},</li>
+     *     <li>{@link #dateAndTimeOfCouple},</li>
+     *     <li>{@link #dateAndTimeFinishOfCouple}.</li>
+     * </ul>
+     * В сравнении не учавствуют:
+     * <ul type="disc">
+     *     <li>{@link #nameOfGroup}, так как в одной паре может учавствовать несколько групп.</li>
+     *     <li>{@link #nameOfTeacher}, так как в одной паре может учавствовать несколько преподавателей.</li>
+     *     <li>{@link #address}, так как я сомневаюсь в эквиваленте в таблицах Excel.
+     *         То есть я предполагаю, что в Excel таблицах адреса могут отличаться:
+     *         те, которые default внизу, и те, которые пишутся посреди дня.</li>
+     * </ul>
+     * @param o Объект, с которым надо сравнивать текущий объект.
+     * @return {@code True}, если два объекта совпадают. Иначе - {@code false}.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -48,14 +69,23 @@ public class CoupleInCalendar extends Couple {
         CoupleInCalendar that = (CoupleInCalendar) o;
         return
                 dateAndTimeOfCouple.equals(that.dateAndTimeOfCouple)
-                && dateAndTimeFinishOfCouple.equals(that.dateAndTimeFinishOfCouple)
-                && super.equals(o);
+                        && dateAndTimeFinishOfCouple.equals(that.dateAndTimeFinishOfCouple)
+                        && itemTitle.equals(that.itemTitle)
+                        && typeOfLesson.equals(that.typeOfLesson)
+                        && audience.equals(that.audience);
     }
 
+    /**
+     * Высчитывает хэш-код текущего объекта.
+     * @return Некотарая числовая маска объекта.
+     * @see #equals(Object) Какие поля учавствуют в генерации хэша?
+     */
     @Override
     public int hashCode() {
         return dateAndTimeOfCouple.hashCode()
                 ^ dateAndTimeFinishOfCouple.hashCode()
-                ^ super.hashCode();
+                ^ itemTitle.hashCode()
+                ^ typeOfLesson.hashCode()
+                ^ audience.hashCode();
     }
 }

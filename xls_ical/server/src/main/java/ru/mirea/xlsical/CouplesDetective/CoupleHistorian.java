@@ -89,6 +89,7 @@ public class CoupleHistorian {
                 outCache.add(couple);
             }
         }
+        mergeCouples(outCache);
         cache = outCache;
         saveCache();
     }
@@ -153,11 +154,19 @@ public class CoupleHistorian {
                     out.add(couple);
             }
         }
-        removeRepetitionsInList(out);
-        return ;
+        return out;
     }
 
-    private void removeRepetitionsInList(ArrayList<CoupleInCalendar> out) {
-        for(int i = 0; )
+    /**
+     * Объеденяет повторяющиеся пары.
+     * Повторяющимися парами являются такая пара учебных занятий, где
+     * совпадает аудитория, время начала и конца пары, заголовок и тип пары.
+     * @param listNeedMerge Список пар, в которых надо найти эквивалентный пары
+     *                      и объединить между собой.
+     * @see CoupleInCalendar#equals(Object) Подробнее об сравнении пар между собой.
+     */
+    private static void mergeCouples(LinkedList<CoupleInCalendar> listNeedMerge) {
+        LinkedList<CoupleInCalendar> needDelete = new LinkedList<>();
+        // TODO!
     }
 }
