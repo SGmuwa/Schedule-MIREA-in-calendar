@@ -1,6 +1,7 @@
 package ru.mirea.xlsical.CouplesDetective;
 
 import java.time.*;
+import java.util.Objects;
 
 
 /**
@@ -38,5 +39,23 @@ public class CoupleInCalendar extends Couple {
                 ", address='" + address + '\'' +
                 ", typeOfLesson='" + typeOfLesson + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CoupleInCalendar)) return false;
+        CoupleInCalendar that = (CoupleInCalendar) o;
+        return
+                dateAndTimeOfCouple.equals(that.dateAndTimeOfCouple)
+                && dateAndTimeFinishOfCouple.equals(that.dateAndTimeFinishOfCouple)
+                && super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return dateAndTimeOfCouple.hashCode()
+                ^ dateAndTimeFinishOfCouple.hashCode()
+                ^ super.hashCode();
     }
 }

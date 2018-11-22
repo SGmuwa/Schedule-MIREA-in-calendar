@@ -64,7 +64,7 @@ public class CoupleHistorian {
      * Анализирует будущие пары.
      * Сохраняет на диск.
      */
-    private void updateCashe() throws IOException, DetectiveException {
+    private void updateCache() throws IOException, DetectiveException {
         LinkedList<CoupleInCalendar> outCache = new LinkedList<>(); // Итоговый кэш
         LinkedList<CoupleInCalendar> newCache = new LinkedList<>(); // То, что получили из МИРЭА
         ZonedDateTime now = ZonedDateTime.now();
@@ -117,6 +117,13 @@ public class CoupleHistorian {
      *         преподавателя. Начиная с даты начала и заканчивая датой конца.
      */
     public ArrayList<CoupleInCalendar> getCouples(Seeker queryCriteria) {
+        ArrayList<CoupleInCalendar> out = new ArrayList<>(cache.size());
+        Pattern p;
+        try {
+            p = Pattern.compile(queryCriteria.nameOfSeeker);
+        } catch (PatternSyntaxException e) {
+            p = null;
+        }
         for (CoupleInCalendar couple :
                 cache) {
             /*
@@ -132,9 +139,25 @@ public class CoupleHistorian {
             if (time1.compareTo(time2) < 0) { // Если time1 раньше time2.
 
              */
-            if (queryCriteria.dateStart.compareTo(couple.dateAndTimeOfCouple) <= 0) { // Раньше или равно
-
+            if (
+                // queryCriteria.dateStart раньше или равно couple.dateAndTimeFinishOfCouple
+                    queryCriteria.dateStart.compareTo(couple.dateAndTimeFinishOfCouple) <= 0
+                            // couple.dateAndTimeOfCouple раньше или равно queryCriteria.dateFinish
+                            && couple.dateAndTimeOfCouple.compareTo(queryCriteria.dateFinish) <= 0
+            ) {
+                if (p != null && (p.matcher(couple.nameOfGroup).find() || p.matcher(couple.nameOfTeacher).find())) {
+                    // if by regex.
+                    out.add(couple);
+                } else if (queryCriteria.nameOfSeeker.equals(couple.nameOfGroup) || queryCriteria.nameOfSeeker.equals(couple.nameOfTeacher))
+                    // if by equals.
+                    out.add(couple);
             }
         }
+        removeRepetitionsInList(out);
+        return ;
+    }
+
+    private void removeRepetitionsInList(ArrayList<CoupleInCalendar> out) {
+        for(int i = 0; )
     }
 }
