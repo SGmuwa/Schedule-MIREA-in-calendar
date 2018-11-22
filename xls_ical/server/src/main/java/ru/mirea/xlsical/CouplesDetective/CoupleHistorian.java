@@ -89,6 +89,7 @@ public class CoupleHistorian {
                 outCache.add(couple);
             }
         }
+        sortByDateTime(outCache);
         mergeCouples(outCache);
         cache = outCache;
         saveCache();
@@ -168,5 +169,9 @@ public class CoupleHistorian {
     private static void mergeCouples(LinkedList<CoupleInCalendar> listNeedMerge) {
         LinkedList<CoupleInCalendar> needDelete = new LinkedList<>();
         // TODO!
+    }
+
+    private static void sortByDateTime(LinkedList<CoupleInCalendar> listNeedMerge) {
+        listNeedMerge.sort(Comparator.comparing(coupleInCalendar -> coupleInCalendar.dateAndTimeOfCouple));
     }
 }
