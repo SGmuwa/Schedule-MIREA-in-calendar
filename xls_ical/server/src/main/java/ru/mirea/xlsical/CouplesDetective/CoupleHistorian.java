@@ -94,28 +94,6 @@ public class CoupleHistorian {
         saveCache();
     }
 
-    /**
-     * Расчитывает время начала составления пар по данному детективу.
-     * @param detective Используется для определения, является ли это
-     *                  расследователь для семестрового расписания
-     *                  или для экзаменационного расписания. <p/>
-     *                  Правила реализации такие:
-     *                  Если семестровое расписание:
-     *                      Контрольные точки для перехода являются:
-     *                          1 июля и 1 декабря
-     *                      Разметка составления расписания:
-     *
-     * @return Время начала составления расписания для данного детектива.
-     * @throws IllegalArgumentException Возникает в случае, если метод
-     * не поддерживает данного расследователя.
-     */
-    private ZonedDateTime getDateStart(Detective detective) {
-        if(detective instanceof DetectiveSemester) {
-
-        }
-        throw new IllegalArgumentException("Not support Detective: " + detective.getClass().getName());
-    }
-
     private void saveCache() {
         do {
             try {
@@ -133,6 +111,31 @@ public class CoupleHistorian {
         } while(true);
     }
 
+    /**
+     * Получение календарного расписания по заданным критериям.
+     * @param queryCriteria Критерии запроса, по которым будет происходить выборка данных.
+     * @return Новый список с календарными парами определённой группы или определённого
+     *         преподавателя. Начиная с даты начала и заканчивая датой конца.
+     */
     public ArrayList<CoupleInCalendar> getCouples(Seeker queryCriteria) {
+        for (CoupleInCalendar couple :
+                cache) {
+            /*
+
+            -------------(A)-----------(T)-----------(B)-----------------(t)>
+
+            A = queryCriteria.start
+            B = queryCriteria.finish
+            T = ...t... = couple
+            out.add if A <= T && T <= B
+            out.add if A раньше или равен T && T раньше или равен B
+
+            if (time1.compareTo(time2) < 0) { // Если time1 раньше time2.
+
+             */
+            if (time1.compareTo(time2) < 0) { // Раньше
+
+            }
+        }
     }
 }

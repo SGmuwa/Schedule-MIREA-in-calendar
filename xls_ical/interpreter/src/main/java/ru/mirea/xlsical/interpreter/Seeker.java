@@ -7,9 +7,7 @@
 package ru.mirea.xlsical.interpreter;
 
 import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
@@ -17,12 +15,16 @@ import java.time.temporal.TemporalUnit;
 /**
  * Класс, который представляет из себя искателя.
  * В этом классе содержатся все поля, которые запрашивает пользователь с интернета.
+ * @author <a href="https://github.com/SGmuwa/">[SG]Muwa</a>.
+ * @see #nameOfSeeker
+ * @see #dateStart
+ * @see #dateFinish
  */
-public class Seeker implements Serializable {
+public final class Seeker implements Serializable {
     /**
      * Имя искателя.
      * Тут может содержаться как имя преподавателя, так и имя группы.
-     * TODO: Необходимо сделать поддержку регулярных выражений.
+     * <p/>TODO: Необходимо сделать поддержку регулярных выражений.
      */
     public final String nameOfSeeker;
     /**
@@ -34,15 +36,18 @@ public class Seeker implements Serializable {
     /**
      * Начало составления ICal расписания.
      * В этот день уже будет составляться расписание.
+     * Указывает на первый день 00:00:00.
      */
-    public final LocalDate dateStart;
+    public final ZonedDateTime dateStart;
     /**
      * Дата конца составления ICal.
      * В этот день будет составлено расписание в последний раз.
+     * Указывает на последний день, последнюю секунду, например, 23:59:59.
      */
-    public final LocalDate dateFinish;
+    public final ZonedDateTime dateFinish;
     /**
      * Часовой пояс, где будут пары. Это значение в начале семестра.
+     * @deprecated Теперь ZoneId хранится в {@link #dateStart} и {@link #dateFinish}.
      */
     public final ZoneId timezoneStart;
     /**
@@ -65,13 +70,14 @@ public class Seeker implements Serializable {
      * @param timezoneStart Часовой пояс, где будут пары. Это значение в начале семестра.
      * @param defaultAddress Какой адрес корпуса по-умолчанию?
      * @param startWeek Первоначальный номер недели. По-умолчанию указывать = 1.
-     * @deprecated Поля {@link #defaultAddress}, {@link #seekerType} и {@link #startWeek} уже не используется.
+     * @deprecated Поля {@link #defaultAddress}, {@link #seekerType}, {@link #startWeek}, {@link #timezoneStart} уже не используется.
+     *             Тип {@code dateStart} и {@code dateFinish} изменены с {@link java.time.LocalDate} на {@link ZonedDateTime}.
      */
     public Seeker(String nameOfSeeker, SeekerType seekerType, LocalDate dateStart, LocalDate dateFinish, ZoneId timezoneStart, String defaultAddress, int startWeek) {
         this.nameOfSeeker = nameOfSeeker;
         this.seekerType = seekerType;
-        this.dateStart = dateStart;
-        this.dateFinish = dateFinish;
+        this.dateStart = ZonedDateTime.of(LocalDateTime.of(dateStart, LocalTime.of(0, 0)), timezoneStart);
+        this.dateFinish = ZonedDateTime.of(LocalDateTime.of(dateFinish, LocalTime.of(0, 0)), timezoneStart).plus(1, ChronoUnit.DAYS).minus(1, ChronoUnit.SECONDS);
         this.timezoneStart = timezoneStart;
         this.defaultAddress = defaultAddress;
         this.startWeek = startWeek;
@@ -86,10 +92,26 @@ public class Seeker implements Serializable {
      */
     public Seeker(String nameOfSeeker, LocalDate dateStart, LocalDate dateFinish, ZoneId timezoneStart) {
         this.nameOfSeeker = nameOfSeeker;
-        this.seekerType = SeekerType.NaN;
-        this.dateStart = dateStart;
-        this.dateFinish = dateFinish;
-        this.timezoneStart = timezoneStart;
+        /*
+        Отправлять в конструктор ZonedDateTime не безопасно, так как тогда
+        студент или преподаватель могут получить расписание не целиком за день, а
+        только части дня. Лучше сокрыть данный функционал, чтобы пользователи
+        получали данные в промежуток включая целиком учебные дни.
+        Необходимо преобразовать LocalDate и ZoneId в указатели времени,
+        чтобы не было проблем с точностью.
+        С датой начала нет проблем: указываем на самую первую минуту дня.
+        С датой конца проблема: не гарантировано, что в дне строго 60*60*24 секунд.
+        Также по описанию данного класса, последний день надо включить.
+        Простро прибавить один день и указать до 00:00:00 нельзя, так как при преобразовании
+        в LocalDate будет покрываться следующий день.
+        Поэтому надо прибавить к dateFinish один день и отнять одну секунду, таким
+        образом возложив расчёты по определению "последнего момента времени дня" на
+        алгоритмы java.time или их потомков.
+         */
+        this.dateStart = ZonedDateTime.of(LocalDateTime.of(dateStart, LocalTime.of(0, 0)), timezoneStart);
+        this.dateFinish = ZonedDateTime.of(LocalDateTime.of(dateFinish, LocalTime.of(0, 0)), timezoneStart).plus(1, ChronoUnit.DAYS).minus(1, ChronoUnit.SECONDS);
+        this.seekerType = null;
+        this.timezoneStart = null;
         this.defaultAddress = null;
         this.startWeek = 1;
     }
@@ -103,12 +125,8 @@ public class Seeker implements Serializable {
             Seeker e = (Seeker) ex;
             return
                     nameOfSeeker.equals(e.nameOfSeeker) &&
-                            seekerType.equals(e.seekerType) &&
                             dateStart.equals(e.dateStart) &&
-                            dateFinish.equals(e.dateFinish) &&
-                            timezoneStart.equals(e.timezoneStart) &&
-                            defaultAddress.equals(e.defaultAddress) &&
-                            startWeek == e.startWeek;
+                            dateFinish.equals(e.dateFinish);
         }
         return false;
     }
@@ -120,6 +138,7 @@ public class Seeker implements Serializable {
          * Для поддержки старых устройств необходим часовой пояс "UTC+03:00" [1],
          * так как не все устройства[2] приняли обновления от 26 октября 2014 [3].
          * Поменять на Europe/Moscow 15 августа 2020 году.
+         * Необходимо проверить, поддерживается ли UTC+03:00?
          *
          * [1][3] http://www.consultant.ru/document/cons_doc_LAW_114656/b2707989c276b5a188e63bc41e7bcbcc18723de8/
          * [2] https://dentnt.windowsfaq.ru/?p=1527
