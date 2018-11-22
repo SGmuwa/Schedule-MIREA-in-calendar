@@ -2,7 +2,6 @@ package ru.mirea.xlsical.CouplesDetective;
 
 import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.Detective;
 import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveException;
-import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveSemester;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import ru.mirea.xlsical.interpreter.Seeker;
 
@@ -80,13 +79,13 @@ public class CoupleHistorian {
         ZonedDateTime deadLine = now.minus(1, ChronoUnit.DAYS);
         // Добавим то, что было раньше.
         for(CoupleInCalendar couple : cache) {
-            if (deadLine.compareTo(couple.DateAndTimeOfCouple) < 0) { // Раньше
+            if (deadLine.compareTo(couple.dateAndTimeOfCouple) < 0) { // Раньше
                 outCache.add(couple);
             }
         }
         // Добавим то, что нового.
         for(CoupleInCalendar couple : newCache) {
-            if (deadLine.compareTo(couple.DateAndTimeOfCouple) >= 0) { // Позже
+            if (deadLine.compareTo(couple.dateAndTimeOfCouple) >= 0) { // Позже
                 outCache.add(couple);
             }
         }
@@ -133,7 +132,7 @@ public class CoupleHistorian {
             if (time1.compareTo(time2) < 0) { // Если time1 раньше time2.
 
              */
-            if (time1.compareTo(time2) < 0) { // Раньше
+            if (queryCriteria.dateStart.compareTo(couple.dateAndTimeOfCouple) <= 0) { // Раньше или равно
 
             }
         }

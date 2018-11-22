@@ -13,24 +13,24 @@ public class CoupleInCalendar extends Couple {
 
     public CoupleInCalendar(String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address, ZonedDateTime dateAndTimeOfCouple, ZonedDateTime dateAndTimeFinishOfCouple) {
         super(itemTitle, typeOfLesson, nameOfGroup, nameOfTeacher, audience, address);
-        DateAndTimeOfCouple = dateAndTimeOfCouple;
-        DateAndTimeFinishOfCouple = dateAndTimeFinishOfCouple;
+        this.dateAndTimeOfCouple = dateAndTimeOfCouple;
+        this.dateAndTimeFinishOfCouple = dateAndTimeFinishOfCouple;
     }
 
     /**
      * Дата и время пары.
      */
-    public final ZonedDateTime DateAndTimeOfCouple;
+    public final ZonedDateTime dateAndTimeOfCouple;
     /**
      * Количество времени, сколько длится пара.
      */
-    public final ZonedDateTime DateAndTimeFinishOfCouple;
+    public final ZonedDateTime dateAndTimeFinishOfCouple;
 
     @Override
     public String toString() {
         return "CoupleInCalendar{" +
-                "DateAndTimeOfCouple=" + DateAndTimeOfCouple +
-                ", DateAndTimeFinishOfCouple=" + DateAndTimeFinishOfCouple +
+                "dateAndTimeOfCouple=" + dateAndTimeOfCouple +
+                ", dateAndTimeFinishOfCouple=" + dateAndTimeFinishOfCouple +
                 ", nameOfGroup='" + nameOfGroup + '\'' +
                 ", nameOfTeacher='" + nameOfTeacher + '\'' +
                 ", itemTitle='" + itemTitle + '\'' +

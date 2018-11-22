@@ -39,12 +39,12 @@ public class ExportCouplesToICal {
             ev.getProperties().add(new Location(c.address));
             ev.getProperties().add(new Uid(String.format("%d_%d@%s", java.time.ZonedDateTime.now().getLong(ChronoField.INSTANT_SECONDS), ran.nextLong(), "ru.mirea.xlsical")));
 
-            DateProperty date = new DtStart(new DateTime(1000L*c.DateAndTimeOfCouple.getLong(ChronoField.INSTANT_SECONDS)), false);
-            date.setTimeZone(registry.getTimeZone(c.DateAndTimeOfCouple.getZone().toString()));
+            DateProperty date = new DtStart(new DateTime(1000L*c.dateAndTimeOfCouple.getLong(ChronoField.INSTANT_SECONDS)), false);
+            date.setTimeZone(registry.getTimeZone(c.dateAndTimeOfCouple.getZone().toString()));
             ev.getProperties().add(date);
 
-            date = new DtEnd(new DateTime(1000L*c.DateAndTimeFinishOfCouple.getLong(ChronoField.INSTANT_SECONDS)), false);
-            date.setTimeZone(registry.getTimeZone(c.DateAndTimeFinishOfCouple.getZone().toString()));
+            date = new DtEnd(new DateTime(1000L*c.dateAndTimeFinishOfCouple.getLong(ChronoField.INSTANT_SECONDS)), false);
+            date.setTimeZone(registry.getTimeZone(c.dateAndTimeFinishOfCouple.getZone().toString()));
             ev.getProperties().add(date);
 
             cal.getComponents().add(ev);
