@@ -61,6 +61,7 @@ public class CoupleHistorian {
 
     /**
      * Скачивает с сайта МИРЭА расписание.
+     * Сортирует пары по дате-времени.
      * Анализирует будущие пары.
      * Сохраняет на диск.
      */
@@ -159,19 +160,35 @@ public class CoupleHistorian {
     }
 
     /**
-     * Объеденяет повторяющиеся пары.
+     * Объеденяет повторяющиеся пары в {@link #sortByDateTime(List) отсортированном} масиве.
      * Повторяющимися парами являются такая пара учебных занятий, где
      * совпадает аудитория, время начала и конца пары, заголовок и тип пары.
      * @param listNeedMerge Список пар, в которых надо найти эквивалентный пары
-     *                      и объединить между собой.
+     *                      и объединить между собой. Данный лист обязан быть отсортирован.
      * @see CoupleInCalendar#equals(Object) Подробнее об сравнении пар между собой.
      */
     private static void mergeCouples(LinkedList<CoupleInCalendar> listNeedMerge) {
-        LinkedList<CoupleInCalendar> needDelete = new LinkedList<>();
-        // TODO!
+        List<CoupleInCalendar> needDelete = new ArrayList<>();
+        ArrayList<CoupleInCalendar> couplesInDay = new ArrayList<>();
+        for(CoupleInCalendar couple : listNeedMerge) {
+            /*
+            Если в масиве ничего нет, то добавить пару в список пар дня.
+            Если текущая пара есть в тот же день, что и все в списке пар конкретного дня,
+            то добавить текущую пару в список пар дня.
+             */
+            if(couplesInDay.size() == 0 || couplesInDay.get(couplesInDay.size() - 1).dateAndTimeOfCouple.toLocalDate().equals(couple.dateAndTimeOfCouple.toLocalDate()))
+                couplesInDay.add(couple);
+            else {
+                // Требуется
+            }
+        }
     }
 
-    private static void sortByDateTime(LinkedList<CoupleInCalendar> listNeedMerge) {
+    /**
+     * Данный метод сортирует входные даныне по возрастанию даты.
+     * @param listNeedMerge Входные данные, которые необходимо отсортировать.
+     */
+    private static void sortByDateTime(List<CoupleInCalendar> listNeedMerge) {
         listNeedMerge.sort(Comparator.comparing(coupleInCalendar -> coupleInCalendar.dateAndTimeOfCouple));
     }
 }

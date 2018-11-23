@@ -1,7 +1,8 @@
 package ru.mirea.xlsical.CouplesDetective;
 
 import java.time.*;
-import java.util.Objects;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 
 /**
@@ -10,7 +11,7 @@ import java.util.Objects;
  * Время начала и конца пары, название группы и имя преподавателя,
  * название предмета, аудитория, адрес, тип пары.
  */
-public class CoupleInCalendar extends Couple {
+public class CoupleInCalendar extends Couple implements Iterable<CoupleInCalendar> {
 
     public CoupleInCalendar(String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address, ZonedDateTime dateAndTimeOfCouple, ZonedDateTime dateAndTimeFinishOfCouple) {
         super(itemTitle, typeOfLesson, nameOfGroup, nameOfTeacher, audience, address);
@@ -26,6 +27,11 @@ public class CoupleInCalendar extends Couple {
      * Количество времени, сколько длится пара.
      */
     public final ZonedDateTime dateAndTimeFinishOfCouple;
+
+    /**
+     * Указатель на следующий похожий элемент.
+     */
+    private CoupleInCalendar next;
 
     @Override
     public String toString() {
@@ -87,5 +93,55 @@ public class CoupleInCalendar extends Couple {
                 ^ itemTitle.hashCode()
                 ^ typeOfLesson.hashCode()
                 ^ audience.hashCode();
+    }
+
+    /**
+     * Получает итератор пар, который проходит по парам, все поля которых
+     * одинаковы, кроме даты времени начала и конца.
+     *
+     * @return an Iterator.
+     */
+    @Override
+    public Iterator<CoupleInCalendar> iterator() {
+        return new CouplesIterator(this);
+    }
+
+    private class CouplesIterator implements Iterator<CoupleInCalendar> {
+
+        /**
+         * Указатель на элемент, который надо будет вернуть.
+         */
+        private CoupleInCalendar current;
+
+        public CouplesIterator(CoupleInCalendar first) {
+            current = first;
+        }
+
+        /**
+         * Returns {@code true} if the iteration has more elements.
+         * (In other words, returns {@code true} if {@link #current} would
+         * return an element rather than throwing an exception.)
+         *
+         * @return {@code true} if the iteration has more elements
+         */
+        @Override
+        public boolean hasNext() {
+            return current != null;
+        }
+
+        /**
+         * Returns the current element in the iteration.
+         *
+         * @return the current element in the iteration
+         * @throws NoSuchElementException if the iteration has no more elements
+         */
+        @Override
+        public CoupleInCalendar next() {
+            if(!hasNext())
+                throw new NoSuchElementException();
+            CoupleInCalendar out = current;
+            current = current.next;
+            return out;
+        }
     }
 }
