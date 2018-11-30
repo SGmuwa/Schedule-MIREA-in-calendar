@@ -54,4 +54,22 @@ public class Couple {
         this.audience = audience;
         this.address = address;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Couple)) return false;
+        Couple couple = (Couple) o;
+        return Objects.equals(itemTitle, couple.itemTitle) &&
+                Objects.equals(typeOfLesson, couple.typeOfLesson) &&
+                Objects.equals(nameOfGroup, couple.nameOfGroup) &&
+                Objects.equals(nameOfTeacher, couple.nameOfTeacher) &&
+                Objects.equals(audience, couple.audience) &&
+                Objects.equals(address, couple.address);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(itemTitle, typeOfLesson, nameOfGroup, nameOfTeacher, audience, address);
+    }
 }

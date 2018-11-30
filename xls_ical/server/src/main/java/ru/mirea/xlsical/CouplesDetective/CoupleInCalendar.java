@@ -31,7 +31,36 @@ public class CoupleInCalendar extends Couple implements Iterable<CoupleInCalenda
     /**
      * Указатель на следующий похожий элемент.
      */
-    private CoupleInCalendar next;
+    private CoupleInCalendar next = null;
+
+    private Duration durationToNext = null;
+
+    /**
+     * Добавляет календарную пару в группу календарных пар.
+     * Требуется для группового редактирования пар.
+     * В случае, если {@link #next} не равен {@code null}, то
+     * будет вызван {@code this.next.add(next)}
+     * @param next Следующая календарная пара.
+     *             Она должна совпадать с {@link Couple#equals(Object) super.equals(Object)}
+     */
+    public void add(CoupleInCalendar next) {
+        if (next == null)
+            throw new NullPointerException("Argument \"next\" must be not null.");
+        if (!super.equals(next))
+            throw new IllegalArgumentException("Params \"this\" and \"next\" except dates must be equals!");
+        if (this.next != null) {
+            this.next.add(next);
+            return;
+        }
+
+        Duration duration = Duration.between(this.dateAndTimeOfCouple, next.dateAndTimeOfCouple);
+        if (this.durationToNext == null)
+            this.durationToNext = duration;
+        else if (!durationToNext.equals(duration))
+            throw new IllegalArgumentException("Duration must be equals previous");
+        this.next = next;
+        this.next.durationToNext = this.durationToNext;
+    }
 
     @Override
     public String toString() {
@@ -106,6 +135,9 @@ public class CoupleInCalendar extends Couple implements Iterable<CoupleInCalenda
         return new CouplesIterator(this);
     }
 
+    /**
+     * Класс, который реализует переход к следующим календарным парам.
+     */
     private class CouplesIterator implements Iterator<CoupleInCalendar> {
 
         /**
