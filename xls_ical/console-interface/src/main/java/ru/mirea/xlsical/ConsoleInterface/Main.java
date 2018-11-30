@@ -4,6 +4,7 @@ import ru.mirea.xlsical.interpreter.Seeker;
 import ru.mirea.xlsical.interpreter.PackageToServer;
 import ru.mirea.xlsical.Server.TaskExecutor;
 import ru.mirea.xlsical.interpreter.SeekerType;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.PrintStream;
 import java.time.LocalDate;
@@ -14,14 +15,16 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        System.out.println(TaskExecutor.monoStep(
+        // TODO
+        throw new NotImplementedException();
+        /*System.out.println(TaskExecutor.monoStep(
                 new PackageToServer(
                         null,
                         getFiles(sc, System.out),
                         getSeeker(sc, System.out)
                 )
         ).toString());
-        sc.next();
+        sc.next();*/
     }
 
     private static String[] getFiles(Scanner sc, PrintStream ps) {
