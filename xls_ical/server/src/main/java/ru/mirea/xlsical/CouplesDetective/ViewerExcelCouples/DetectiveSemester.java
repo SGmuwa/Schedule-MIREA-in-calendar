@@ -3,7 +3,6 @@ package ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples;
 import ru.mirea.xlsical.CouplesDetective.Couple;
 import ru.mirea.xlsical.CouplesDetective.CoupleInCalendar;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.awt.*;
 import java.io.IOException;
@@ -85,7 +84,7 @@ public class DetectiveSemester extends Detective {
     @Override
     public ZonedDateTime getStartTime(ZonedDateTime now) {
         // TODO
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException("Not impl");
         /*
         if (Month.JANUARY.getValue() <= now.getMonth().getValue()
                 && now.getMonth().getValue() <= Month.JUNE.getValue()
@@ -105,7 +104,7 @@ public class DetectiveSemester extends Detective {
     @Override
     public ZonedDateTime getFinishTime(ZonedDateTime now) {
         // TODO
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException("Not impl");
     }
 
 

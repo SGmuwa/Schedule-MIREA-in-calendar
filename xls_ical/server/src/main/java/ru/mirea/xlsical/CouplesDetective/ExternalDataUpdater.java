@@ -153,6 +153,7 @@ public class ExternalDataUpdater implements Runnable {
         Stream<String> htmlExcels = downloadHTML("https://www.mirea.ru/education/schedule-main/schedule/");
 
         Collection<String> excelUrls = FindAllExcelURLs(htmlExcels);
+        htmlExcels.close();
         try {
             excelFiles = downloadHTMLsToPath(excelUrls);
 
@@ -260,6 +261,11 @@ public class ExternalDataUpdater implements Runnable {
         return excelsUrls;
     }
 
+    /**
+     * Передаёт поток на скаичвание. Поток надо закрывать!
+     * @param s
+     * @return
+     */
     private Stream<String> downloadHTML(String s) {
         URL url;
         InputStream is = null;
@@ -273,12 +279,6 @@ public class ExternalDataUpdater implements Runnable {
             return br.lines();
         } catch (IOException ioe) {
             ioe.printStackTrace();
-        } finally {
-            try {
-                if (is != null) is.close();
-            } catch (IOException ioe) {
-                // nothing to see here
-            }
         }
         return null;
     }
