@@ -32,3 +32,5 @@ xls_ical/interpreter/target/surefire-reports/TestSeeker.txt
 *~*.xls*
 
 *target*
+
+**/cache/excel/*

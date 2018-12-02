@@ -1,12 +1,12 @@
 package ru.mirea.xlsical.CouplesDetective;
 
-import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.Detective;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
 
 import java.io.*;
 import java.net.URL;
-import java.nio.file.Files;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -20,7 +20,7 @@ import java.util.stream.Stream;
  * @version 18.11.2018
  * @author <a href="https://github.com/SGmuwa/">[SG]Muwa</a>
  */
-public class ExternalDataUpdater implements Runnable {
+public class ExternalDataUpdater {
 
     /**
      * Создаёт новый экземпляр синхронизатора расписания и имён преподавателей.
@@ -42,6 +42,7 @@ public class ExternalDataUpdater implements Runnable {
     public ExternalDataUpdater(File path) throws IOException {
         pathToCache = path;
         createCacheDir();
+        download(); // first download
     }
 
     private void createCacheDir() throws IOException {
@@ -65,12 +66,7 @@ public class ExternalDataUpdater implements Runnable {
     /**
      * Данный монитор выступает в роли синхронизации потоков.
      */
-    private final Object monitorCacheIsReady = new Object();
-
-    /**
-     * Отвечает на вопрос, нужно ли ждать вообще. Идёт ли какой-то процесс?
-     */
-    private boolean isNeedWait = false;
+    private Thread myThread = null;
 
     /**
      * Генератор случайных значений
@@ -94,7 +90,6 @@ public class ExternalDataUpdater implements Runnable {
      * @return Возвращает все таблицы из сайта <a href="https://www.mirea.ru/education/schedule-main/schedule/">mirea.ru</a>.
      */
     public ArrayList<ExcelFileInterface> openTablesFromExternal() {
-        waitCache();
         ArrayList<ExcelFileInterface> files = new ArrayList<>(excelFiles.size());
         for (File path :
                 excelFiles) {
@@ -115,26 +110,40 @@ public class ExternalDataUpdater implements Runnable {
      */
     public String findTeacher(String nameInExcel) {
         // TODO: Необходимо реализовать функционал.
-        return nameInExcel;
-    }
+        String
+                surname, // Фамилия
+                firstName, // Имя
+                patronymic; // Отчество
+        for(int i = 0; i < nameInExcel.length(); i++) {
 
-    private void waitCache() {
-        if (isNeedWait)
-            try {
-                monitorCacheIsReady.wait();
-            } catch (InterruptedException e) {
-                // ignore.
-            }
+        }
+        return nameInExcel;
     }
 
     /**
      * Запускает механизм автоматического обновления, скачивания данных
      * из сайта <a href="https://www.mirea.ru/education/">mirea.ru</a>.
-     *
-     * @see Runnable#run()
      */
-    @Override
     public void run() {
+        if(myThread != null) {
+            if(!myThread.isInterrupted())
+                myThread.interrupt();
+        }
+        myThread = new Thread(this::threadBody);
+        myThread.start();
+    }
+
+    public boolean isAlive() {
+        return myThread != null && myThread.isAlive();
+    }
+
+    public void interrupt() {
+        if(!myThread.isInterrupted())
+            myThread.interrupt();
+        myThread = null;
+    }
+
+    private void threadBody() {
         try {
             while (!Thread.currentThread().isInterrupted()) {
                 download();
@@ -149,13 +158,12 @@ public class ExternalDataUpdater implements Runnable {
      * Функция скачивает необходимый контент в папку кэша.
      */
     private synchronized void download() {
-        isNeedWait = true;
         Stream<String> htmlExcels = downloadHTML("https://www.mirea.ru/education/schedule-main/schedule/");
 
-        Collection<String> excelUrls = FindAllExcelURLs(htmlExcels);
+        Collection<String> excelUrls = findAllExcelURLs(htmlExcels);
         htmlExcels.close();
         try {
-            excelFiles = downloadHTMLsToPath(excelUrls);
+            excelFiles = downloadFilesToPath(excelUrls, this.pathToCache);
 
             Stream<String> htmlNames = downloadHTML("https://www.mirea.ru/sveden/employees/");
             teachers = getTeachers(htmlNames);
@@ -163,8 +171,6 @@ public class ExternalDataUpdater implements Runnable {
             e.printStackTrace();
             System.out.println(e.getLocalizedMessage());
         }
-        isNeedWait = false;
-        monitorCacheIsReady.notifyAll();
     }
 
     /**
@@ -228,17 +234,15 @@ public class ExternalDataUpdater implements Runnable {
      * Загружает все файлы по URL и помещает в дерикторию кэша.
      * @param excelUrls Коллекция ссылок на скачивание.
      */
-    private ArrayList<File> downloadHTMLsToPath(Collection<String> excelUrls) throws IOException {
+    private ArrayList<File> downloadFilesToPath(Collection<String> excelUrls, File pathToCache) throws IOException {
         ArrayList<File> excelFilesPaths = new ArrayList<>();
         for(String url : excelUrls) {
-            Stream<String> fStream = downloadHTML(url);
-            if(fStream != null) {
-                File newFile = new File(this.pathToCache, LocalDateTime.now().toString() + "_" + url.substring(url.lastIndexOf("/")));
-                Files.write(newFile.toPath(), (Iterable<String>) fStream::iterator);
-                excelFilesPaths.add(newFile);
-            }
-            else
-                throw new IOException("ExcelUrls can't download.");
+            File currentFile = new File(pathToCache, LocalDateTime.now().toString().replace(':', '-').replace('.', '_') + "_" + url.substring(url.lastIndexOf("/") + 1));
+            System.out.println(currentFile.toString());
+            if(!currentFile.createNewFile())
+                throw new IOException("can't create new excel file. File = " + currentFile.toString());
+            downloadFile(new URL(url), currentFile);
+            excelFilesPaths.add(currentFile);
         }
         return excelFilesPaths;
     }
@@ -248,14 +252,17 @@ public class ExternalDataUpdater implements Runnable {
      * @param htmlExcels Поток текста html.
      * @return Лист на ссылки excel файлов.
      */
-    private List<String> FindAllExcelURLs(Stream<String> htmlExcels) {
+    private List<String> findAllExcelURLs(Stream<String> htmlExcels) {
         // href ?= ?"http.+?\.[xX][lL][sS][xX]?"
         ArrayList<String> excelsUrls = new ArrayList<>();
         Pattern p = Pattern.compile("href ?= ?\"http.+?\\.[xX][lL][sS][xX]?\"");
         htmlExcels.forEach((str) -> {
             Matcher m = p.matcher(str);
-            if(m.find())
-                excelsUrls.add(m.group());
+            if(m.find()) {
+                String resultFind =  m.group();
+                resultFind = resultFind.substring(resultFind.indexOf("http"), resultFind.lastIndexOf("\"") - 1);
+                excelsUrls.add(resultFind);
+            }
 
         });
         return excelsUrls;
@@ -281,5 +288,15 @@ public class ExternalDataUpdater implements Runnable {
             ioe.printStackTrace();
         }
         return null;
+    }
+
+    private void downloadFile(URL url, File fileToWrite) throws IOException {
+        ReadableByteChannel readableByteChannel = Channels.newChannel(url.openStream());
+
+        FileOutputStream fileOutputStream = new FileOutputStream(fileToWrite);
+        fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+
+        readableByteChannel.close();
+        fileOutputStream.close();
     }
 }

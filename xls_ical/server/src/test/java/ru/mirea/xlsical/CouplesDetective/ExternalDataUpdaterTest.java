@@ -16,14 +16,14 @@ public class ExternalDataUpdaterTest {
         ExternalDataUpdater edu = new ExternalDataUpdater();
         assertNotNull(edu.pathToCache);
         assertTrue(edu.pathToCache.canWrite());
-        Thread thread = new Thread(edu); thread.run();
-        assertTrue(thread.isAlive());
+        edu.run();
+        assertTrue(edu.isAlive());
         try {
-            wait(100);
+            Thread.sleep(100);
         } catch (InterruptedException e) {
             fail("Cancel test.");
         }
-        assertTrue(thread.isAlive());
+        assertTrue(edu.isAlive());
         assertEquals("Матчин Василий Тимофеевич, старший преподаватель кафедры инструментального и прикладного программного обеспечения.", edu.findTeacher("Матчин В.Т."));
         // 63 файла в бакалавре
         // 22 файла в магистратуре
@@ -39,12 +39,12 @@ public class ExternalDataUpdaterTest {
         for (ExcelFileInterface file : files) {
             file.close();
         }
-        thread.interrupt();
+        edu.interrupt();
         try {
-            wait(20);
+            Thread.sleep(20);
         } catch (InterruptedException e) {
             fail("Cancel test.");
         }
-        assertSame(thread.getState(), Thread.State.TERMINATED);
+        assertFalse(edu.isAlive());
     }
 }
