@@ -6,12 +6,106 @@ import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Iterator;
 
 import static org.junit.Assert.*;
 
 public class ExternalDataUpdaterTest {
+
+    /**
+     * Функция разработана для математического вычисления,
+     * как надо реализовать расстановку начала и конца семестра.
+     */
+    @Test
+    public void calculateDays() {
+
+        assertEquals(2,
+                getCounts6Days(ZonedDateTime.of(
+                        LocalDate.of(2000, 1, 1),
+                        LocalTime.of(0, 0, 0),
+                        ZoneId.systemDefault()
+                        ),
+                        ZonedDateTime.of(
+                                LocalDate.of(2000, 1, 2),
+                                LocalTime.of(0, 0, 0),
+                                ZoneId.systemDefault()
+                        )
+                )
+        );
+
+        assertEquals(6,
+                getCounts6Days(ZonedDateTime.of(
+                        LocalDate.of(2000, 1, 1),
+                        LocalTime.of(0, 0, 0),
+                        ZoneId.systemDefault()
+                        ),
+                        ZonedDateTime.of(
+                                LocalDate.of(2000, 1, 7),
+                                LocalTime.of(0, 0, 0),
+                                ZoneId.systemDefault()
+                        )
+                )
+        );
+
+        System.out.println(getCounts6Days(ZonedDateTime.of(
+                LocalDate.of(2015, 1, 1),
+                LocalTime.of(0, 0, 0),
+                ZoneId.systemDefault()
+                ),
+                ZonedDateTime.of(
+                        LocalDate.of(2015, 2, 9),
+                        LocalTime.of(0, 0, 0),
+                        ZoneId.systemDefault()
+                )));
+
+        System.out.println(getCounts6Days(ZonedDateTime.of(
+                LocalDate.of(2017, 1, 1),
+                LocalTime.of(0, 0, 0),
+                ZoneId.systemDefault()
+                ),
+                ZonedDateTime.of(
+                        LocalDate.of(2017, 2, 6),
+                        LocalTime.of(0, 0, 0),
+                        ZoneId.systemDefault()
+                )));
+        System.out.println(getCounts6Days(ZonedDateTime.of(
+                LocalDate.of(2018, 1, 1),
+                LocalTime.of(0, 0, 0),
+                ZoneId.systemDefault()
+                ),
+                ZonedDateTime.of(
+                        LocalDate.of(2018, 2, 9),
+                        LocalTime.of(0, 0, 0),
+                        ZoneId.systemDefault()
+                )));
+        System.out.println(getCounts6Days(ZonedDateTime.of(
+                LocalDate.of(2019, 1, 1),
+                LocalTime.of(0, 0, 0),
+                ZoneId.systemDefault()
+                ),
+                ZonedDateTime.of(
+                        LocalDate.of(2019, 2, 11),
+                        LocalTime.of(0, 0, 0),
+                        ZoneId.systemDefault()
+                )));
+    }
+
+    private int getCounts6Days(ZonedDateTime current, ZonedDateTime target) {
+        int out = 1;
+        if(current.compareTo(target) >= 0)
+            throw new IllegalArgumentException();
+        while(current.compareTo(target) < 0) {
+            if(current.getDayOfWeek() == DayOfWeek.SUNDAY)
+                current = current.plus(2, ChronoUnit.DAYS);
+            else
+                current = current.plus(1, ChronoUnit.DAYS);
+            out++;
+        }
+        return out;
+    }
 
     @Test
     public void run() throws IOException, InvalidFormatException {

@@ -84,14 +84,47 @@ public class DetectiveSemester extends Detective {
     @Override
     public ZonedDateTime getStartTime(ZonedDateTime now) {
         // TODO
-        throw new UnsupportedOperationException("Not impl");
-        /*
         if (Month.JANUARY.getValue() <= now.getMonth().getValue()
                 && now.getMonth().getValue() <= Month.JUNE.getValue()
-        ) {
-
+        ) { // У нас загружано расписание для весны
+            // Установить на начало января
+            ZonedDateTime current = ZonedDateTime.of(
+                    LocalDate.of(now.getYear(), 1, 1),
+                    LocalTime.of(0, 0, 0),
+                    now.getZone()
+            );
+            // Прибавить 35 будни+суббота дней
+            for(int i = 0; i <= 35; i++) {
+                if(current.getDayOfWeek() == DayOfWeek.SUNDAY)
+                    current = current.plus(2, ChronoUnit.DAYS);
+                else
+                    current = current.plus(1, ChronoUnit.DAYS);
+            }
+            switch (current.getDayOfWeek()) {
+                //case MONDAY:
+                //    break;
+                case TUESDAY:
+                    current = current.minus(1, ChronoUnit.DAYS);
+                    break;
+                case WEDNESDAY:
+                    current = current.minus(2, ChronoUnit.DAYS);
+                    break;
+                //case THURSDAY:
+                //    break;
+                //case FRIDAY:
+                //    break;
+                case SATURDAY:
+                    current = current.plus(2, ChronoUnit.DAYS);
+                    break;
+                case SUNDAY:
+                    current = current.plus(1, ChronoUnit.DAYS);
+                    break;
+            }
+            return current;
         }
-        */
+        else { // У нас загружано расписание для осени.
+            throw new UnsupportedOperationException("Not impl");
+        }
     }
 
     /**
