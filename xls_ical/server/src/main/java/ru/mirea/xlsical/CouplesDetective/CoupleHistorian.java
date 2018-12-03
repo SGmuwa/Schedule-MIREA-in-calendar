@@ -1,5 +1,6 @@
 package ru.mirea.xlsical.CouplesDetective;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.Detective;
 import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveException;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
@@ -65,11 +66,12 @@ public class CoupleHistorian {
      * Анализирует будущие пары.
      * Сохраняет на диск.
      */
-    private void updateCache() throws IOException, DetectiveException {
+    private void updateCache() throws IOException, DetectiveException, InvalidFormatException {
         LinkedList<CoupleInCalendar> outCache = new LinkedList<>(); // Итоговый кэш
         LinkedList<CoupleInCalendar> newCache = new LinkedList<>(); // То, что получили из МИРЭА
         ZonedDateTime now = ZonedDateTime.now();
-        for(ExcelFileInterface file : edUpdater.openTablesFromExternal()) {
+        for (Iterator<ExcelFileInterface> it = edUpdater.openTablesFromExternal(); it.hasNext(); ) {
+            ExcelFileInterface file = it.next();
             Detective detective = Detective.chooseDetective(file);
             newCache.addAll(detective.startAnInvestigation(
                     detective.getStartTime(now),

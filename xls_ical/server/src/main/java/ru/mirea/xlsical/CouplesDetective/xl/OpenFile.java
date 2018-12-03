@@ -18,6 +18,13 @@ import java.util.ArrayList;
  * @see OpenFile#newInstances(String)
  */
 public class OpenFile implements ExcelFileInterface {
+    @Override
+    public String toString() {
+        return "OpenFile{" +
+                "wb=" + wb +
+                ", numberSheet=" + numberSheet +
+                '}';
+    }
 
     /**
      * Открывает Excel файл вместе со всеми его листами.

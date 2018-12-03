@@ -1,10 +1,12 @@
 package ru.mirea.xlsical.CouplesDetective;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
 
 import java.io.*;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.time.LocalDateTime;
@@ -89,20 +91,44 @@ public class ExternalDataUpdater {
      * Функция отвечает за то, чтобы получить таблицы из сайта <a href="https://www.mirea.ru/education/schedule-main/schedule/">mirea.ru</a>.
      * Стоит отметить, что если в кэше есть не устаревшие таблицы, то функция
      * вернёт таблицы из кэша.
-     * @return Возвращает все таблицы из сайта <a href="https://www.mirea.ru/education/schedule-main/schedule/">mirea.ru</a>.
+     * После вызова hasNext предыдущий файл закрывается.
+     * @return Возвращает все таблицы из сайта <a href="https://www.mirea.ru/education/schedule-main/schedule/">mirea.ru</a>. Вызвать метод .close не обязательно.
      */
-    public ArrayList<ExcelFileInterface> openTablesFromExternal() {
-        ArrayList<ExcelFileInterface> files = new ArrayList<>(excelFiles.size());
-        for (File path :
-                excelFiles) {
-            try {
-                files.addAll(OpenFile.newInstances(path.getPath()));
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println(e.getLocalizedMessage() + "\nfile: " + path);
+    public Iterator<ExcelFileInterface> openTablesFromExternal() throws IOException, InvalidFormatException {
+        return new Iterator<ExcelFileInterface>() {
+            Iterator<File> FilesIterator = ((ArrayList<File>) excelFiles.clone()).iterator();
+            Iterator<? extends ExcelFileInterface> nextElm = null;
+            ExcelFileInterface previous = null;
+
+            @Override
+            public boolean hasNext() {
+                if(nextElm == null || !nextElm.hasNext()) {
+                    for (; FilesIterator.hasNext(); ) {
+                        File path = FilesIterator.next();
+                        try {
+                            nextElm = new ArrayList<>(OpenFile.newInstances(path.getPath())).iterator();
+                            return true;
+                        } catch (IOException | InvalidFormatException e) {
+                            System.out.println(e.getLocalizedMessage() + "\nfile: " + path);
+                        }
+                    }
+                }
+                return false;
             }
-        }
-        return files;
+
+            @Override
+            public ExcelFileInterface next() {
+                if(previous != null) {
+                    try {
+                        previous.close();
+                    } catch (IOException e) {
+                        System.out.println("Can't close file: " + previous.toString());
+                    }
+                }
+                previous = nextElm.next();
+                return previous;
+            }
+        };
     }
 
     /**
@@ -148,7 +174,7 @@ public class ExternalDataUpdater {
         try {
             while (!Thread.currentThread().isInterrupted()) {
                 download();
-                wait(1000 * 60 * 60 * 8); // Проверка три раза в день.
+                Thread.sleep(1000 * 60 * 60 * 8); // Проверка три раза в день.
             }
         } catch (InterruptedException e) {
             // finish.
@@ -161,8 +187,17 @@ public class ExternalDataUpdater {
     private synchronized void download() {
         Stream<String> htmlExcels = downloadHTML("https://www.mirea.ru/education/schedule-main/schedule/");
 
-        Collection<String> excelUrls = findAllExcelURLs(htmlExcels);
+        ArrayList<String> excelUrls = findAllExcelURLs(htmlExcels);
         htmlExcels.close();
+        // ---- https -> http
+        String elm;
+        for(int i = excelUrls.size() - 1; i >= 0; i--) {
+            elm = excelUrls.get(i);
+            System.out.println(elm);
+            elm = elm.replaceFirst("https:/", "http:/");
+            excelUrls.set(i, elm);
+        }
+        // ----
         try {
             excelFiles = downloadFilesToPath(excelUrls, this.pathToCache);
 
@@ -253,7 +288,7 @@ public class ExternalDataUpdater {
      * @param htmlExcels Поток текста html.
      * @return Лист на ссылки excel файлов.
      */
-    private List<String> findAllExcelURLs(Stream<String> htmlExcels) {
+    private ArrayList<String> findAllExcelURLs(Stream<String> htmlExcels) {
         // href ?= ?"http.+?\.[xX][lL][sS][xX]?"
         ArrayList<String> excelsUrls = new ArrayList<>();
         Pattern p = Pattern.compile("href ?= ?\"http.+?\\.[xX][lL][sS][xX]?\"");
@@ -261,7 +296,7 @@ public class ExternalDataUpdater {
             Matcher m = p.matcher(str);
             if(m.find()) {
                 String resultFind =  m.group();
-                resultFind = resultFind.substring(resultFind.indexOf("http"), resultFind.lastIndexOf("\"") - 1);
+                resultFind = resultFind.substring(resultFind.indexOf("http"), resultFind.lastIndexOf("\""));
                 excelsUrls.add(resultFind);
             }
 
@@ -282,6 +317,11 @@ public class ExternalDataUpdater {
 
         try {
             url = new URL(s);
+            URLConnection connection = url.openConnection();
+            String redirect = connection.getHeaderField("Location");
+            if (redirect != null){
+                url = new URL(redirect);
+            }
             is = url.openStream();  // throws an IOException
             br = new BufferedReader(new InputStreamReader(is));
             return br.lines();
@@ -292,6 +332,12 @@ public class ExternalDataUpdater {
     }
 
     private void downloadFile(URL url, File fileToWrite) throws IOException {
+        URLConnection connection = url.openConnection();
+        String redirect = connection.getHeaderField("Location");
+        if (redirect != null){ // https://stackoverflow.com/questions/18431440/301-moved-permanently
+            url = new URL(redirect);
+        }
+
         ReadableByteChannel readableByteChannel = Channels.newChannel(url.openStream());
 
         FileOutputStream fileOutputStream = new FileOutputStream(fileToWrite);
