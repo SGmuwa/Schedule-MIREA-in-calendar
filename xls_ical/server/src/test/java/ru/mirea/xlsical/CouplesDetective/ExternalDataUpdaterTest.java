@@ -7,6 +7,7 @@ import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import java.io.Closeable;
 import java.io.IOException;
 import java.time.*;
+import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -24,12 +25,40 @@ public class ExternalDataUpdaterTest {
 
         assertEquals(2,
                 getCounts6Days(ZonedDateTime.of(
-                        LocalDate.of(2000, 1, 1),
+                        LocalDate.of(2018, 12, 3),
                         LocalTime.of(0, 0, 0),
                         ZoneId.systemDefault()
                         ),
                         ZonedDateTime.of(
-                                LocalDate.of(2000, 1, 2),
+                                LocalDate.of(2018, 12, 4),
+                                LocalTime.of(0, 0, 0),
+                                ZoneId.systemDefault()
+                        )
+                )
+        );
+
+        assertEquals(1,
+                getCounts6Days(ZonedDateTime.of(
+                        LocalDate.of(2018, 12, 1),
+                        LocalTime.of(0, 0, 0),
+                        ZoneId.systemDefault()
+                        ),
+                        ZonedDateTime.of(
+                                LocalDate.of(2018, 12, 2),
+                                LocalTime.of(0, 0, 0),
+                                ZoneId.systemDefault()
+                        )
+                )
+        );
+
+        assertEquals(1,
+                getCounts6Days(ZonedDateTime.of(
+                        LocalDate.of(2018, 12, 2),
+                        LocalTime.of(0, 0, 0),
+                        ZoneId.systemDefault()
+                        ),
+                        ZonedDateTime.of(
+                                LocalDate.of(2018, 12, 3),
                                 LocalTime.of(0, 0, 0),
                                 ZoneId.systemDefault()
                         )
@@ -56,7 +85,7 @@ public class ExternalDataUpdaterTest {
                 ZoneId.systemDefault()
                 ),
                 ZonedDateTime.of(
-                        LocalDate.of(2015, 2, 9),
+                        LocalDate.of(2015, 2, 8),
                         LocalTime.of(0, 0, 0),
                         ZoneId.systemDefault()
                 )));
@@ -67,7 +96,7 @@ public class ExternalDataUpdaterTest {
                 ZoneId.systemDefault()
                 ),
                 ZonedDateTime.of(
-                        LocalDate.of(2017, 2, 6),
+                        LocalDate.of(2017, 2, 5),
                         LocalTime.of(0, 0, 0),
                         ZoneId.systemDefault()
                 )));
@@ -77,7 +106,7 @@ public class ExternalDataUpdaterTest {
                 ZoneId.systemDefault()
                 ),
                 ZonedDateTime.of(
-                        LocalDate.of(2018, 2, 9),
+                        LocalDate.of(2018, 2, 8),
                         LocalTime.of(0, 0, 0),
                         ZoneId.systemDefault()
                 )));
@@ -87,24 +116,30 @@ public class ExternalDataUpdaterTest {
                 ZoneId.systemDefault()
                 ),
                 ZonedDateTime.of(
-                        LocalDate.of(2019, 2, 11),
+                        LocalDate.of(2019, 2, 10),
                         LocalTime.of(0, 0, 0),
                         ZoneId.systemDefault()
                 )));
     }
 
     private int getCounts6Days(ZonedDateTime current, ZonedDateTime target) {
-        int out = 1;
-        if(current.compareTo(target) >= 0)
+        int sundays = 0;
+        if(current.compareTo(target) > 0)
             throw new IllegalArgumentException();
-        while(current.compareTo(target) < 0) {
+        Duration duration = Duration.between(current, target);
+        long days = duration.toDays() + 1;
+        long weeks = days / 7;
+        current = current.plus(weeks, ChronoUnit.WEEKS);
+        while(current.compareTo(target) <= 0) {
             if(current.getDayOfWeek() == DayOfWeek.SUNDAY)
-                current = current.plus(2, ChronoUnit.DAYS);
-            else
-                current = current.plus(1, ChronoUnit.DAYS);
-            out++;
+                sundays++;
+            current = current.plus(1, ChronoUnit.DAYS);
         }
-        return out;
+        return (int)(-sundays + (days - weeks));
+    }
+
+    private ZonedDateTime addBussinessDaysToDate(ZonedDateTime current, long bDays) {
+        throw new UnsupportedOperationException();
     }
 
     @Test
