@@ -13,6 +13,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static ru.mirea.xlsical.CouplesDetective.Teacher.ConvertNameFromStrToArray;
+
 /**
  * Класс, который отвечает за синхронизацию с <a href="https://www.mirea.ru/education/">mirea.ru</a>.
  * Данный класс потокобезопасный.
@@ -110,15 +112,14 @@ public class ExternalDataUpdater {
      */
     public String findTeacher(String nameInExcel) {
         // TODO: Необходимо реализовать функционал.
-        String
-                surname, // Фамилия
-                firstName, // Имя
-                patronymic; // Отчество
-        for(int i = 0; i < nameInExcel.length(); i++) {
-
-        }
         return nameInExcel;
+        //String[] fullName = Teacher.ConvertNameFromStrToArray(nameInExcel);
+        //return findTeacher(fullName[0], fullName[1], fullName[2]);
     }
+
+    //private String findTeacher(String surname, String firstName, String partonymic) {
+        //Collections.binarySearch(teachers, surname, (left, right) -> )
+    //}
 
     /**
      * Запускает механизм автоматического обновления, скачивания данных
