@@ -21,8 +21,8 @@ import java.util.regex.Pattern;
  */
 public class DetectiveSemester extends Detective {
 
-    public DetectiveSemester(ExcelFileInterface file) {
-        super(file);
+    public DetectiveSemester(ExcelFileInterface file, DetectiveDate dateSettings) {
+        super(file, dateSettings);
     }
 
     /**
@@ -83,6 +83,31 @@ public class DetectiveSemester extends Detective {
      */
     @Override
     public ZonedDateTime getStartTime(ZonedDateTime now) {
+        // TODO
+        if (Month.JANUARY.getValue() <= now.getMonth().getValue()
+                && now.getMonth().getValue() <= Month.JUNE.getValue()
+        ) { // У нас загружано расписание для весны
+
+            DetectiveDate.TwoZonedDateTime search = dateSettings.searchBeforeAfter(
+                    ZonedDateTime.of(
+                            LocalDate.of(now.getYear(), Month.FEBRUARY, 25),
+                            LocalTime.NOON,
+                            now.getZone()
+                    ),
+                    Duration.of(25, ChronoUnit.DAYS)
+            );
+
+            if(search.getLeft() == null)
+                guessStartTime(now);
+
+        }
+        else { // У нас загружано расписание для осени.
+
+        }
+        throw new UnsupportedOperationException("Not impl");
+    }
+
+    private ZonedDateTime guessStartTime(ZonedDateTime now) {
         // TODO
         if (Month.JANUARY.getValue() <= now.getMonth().getValue()
                 && now.getMonth().getValue() <= Month.JUNE.getValue()

@@ -13,8 +13,8 @@ import java.util.List;
  * Данный класс может видеть только экзаменационное расписание.
  */
 public class DetectiveExams extends Detective {
-    protected DetectiveExams(ExcelFileInterface file) {
-        super(file);
+    protected DetectiveExams(ExcelFileInterface file, DetectiveDate dateSettings) {
+        super(file, dateSettings);
     }
 
     /**
@@ -29,7 +29,7 @@ public class DetectiveExams extends Detective {
      */
     @Override
     public List<CoupleInCalendar> startAnInvestigation(ZonedDateTime start, ZonedDateTime finish) throws DetectiveException, IOException {
-        return null;
+        throw new UnsupportedOperationException("Not implemented");
     }
 
     /**

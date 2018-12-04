@@ -21,13 +21,21 @@ public abstract class Detective implements Closeable {
      * Файл, в котором требуется искать пары занятий.
      */
     protected final ExcelFileInterface file;
+    /**
+     * Используется для доступа к конфигураций дат.
+     * Благодаря этому Детектив знает, когда начало или конец
+     * семестра поставил ректор университета.
+     */
+    protected final DetectiveDate dateSettings;
 
     /**
      * Создаёт экземпляр просмоторщика excel таблицы.
      * @param file Файл, в котором требуется искать пары занятий.
+     * @param dateSettings Настройки дат. Подсказывает начала и концы семестров.
      */
-    protected Detective(ExcelFileInterface file) {
+    protected Detective(ExcelFileInterface file, DetectiveDate dateSettings) {
         this.file = file;
+        this.dateSettings = dateSettings;
     }
 
     /**
@@ -38,7 +46,7 @@ public abstract class Detective implements Closeable {
      * @param finish Время конца составления.
      * @throws DetectiveException Появилась проблема, связанная с обработкой Excel файла
      * @throws IOException Во время работы с Excel file - файл стал недоступен.
-     * @see Detective#chooseDetective(ExcelFileInterface)
+     * @see Detective#chooseDetective(ExcelFileInterface,DetectiveDate)
      */
     public static List<CoupleInCalendar> startAnInvestigations(Iterable<? extends Detective> detectives, ZonedDateTime start, ZonedDateTime finish) throws DetectiveException, IOException {
         List<CoupleInCalendar> output = new LinkedList<>();
@@ -78,8 +86,8 @@ public abstract class Detective implements Closeable {
      * @param file Входящий файл, к которому необходимо применить правило.
      * @return Детектив, который разбирается с данным файлом.
      */
-    public static Detective chooseDetective(ExcelFileInterface file) {
-        return new DetectiveSemester(file);
+    public static Detective chooseDetective(ExcelFileInterface file, DetectiveDate dateSettings) {
+        return new DetectiveSemester(file, dateSettings);
     }
 
     @Override

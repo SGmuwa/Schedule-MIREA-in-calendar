@@ -2,6 +2,7 @@ package ru.mirea.xlsical.CouplesDetective;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.Detective;
+import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveDate;
 import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveException;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import ru.mirea.xlsical.interpreter.Seeker;
@@ -24,6 +25,7 @@ public class CoupleHistorian {
 
     private ExternalDataUpdater edUpdater = null;
     private LinkedList<CoupleInCalendar> cache;
+    private DetectiveDate settingDates;
 
     public CoupleHistorian() {
         try {
@@ -72,7 +74,7 @@ public class CoupleHistorian {
         ZonedDateTime now = ZonedDateTime.now();
         for (Iterator<ExcelFileInterface> it = edUpdater.openTablesFromExternal(); it.hasNext(); ) {
             ExcelFileInterface file = it.next();
-            Detective detective = Detective.chooseDetective(file);
+            Detective detective = Detective.chooseDetective(file, settingDates);
             newCache.addAll(detective.startAnInvestigation(
                     detective.getStartTime(now),
                     detective.getFinishTime(now)

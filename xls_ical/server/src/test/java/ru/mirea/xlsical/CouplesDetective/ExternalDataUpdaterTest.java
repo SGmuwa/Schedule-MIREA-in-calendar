@@ -119,7 +119,21 @@ public class ExternalDataUpdaterTest {
                         LocalDate.of(2019, 2, 10),
                         LocalTime.of(0, 0, 0),
                         ZoneId.systemDefault()
-                )));
+                ))
+        );
+        {
+            ZonedDateTime a = ZonedDateTime.of(
+                    LocalDate.of(2019, 1, 1),
+                    LocalTime.of(0, 0, 0),
+                    ZoneId.systemDefault()
+            );
+            ZonedDateTime b = ZonedDateTime.of(
+                    LocalDate.of(2019, 2, 10),
+                    LocalTime.of(0, 0, 0),
+                    ZoneId.systemDefault()
+            );
+            assertEquals(getCounts6Days(a, b), getCounts6Days(a, addBussinessDaysToDate(a, getCounts6Days(a, b))));
+        }
     }
 
     private int getCounts6Days(ZonedDateTime current, ZonedDateTime target) {
@@ -139,7 +153,13 @@ public class ExternalDataUpdaterTest {
     }
 
     private ZonedDateTime addBussinessDaysToDate(ZonedDateTime current, long bDays) {
-        throw new UnsupportedOperationException();
+        for(long i = 0; i <= bDays; i++) {
+            if(current.getDayOfWeek() == DayOfWeek.SUNDAY)
+                current = current.plus(2, ChronoUnit.DAYS);
+            else
+                current = current.plus(1, ChronoUnit.DAYS);
+        }
+        return current;
     }
 
     @Test
