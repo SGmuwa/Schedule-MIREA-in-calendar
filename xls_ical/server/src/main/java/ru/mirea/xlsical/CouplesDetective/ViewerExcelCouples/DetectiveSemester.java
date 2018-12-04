@@ -91,28 +91,33 @@ public class DetectiveSemester extends Detective {
      */
     @Override
     public ZonedDateTime getStartTime(ZonedDateTime now) {
-        // TODO
+        DetectiveDate.TwoZonedDateTime search;
         if (Month.JANUARY.getValue() <= now.getMonth().getValue()
                 && now.getMonth().getValue() <= Month.JUNE.getValue()
-        ) { // У нас загружано расписание для весны
-
-            DetectiveDate.TwoZonedDateTime search = dateSettings.searchBeforeAfter(
+        ) { // У нас загружано расписание для весны. Ищем начало.
+            search = dateSettings.searchBeforeAfter(
                     ZonedDateTime.of(
                             LocalDate.of(now.getYear(), Month.FEBRUARY, 25),
                             LocalTime.NOON,
                             now.getZone()
                     ),
-                    Duration.of(25, ChronoUnit.DAYS)
+                    Duration.of(35, ChronoUnit.DAYS)
             );
-
-            if(search.getLeft() == null)
-                guessStartTime(now);
-
         }
-        else { // У нас загружано расписание для осени.
-
+        else { // У нас загружано расписание для осени. Ищем начало.
+            search = dateSettings.searchBeforeAfter(
+                    ZonedDateTime.of(
+                            LocalDate.of(now.getYear(), Month.SEPTEMBER, 25),
+                            LocalTime.NOON,
+                            now.getZone()
+                    ),
+                    Duration.of(35, ChronoUnit.DAYS)
+            );
         }
-        throw new UnsupportedOperationException("Not impl");
+        if(search.getLeft() == null)
+            guessStartTime(now); // Не нашёл? Давай гадать!
+
+        return search.getLeft();
     }
 
     private ZonedDateTime guessStartTime(ZonedDateTime now) {
@@ -126,13 +131,8 @@ public class DetectiveSemester extends Detective {
                     LocalTime.of(0, 0, 0),
                     now.getZone()
             );
-            // Прибавить 35 будни+суббота дней
-            for(int i = 0; i <= 35; i++) {
-                if(current.getDayOfWeek() == DayOfWeek.SUNDAY)
-                    current = current.plus(2, ChronoUnit.DAYS);
-                else
-                    current = current.plus(1, ChronoUnit.DAYS);
-            }
+            // Прибавить 32 будни+суббота дней
+            current = addBusinessDaysToDate(current, 32);
             switch (current.getDayOfWeek()) {
                 //case MONDAY:
                 //    break;
@@ -156,7 +156,20 @@ public class DetectiveSemester extends Detective {
             return current;
         }
         else { // У нас загружано расписание для осени.
-            throw new UnsupportedOperationException("Not impl");
+            ZonedDateTime current = ZonedDateTime.of(
+                    LocalDate.of(now.getYear(), 9, 1),
+                    LocalTime.of(0, 0, 0),
+                    now.getZone()
+            );
+            switch (current.getDayOfWeek()) {
+                case SATURDAY:
+                    current = current.plus(2, ChronoUnit.DAYS);
+                    break;
+                case SUNDAY:
+                    current = current.plus(1, ChronoUnit.DAYS);
+                    break;
+            }
+            return current;
         }
     }
 
@@ -169,8 +182,31 @@ public class DetectiveSemester extends Detective {
      */
     @Override
     public ZonedDateTime getFinishTime(ZonedDateTime now) {
-        // TODO
-        throw new UnsupportedOperationException("Not impl");
+        DetectiveDate.TwoZonedDateTime search;
+        if (Month.JANUARY.getValue() <= now.getMonth().getValue()
+                && now.getMonth().getValue() <= Month.JUNE.getValue()
+        ) { // У нас загружано расписание для весны. Ищем начало.
+            search = dateSettings.searchBeforeAfter(
+                    ZonedDateTime.of(
+                            LocalDate.of(now.getYear(), Month.MAY, 15),
+                            LocalTime.NOON,
+                            now.getZone()
+                    ),
+                    Duration.of(35, ChronoUnit.DAYS)
+            );
+        }
+        else { // У нас загружано расписание для осени. Ищем начало.
+            search = dateSettings.searchBeforeAfter(
+                    ZonedDateTime.of(
+                            LocalDate.of(now.getYear(), Month.DECEMBER, 10),
+                            LocalTime.NOON,
+                            now.getZone()
+                    ),
+                    Duration.of(35, ChronoUnit.DAYS)
+            );
+        }
+
+        return search.getRight() == null ? guessStartTime(now) : search.getRight();
     }
 
 

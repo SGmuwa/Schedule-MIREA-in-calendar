@@ -75,7 +75,7 @@ public class DetectiveTest {
                 )
         );
 
-        System.out.println(getCounts6Days(ZonedDateTime.of(
+        System.out.print(getCounts6Days(ZonedDateTime.of(
                 LocalDate.of(2015, 1, 1),
                 LocalTime.of(0, 0, 0),
                 ZoneId.systemDefault()
@@ -84,9 +84,9 @@ public class DetectiveTest {
                         LocalDate.of(2015, 2, 8),
                         LocalTime.of(0, 0, 0),
                         ZoneId.systemDefault()
-                )));
+                )) + ", ");
 
-        System.out.println(getCounts6Days(ZonedDateTime.of(
+        System.out.print(getCounts6Days(ZonedDateTime.of(
                 LocalDate.of(2017, 1, 1),
                 LocalTime.of(0, 0, 0),
                 ZoneId.systemDefault()
@@ -95,8 +95,8 @@ public class DetectiveTest {
                         LocalDate.of(2017, 2, 5),
                         LocalTime.of(0, 0, 0),
                         ZoneId.systemDefault()
-                )));
-        System.out.println(getCounts6Days(ZonedDateTime.of(
+                )) + ", ");
+        System.out.print(getCounts6Days(ZonedDateTime.of(
                 LocalDate.of(2018, 1, 1),
                 LocalTime.of(0, 0, 0),
                 ZoneId.systemDefault()
@@ -105,7 +105,7 @@ public class DetectiveTest {
                         LocalDate.of(2018, 2, 8),
                         LocalTime.of(0, 0, 0),
                         ZoneId.systemDefault()
-                )));
+                )) + ", ");
         System.out.println(getCounts6Days(ZonedDateTime.of(
                 LocalDate.of(2019, 1, 1),
                 LocalTime.of(0, 0, 0),
@@ -115,7 +115,7 @@ public class DetectiveTest {
                         LocalDate.of(2019, 2, 10),
                         LocalTime.of(0, 0, 0),
                         ZoneId.systemDefault()
-                ))
+                )) + "."
         );
         assertEquals(ZonedDateTime.of(
                 LocalDate.of(2018, 12, 4),
