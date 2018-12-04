@@ -26,6 +26,14 @@ public class DetectiveSemester extends Detective {
     }
 
     /**
+     * @deprecated
+     * @see #DetectiveSemester(ExcelFileInterface, DetectiveDate)
+     */
+    public DetectiveSemester(ExcelFileInterface file) {
+        super(file);
+    }
+
+    /**
      * Функция ищет занятия для seeker в файле File.
      *
      * @param start  Дата и время начала составления расписания.

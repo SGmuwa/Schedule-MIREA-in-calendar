@@ -1,5 +1,6 @@
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import ru.mirea.xlsical.CouplesDetective.CoupleInCalendar;
+import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveDate;
 import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveSemester;
 import org.junit.Test;
 import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveException;
@@ -74,9 +75,9 @@ public class DetectiveSemesterTest {
         files = OpenFile.newInstances("tests/test-01.xlsx");
         assertEquals(1, files.size());
         ExcelFileInterface file = files.iterator().next();
-        Seeker seeker = new Seeker("ИКБО-04-16", SeekerType.StudyGroup, LocalDate.of(2018,9,1), LocalDate.of(2018, 10,1), ZoneId.of("UTC+3"), "пр-т Вернадского, 78", 1);
+        Seeker seeker = new Seeker("ИКБО-04-16", LocalDate.of(2018,9,1), LocalDate.of(2018, 10,1), ZoneId.of("UTC+3"));
 
-        col = new DetectiveSemester(files.iterator().next()).GetCouplesFromDay(
+        col = new DetectiveSemester(files.iterator().next(), new DetectiveDate()).GetCouplesFromDay(
                 6,
                 3,
                 "ИКБО-04-16",

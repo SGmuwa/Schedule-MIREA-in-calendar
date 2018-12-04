@@ -13,7 +13,14 @@ import java.util.ArrayList;
  * когда начинается и заканчивается семестр.
  */
 public class DetectiveDate {
+
+    public DetectiveDate() {
+        this(new File("settings_DetectiveDate.cfg"));
+    }
+
     public DetectiveDate(File filename) {
+        if(filename == null)
+            return;
         if (filename.exists())
             loadFile(filename);
         else {

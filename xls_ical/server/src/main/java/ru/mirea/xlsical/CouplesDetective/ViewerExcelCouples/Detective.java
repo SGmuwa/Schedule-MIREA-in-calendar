@@ -5,7 +5,10 @@ import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -36,6 +39,18 @@ public abstract class Detective implements Closeable {
     protected Detective(ExcelFileInterface file, DetectiveDate dateSettings) {
         this.file = file;
         this.dateSettings = dateSettings;
+    }
+
+    /**
+     * Создаёт экземпляр просмоторщика excel таблицы.
+     * @param file Файл, в котором требуется искать пары занятий.
+     * @see Detective#Detective(ExcelFileInterface, DetectiveDate) Требуется синхронизация с датами ректора?
+     * @deprecated Используйте {@link #Detective(ExcelFileInterface, DetectiveDate)}
+     * для синхронизации с изменениями ректора.
+     */
+    protected Detective(ExcelFileInterface file) {
+        this.file = file;
+        this.dateSettings = new DetectiveDate(null);
     }
 
     /**
@@ -88,6 +103,52 @@ public abstract class Detective implements Closeable {
      */
     public static Detective chooseDetective(ExcelFileInterface file, DetectiveDate dateSettings) {
         return new DetectiveSemester(file, dateSettings);
+    }
+
+
+
+    protected static int getCounts6Days(ZonedDateTime current, ZonedDateTime target) {
+        int sundays = 0;
+        if(current.compareTo(target) > 0)
+            throw new IllegalArgumentException();
+        Duration duration = Duration.between(current, target);
+        long days = duration.toDays() + 1;
+        long weeks = days / 7;
+        current = current.plus(weeks, ChronoUnit.WEEKS);
+        while(current.compareTo(target) <= 0) {
+            if(current.getDayOfWeek() == DayOfWeek.SUNDAY)
+                sundays++;
+            current = current.plus(1, ChronoUnit.DAYS);
+        }
+        return (int)(-sundays + (days - weeks));
+    }
+
+    /**
+     * Прибавляет к дате определённое количество будних дней.
+     * Используется 6-тидневная рабочая неделя. (понедельник ... суббота)
+     * @param current Исходная дата, к которой надо прибавить будние дни.
+     * @param bDays Количество дней, которые надо подсчитать.
+     * @return Возвращает сумму даты {@code current} и {@code bDays}.
+     */
+    protected static ZonedDateTime addBusinessDaysToDate(ZonedDateTime current, long bDays) {
+        if(current == null)
+            return null;
+        if(bDays == 0)
+            return current;
+        if(bDays < 0)
+            throw new IllegalArgumentException("bDays must be more or equals 0");
+
+        if(current.getDayOfWeek() == DayOfWeek.SUNDAY)
+            current = current.plus(1, ChronoUnit.DAYS);
+        long weeks = bDays / 6;
+        current = current.plus(weeks, ChronoUnit.WEEKS);
+        bDays -= weeks * 6;
+        for(long i = 0; i < bDays; i++) {
+            current = current.plus(1, ChronoUnit.DAYS);
+            if(current.getDayOfWeek() == DayOfWeek.SUNDAY)
+                current = current.plus(1, ChronoUnit.DAYS);
+        }
+        return current;
     }
 
     @Override
