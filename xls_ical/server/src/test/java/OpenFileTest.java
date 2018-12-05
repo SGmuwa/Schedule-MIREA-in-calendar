@@ -9,7 +9,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class OpenFileTest {
     @Test
@@ -39,7 +39,12 @@ public class OpenFileTest {
         assertEquals("Error 1:2(AБ)", "АБ", openFile.getCellData(1,2));
         assertEquals("Error 2:1(БА)", "БА", openFile.getCellData(2,1));
         assertEquals("Error 2:2(Груша)", "Груша", openFile.getCellData(2,2));
-        assertEquals("Error -1:-1(null)", "", openFile.getCellData(-1,-1));
+        try {
+            assertEquals("Error -1:-1(null)", "", openFile.getCellData(-1, -1));
+            fail();
+        } catch (Exception e) {
+            // good.
+        }
         assertEquals("Error 999:999( )", "", openFile.getCellData(999,999));
         openFile.close();
         new File("delete1.xls").delete();

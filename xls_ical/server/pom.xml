@@ -13,17 +13,17 @@
     </parent>
 
     <dependencies>
-        <!-- Для работы Excel -->
+        <!-- Для работы Excel
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
             <version>3.12</version>
-        </dependency>
+        </dependency> -->
         <!-- Для работы Excel -->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>3.12</version>
+            <version>4.0.1</version>
         </dependency>
         <!-- Для работы тестов -->
         <dependency>

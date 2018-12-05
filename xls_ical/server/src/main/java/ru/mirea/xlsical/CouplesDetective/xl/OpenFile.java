@@ -1,6 +1,7 @@
 package ru.mirea.xlsical.CouplesDetective.xl;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.*;
 
 import java.io.File;
@@ -18,6 +19,11 @@ import java.util.ArrayList;
  * @see OpenFile#newInstances(String)
  */
 public class OpenFile implements ExcelFileInterface {
+
+    static {
+        ZipSecureFile.setMinInflateRatio(0.008);
+    }
+
     @Override
     public String toString() {
         return "OpenFile{" +
@@ -39,7 +45,7 @@ public class OpenFile implements ExcelFileInterface {
      */
     public static ArrayList<OpenFile> newInstances(String fileName) throws IOException, InvalidFormatException {
         SetInt setInt = new SetInt();
-        OpenFile first = new OpenFile(fileName, 1);
+        OpenFile first = new OpenFile(fileName, 0);
         int size = first.wb.getNumberOfSheets();
         ArrayList<OpenFile> out = new ArrayList<>(size);
         out.add(first);
@@ -65,9 +71,9 @@ public class OpenFile implements ExcelFileInterface {
         if (cell == null)
             return "";
         switch (cell.getCellType()) {
-            case Cell.CELL_TYPE_STRING:
+            case STRING:
                 return cell.getStringCellValue();
-            case Cell.CELL_TYPE_NUMERIC:
+            case NUMERIC:
                 return Long.toString((long) cell.getNumericCellValue());
             default:
                 return "";
@@ -105,7 +111,9 @@ public class OpenFile implements ExcelFileInterface {
         if(isOpen && closed.get() < needToClose) {
             isOpen = false;
             closed.add();
-            wb.close();
+            if(closed.get() == needToClose) {
+                wb.close();
+            }
         }
     }
 

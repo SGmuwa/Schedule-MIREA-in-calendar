@@ -167,8 +167,8 @@ public class ExternalDataUpdater {
     private void threadBody() {
         try {
             while (!Thread.currentThread().isInterrupted()) {
-                download();
                 Thread.sleep(1000 * 60 * 60 * 8); // Проверка три раза в день.
+                download();
             }
         } catch (InterruptedException e) {
             // finish.
@@ -271,8 +271,16 @@ public class ExternalDataUpdater {
         Iterator<String> it = excelUrls.iterator();
         for(int i = 0; i < size; i++) {
             String url = it.next();
-            excelFilesPaths.add(new File(pathToCache, LocalDateTime.now().toString().replace(':', '-').replace('.', '_') + "_" + random.nextLong() + "_" + url.substring(url.lastIndexOf("/") + 1)));
-            System.out.print(ZonedDateTime.now() + " ExternalDataUpdater.java: " + excelFilesPaths.get(i).toString() + ";\t");
+            if(!url.substring(url.lastIndexOf("/") + 1).equals("2-kurs-MAGISTRY.xlsx")
+            && !url.substring(url.lastIndexOf("/") + 1).equals("Institut-INTEGU-2-kurs.xlsx")) {
+                excelFilesPaths.add(new File(pathToCache, LocalDateTime.now().toString().replace(':', '-').replace('.', '_') + "_" + random.nextLong() + "_" + url.substring(url.lastIndexOf("/") + 1)));
+                System.out.print(ZonedDateTime.now() + " ExternalDataUpdater.java: " + excelFilesPaths.get(i).toString() + ";\t");
+            }
+            else {
+                System.out.println("\nIgnore...");
+                i--;
+                size--;
+            }
         }
         System.out.println();
         it = excelUrls.iterator();
