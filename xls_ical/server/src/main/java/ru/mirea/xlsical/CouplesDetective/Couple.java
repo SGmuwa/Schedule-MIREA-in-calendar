@@ -93,6 +93,10 @@ public class Couple {
         return itemTitle;
     }
 
+    public static List<Couple> getCouplesByPeriod(ZonedDateTime start, ZonedDateTime finish, ZoneId startZoneId, int startWeek, LocalTime timeStartOfCouple, LocalTime timeFinishOfCouple, DayOfWeek dayOfWeek, boolean isOdd, String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address) {
+        return getCouplesByPeriod(start.toLocalDate(), finish.toLocalDate(), startZoneId, startWeek, timeStartOfCouple, timeFinishOfCouple, dayOfWeek, isOdd, itemTitle, typeOfLesson, nameOfGroup, nameOfTeacher, audience, address);
+    }
+
     /**
      * Получает на входе данные про одну строку. Принимает решение, в какие дни будут пары. Не делает выборку данных.
      * @param start Дата и время начала сессии. Расписание будет составлено с этого дня и времени.

@@ -88,7 +88,7 @@ public class TaskExecutor implements Runnable {
     public static PackageToClient monoStep(PackageToServer pkg) {
         List<Couple> couples = new LinkedList<>();
         if(pkg.excelsFiles == null) {
-            return new PackageToClient(pkg.ctx, null, 0, "Ошибка внутри обработчика. Не было передано множество excel файлов.");
+            return new PackageToClient(pkg.ctx, null, 0, "Ошибка внутри обработчика. Не было передано множество excel файлов. Данная функция появится позднее.");
         }
         Collection<ExcelFileInterface> fs = null;
         try {

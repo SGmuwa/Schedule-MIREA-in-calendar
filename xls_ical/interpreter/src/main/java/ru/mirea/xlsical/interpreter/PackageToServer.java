@@ -11,7 +11,9 @@ import java.io.ObjectInputStream;
 public class PackageToServer extends Package {
 
     /**
-    Тут содержатся пути до файлов .xls и .xlsx.
+     * Тут содержатся пути до файлов .xls и .xlsx.
+     * @deprecated Теперь excel файлы будут браться из другого места.
+     * Сторона Server будет сама контролировать список excel файлов.
      */
     public final String[] excelsFiles;
     /**
@@ -24,6 +26,7 @@ public class PackageToServer extends Package {
      @param ctx Уникальный идентификатор сообщения.
      @param excelsFiles Тут содержатся пути до файлов .xls и .xlsx.
      @param queryCriteria Тут содержатся критерии запроса.
+     @deprecated Excel файлы будут искаться самостоятельно из сайта mirea.
      */
     public PackageToServer(Object ctx, String[] excelsFiles, Seeker queryCriteria) {
         super(ctx);
@@ -31,7 +34,17 @@ public class PackageToServer extends Package {
         this.queryCriteria = queryCriteria;
     }
 
-
+    /**
+     * Строит данные отправляемые на сервер.
+     * @param ctx Уникальный идентификатор сообщения.
+     * @param queryCriteria Тут содержатся критерии запроса.
+     * @deprecated Excel файлы будут искаться самостоятельно из сайта mirea.
+     */
+    public PackageToServer(Object ctx, Seeker queryCriteria) {
+        super(ctx);
+        this.excelsFiles = null;
+        this.queryCriteria = queryCriteria;
+    }
 
     /**
      * Преобразует входящий массив байтов в текущее хранилище.
