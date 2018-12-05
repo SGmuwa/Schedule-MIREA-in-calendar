@@ -26,6 +26,10 @@ public class OpenFile implements ExcelFileInterface {
                 '}';
     }
 
+    private int needToClose;
+
+    private SetInt closed;
+
     /**
      * Открывает Excel файл вместе со всеми его листами.
      * @param fileName Путь до файла, который необходимо открыть.
@@ -34,12 +38,16 @@ public class OpenFile implements ExcelFileInterface {
      * @throws InvalidFormatException Ошибка распознования .xls или .xlsx файла.
      */
     public static ArrayList<OpenFile> newInstances(String fileName) throws IOException, InvalidFormatException {
+        SetInt setInt = new SetInt();
         OpenFile first = new OpenFile(fileName, 1);
         int size = first.wb.getNumberOfSheets();
         ArrayList<OpenFile> out = new ArrayList<>(size);
         out.add(first);
+        first.needToClose = size;
+        first.closed = setInt;
+
         for(int i = 1; i < size; i++) {
-            out.add(new OpenFile(fileName, i));
+            out.add(new OpenFile(fileName, i, size, setInt));
         }
         return out;
     }
@@ -86,13 +94,19 @@ public class OpenFile implements ExcelFileInterface {
         //return cellA.getCellStyle().getFillBackgroundColor() == cellB.getCellStyle().getFillBackgroundColor(); // XSSF only work.
     }
 
+    private boolean isOpen = true;
+
     /**
      * Закрывает Excel файл.
      * @throws IOException Ошибка при закрытии файла.
      */
     @Override
-    public void close() throws IOException {
-        wb.close();
+    public synchronized void close() throws IOException {
+        if(isOpen && closed.get() < needToClose) {
+            isOpen = false;
+            closed.add();
+            wb.close();
+        }
     }
 
     private final Workbook wb;
@@ -113,6 +127,22 @@ public class OpenFile implements ExcelFileInterface {
     }
 
     /**
+     * Создаёт экземпляр открытия файла.
+     * Для открытия всех листов Excel файла используйте {@link #newInstances(String)}.
+     * @param fileName Имя файла, который необходимо открыть.
+     * @param numberSheet Номер страницы книги Excel.
+     * @throws IOException Ошибка доступа к файлу.
+     * @throws InvalidFormatException Ошибка распознования файла.
+     * @see #newInstances(String)
+     */
+    private OpenFile(String fileName, int numberSheet, int needToClose, SetInt closed) throws IOException, InvalidFormatException {
+        this.needToClose = needToClose;
+        this.closed = closed;
+        this.wb = WorkbookFactory.create(new File(fileName));
+        this.numberSheet = numberSheet;
+    }
+
+    /**
      * Получение ячейки по номеру колонки и строки.
      * @param column Порядковый номер колонки.
      * @param row Порядковый номер строки.
@@ -129,5 +159,34 @@ public class OpenFile implements ExcelFileInterface {
         if (cell == null)
             return null;
         return cell;
+    }
+}
+
+
+class SetInt {
+    SetInt(int value) {
+        this.value = value;
+    }
+
+    SetInt() {
+        this.value = 0;
+    }
+
+    private int value;
+
+    public int get() {
+        return value;
+    }
+
+    public void set(int value) {
+        this.value = value;
+    }
+
+    public void add(int value) {
+        this.value += value;
+    }
+
+    public void add() {
+        this.value++;
     }
 }

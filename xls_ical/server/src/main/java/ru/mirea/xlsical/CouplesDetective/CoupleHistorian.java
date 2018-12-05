@@ -79,6 +79,7 @@ public class CoupleHistorian {
                     detective.getStartTime(now),
                     detective.getFinishTime(now)
             ));
+            file.close();
         }
         // Всё, что позже этой метки - можно менять. Всё, что раньше - нелья.
         ZonedDateTime deadLine = now.minus(1, ChronoUnit.DAYS);

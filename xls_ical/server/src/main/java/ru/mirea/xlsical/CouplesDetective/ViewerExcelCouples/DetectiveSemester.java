@@ -178,24 +178,22 @@ public class DetectiveSemester extends Detective {
     }
 
     /**
-     * Метод отвечает за то, чтобы догадаться, в какой день закончится семестр.
-     * @param now Любая дата требуемого семестра.
-     * @return Предполагаемая дата конца семестра.
-     */
-    protected static ZonedDateTime guessFinishTime(ZonedDateTime now) {
-        Detective
-    }
-
-    /**
      * Функция расчитывает рекомендуемое время конца построения текущего расписания.
      *
      * @param now Момент времени, который считается настоящим.
-     * @return Время конца занятий.
+     * @return Время
      * @see #getStartTime(ZonedDateTime)
      */
     @Override
     public ZonedDateTime getFinishTime(ZonedDateTime now) {
-        Уточнить использование файла настроек;
+        /*
+         * Обращаемся к зачётным неделям.
+         * Детектив зачётной недели говорит, когда у него начало построения.
+         * Это время гарантированно 00:00:00.
+         * Мы отнимаем секунду и получаем последнюю секунду, когда могут проводится
+         * семестровые занятия.
+         */
+        return DetectiveLastWeekS.static_getStartTime(this.dateSettings, now).minus(1, ChronoUnit.SECONDS);
     }
 
 

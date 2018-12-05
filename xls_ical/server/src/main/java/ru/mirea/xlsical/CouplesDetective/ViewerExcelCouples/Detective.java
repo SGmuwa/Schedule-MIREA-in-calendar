@@ -63,9 +63,9 @@ public abstract class Detective implements IDetective {
      * @throws IOException Во время работы с Excel file - файл стал недоступен.
      * @see Detective#chooseDetective(ExcelFileInterface,DetectiveDate)
      */
-    public static List<CoupleInCalendar> startAnInvestigations(Iterable<? extends Detective> detectives, ZonedDateTime start, ZonedDateTime finish) throws DetectiveException, IOException {
+    public static List<CoupleInCalendar> startAnInvestigations(Iterable<? extends IDetective> detectives, ZonedDateTime start, ZonedDateTime finish) throws DetectiveException, IOException {
         List<CoupleInCalendar> output = new LinkedList<>();
-        for (Detective d : detectives)
+        for (IDetective d : detectives)
                 output.addAll(d.startAnInvestigation(start, finish));
         return output;
     }

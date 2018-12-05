@@ -42,7 +42,14 @@ public class ExternalDataUpdaterTest {
         //    file.close();
         //}
         assertTrue(files.hasNext());
+        assertTrue(files.hasNext());
         edu.interrupt();
+        int count = 0;
+        while(files.hasNext()) {
+            files.next().close();
+            count++;
+        }
+        assertEquals(101, count);
         try {
             Thread.sleep(20);
         } catch (InterruptedException e) {

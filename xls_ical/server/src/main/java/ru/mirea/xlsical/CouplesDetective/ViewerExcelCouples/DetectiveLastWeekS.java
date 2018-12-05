@@ -31,30 +31,52 @@ public class DetectiveLastWeekS implements IDetective {
 
     /**
      * Функция расчитывает рекомендуемое время начала построения текущего расписания.
-     *
      * @param now Момент времени, который считается настоящим.
-     * @return Время начала занятий.
+     * @return Возвращает первую секунду, с которой можно принимать зачёт. Это гаратированно 00:00:00.
      * @see #getFinishTime(ZonedDateTime)
      */
     @Override
     public ZonedDateTime getStartTime(ZonedDateTime now) {
-        Detective.subtractBusinessDaysToDate(getFinishTime(), 7);
+        return static_getStartTime(detectiveSemester.dateSettings, now);
+    }
+
+    /**
+     * Данный метот является реализацией для {@link #getStartTime(ZonedDateTime)}.
+     * Используется для того, чтобы Детектив симестра узнал, до какой даты ему строить расписание.
+     *
+     * Функция расчитывает рекомендуемое время начала построения текущего расписания.
+     * @param dateSettings Параметры дат, которые внесены ректором.
+     * @param now Момент времени, который считается настоящим.
+     * @return Возвращает первую секунду, с которой можно принимать зачёт. Это гарантированно 00:00:00.
+     * @see #getFinishTime(ZonedDateTime)
+     */
+    protected static ZonedDateTime static_getStartTime(DetectiveDate dateSettings, ZonedDateTime now) {
+        ZonedDateTime current = static_getFinishTime(dateSettings, now).minus(7, ChronoUnit.DAYS);
+        return ZonedDateTime.of(
+                current.toLocalDate(),
+                LocalTime.MIN,
+                current.getZone()
+        );
     }
 
     /**
      * Функция расчитывает рекомендуемое время конца построения текущего расписания.
      *
      * @param now Момент времени, который считается настоящим.
-     * @return Время конца занятий.
+     * @return Последняя доступная секунда для принятия зачёта.
      * @see #getStartTime(ZonedDateTime)
      */
     @Override
     public ZonedDateTime getFinishTime(ZonedDateTime now) {
+        return static_getFinishTime(detectiveSemester.dateSettings, now);
+    }
+
+    protected static ZonedDateTime static_getFinishTime(DetectiveDate dateSettings, ZonedDateTime now) {
         DetectiveDate.TwoZonedDateTime search;
         if (Month.JANUARY.getValue() <= now.getMonth().getValue()
                 && now.getMonth().getValue() <= Month.JUNE.getValue()
         ) { // У нас загружано расписание для весны. Ищем конец.
-            search = detectiveSemester.dateSettings.searchBeforeAfter(
+            search = dateSettings.searchBeforeAfter(
                     ZonedDateTime.of(
                             LocalDate.of(now.getYear(), Month.MAY, 15),
                             LocalTime.NOON,
@@ -64,7 +86,7 @@ public class DetectiveLastWeekS implements IDetective {
             );
         }
         else { // У нас загружано расписание для осени. Ищем конец.
-            search = detectiveSemester.dateSettings.searchBeforeAfter(
+            search = dateSettings.searchBeforeAfter(
                     ZonedDateTime.of(
                             LocalDate.of(now.getYear(), Month.DECEMBER, 10),
                             LocalTime.NOON,
@@ -80,14 +102,15 @@ public class DetectiveLastWeekS implements IDetective {
 
     /**
      * Угадывает, в какой день будет закончена зачётная неделя
-     * @param now
-     * @return
+     * @param now Любая дата семестра, к которому прилегает зачёт.
+     * @return День и время, в который зачёт проводить можно.
      */
     protected static ZonedDateTime guessFinishTime(ZonedDateTime now) {
+        ZonedDateTime current;
         if (Month.JANUARY.getValue() <= now.getMonth().getValue()
                 && now.getMonth().getValue() <= Month.JUNE.getValue()
         ) { // У нас загружано расписание для весны. Ищем конец.
-            ZonedDateTime current = ZonedDateTime.of(
+            current = ZonedDateTime.of(
                     // Мы узнаём последний день мая защищённым способом =). Хотя я в курсе, что это 31 мая.
                     LocalDate.of(now.getYear(), Month.JUNE, 1),
                     LocalTime.MIN,
@@ -95,9 +118,21 @@ public class DetectiveLastWeekS implements IDetective {
             );
         }
         else { // У нас загружано расписание для осени. Ищем конец.
-
+            current = ZonedDateTime.of(
+                    // Производственный шестидненвый календарь предполагает, что 30 декабря - последний рабочий день.
+                    // Выставим 31 декабря и отнимим секунду.
+                    LocalDate.of(now.getYear(), Month.DECEMBER, 31),
+                    LocalTime.MIN,
+                    now.getZone()
+            );
         }
-        throw new UnsupportedOperationException();
+        // Переходим на последнию секунду доступного дня:
+        current = current.minus(1, ChronoUnit.SECONDS);
+        // Если мы попали на воскресенье, то сдвинемся на день назад:
+        if(current.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+            current = current.minus(1, ChronoUnit.DAYS);
+        }
+        return current;
     }
 
     @Override

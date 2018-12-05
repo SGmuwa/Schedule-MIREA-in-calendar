@@ -10,6 +10,7 @@ import java.net.URLConnection;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -91,14 +92,14 @@ public class ExternalDataUpdater {
      * Функция отвечает за то, чтобы получить таблицы из сайта <a href="https://www.mirea.ru/education/schedule-main/schedule/">mirea.ru</a>.
      * Стоит отметить, что если в кэше есть не устаревшие таблицы, то функция
      * вернёт таблицы из кэша.
-     * После вызова hasNext предыдущий файл закрывается.
-     * @return Возвращает все таблицы из сайта <a href="https://www.mirea.ru/education/schedule-main/schedule/">mirea.ru</a>. Вызвать метод .close не обязательно.
+     * Файлы надо закрывать методом {@link Closeable#close()}!
+     * Если вам по-середине понадобилось закрыть все файлы, вам всё равно придётся все элементы перебрать и закрыть.
+     * @return Возвращает все таблицы из сайта <a href="https://www.mirea.ru/education/schedule-main/schedule/">mirea.ru</a>. Вызвать метод .close обязательно.
      */
     public Iterator<ExcelFileInterface> openTablesFromExternal() throws IOException, InvalidFormatException {
         return new Iterator<ExcelFileInterface>() {
             Iterator<File> FilesIterator = ((ArrayList<File>) excelFiles.clone()).iterator();
             Iterator<? extends ExcelFileInterface> nextElm = null;
-            ExcelFileInterface previous = null;
 
             @Override
             public boolean hasNext() {
@@ -112,21 +113,14 @@ public class ExternalDataUpdater {
                             System.out.println(e.getLocalizedMessage() + "\nfile: " + path);
                         }
                     }
+                    return false;
                 }
-                return false;
+                return true;
             }
 
             @Override
             public ExcelFileInterface next() {
-                if(previous != null) {
-                    try {
-                        previous.close();
-                    } catch (IOException e) {
-                        System.out.println("Can't close file: " + previous.toString());
-                    }
-                }
-                previous = nextElm.next();
-                return previous;
+                return nextElm.next();
             }
         };
     }
@@ -193,10 +187,11 @@ public class ExternalDataUpdater {
         String elm;
         for(int i = excelUrls.size() - 1; i >= 0; i--) {
             elm = excelUrls.get(i);
-            System.out.println(elm);
+            System.out.print(ZonedDateTime.now() + " ExternalDataUpdater.java: " + elm + " ;\t");
             elm = elm.replaceFirst("https:/", "http:/");
             excelUrls.set(i, elm);
         }
+        System.out.println();
         // ----
         try {
             excelFiles = downloadFilesToPath(excelUrls, this.pathToCache);
@@ -271,14 +266,30 @@ public class ExternalDataUpdater {
      * @param excelUrls Коллекция ссылок на скачивание.
      */
     private ArrayList<File> downloadFilesToPath(Collection<String> excelUrls, File pathToCache) throws IOException {
-        ArrayList<File> excelFilesPaths = new ArrayList<>();
-        for(String url : excelUrls) {
-            File currentFile = new File(pathToCache, LocalDateTime.now().toString().replace(':', '-').replace('.', '_') + "_" + url.substring(url.lastIndexOf("/") + 1));
-            System.out.println(currentFile.toString());
-            if(!currentFile.createNewFile())
-                throw new IOException("can't create new excel file. File = " + currentFile.toString());
-            downloadFile(new URL(url), currentFile);
-            excelFilesPaths.add(currentFile);
+        int size = excelUrls.size();
+        ArrayList<File> excelFilesPaths = new ArrayList<>(size);
+        Iterator<String> it = excelUrls.iterator();
+        for(int i = 0; i < size; i++) {
+            String url = it.next();
+            excelFilesPaths.add(new File(pathToCache, LocalDateTime.now().toString().replace(':', '-').replace('.', '_') + "_" + random.nextLong() + "_" + url.substring(url.lastIndexOf("/") + 1)));
+            System.out.print(ZonedDateTime.now() + " ExternalDataUpdater.java: " + excelFilesPaths.get(i).toString() + ";\t");
+        }
+        System.out.println();
+        it = excelUrls.iterator();
+        for(int i = 0; i < excelFilesPaths.size(); i++) {
+            if(!excelFilesPaths.get(i).createNewFile())
+                throw new IOException("can't create new excel file. File = " + excelFilesPaths.get(i).toString());
+            try {
+                downloadFile(new URL(it.next()), excelFilesPaths.get(i));
+            }
+            catch (IOException e) {
+                System.out.println("ExternalDataUpdater.java: I can't save file " + excelFilesPaths.get(i));
+                excelFilesPaths.remove(i);
+                i--;
+                continue;
+            }
+            if(i % 5 == 0)
+                System.out.println((int)((float)i / (float)size * 100f));
         }
         return excelFilesPaths;
     }
