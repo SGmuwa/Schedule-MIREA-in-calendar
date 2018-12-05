@@ -120,8 +120,12 @@ public class DetectiveSemester extends Detective {
         return search.getLeft();
     }
 
-    private ZonedDateTime guessStartTime(ZonedDateTime now) {
-        // TODO
+    /**
+     * Метод отвечает за то, чтобы догадаться, в какой день начнётся семестр.
+     * @param now Любая дата требуемого семестра.
+     * @return Предполагаемая дата начала семестра.
+     */
+    protected static ZonedDateTime guessStartTime(ZonedDateTime now) {
         if (Month.JANUARY.getValue() <= now.getMonth().getValue()
                 && now.getMonth().getValue() <= Month.JUNE.getValue()
         ) { // У нас загружано расписание для весны
@@ -174,6 +178,15 @@ public class DetectiveSemester extends Detective {
     }
 
     /**
+     * Метод отвечает за то, чтобы догадаться, в какой день закончится семестр.
+     * @param now Любая дата требуемого семестра.
+     * @return Предполагаемая дата конца семестра.
+     */
+    protected static ZonedDateTime guessFinishTime(ZonedDateTime now) {
+        Detective
+    }
+
+    /**
      * Функция расчитывает рекомендуемое время конца построения текущего расписания.
      *
      * @param now Момент времени, который считается настоящим.
@@ -182,31 +195,7 @@ public class DetectiveSemester extends Detective {
      */
     @Override
     public ZonedDateTime getFinishTime(ZonedDateTime now) {
-        DetectiveDate.TwoZonedDateTime search;
-        if (Month.JANUARY.getValue() <= now.getMonth().getValue()
-                && now.getMonth().getValue() <= Month.JUNE.getValue()
-        ) { // У нас загружано расписание для весны. Ищем начало.
-            search = dateSettings.searchBeforeAfter(
-                    ZonedDateTime.of(
-                            LocalDate.of(now.getYear(), Month.MAY, 15),
-                            LocalTime.NOON,
-                            now.getZone()
-                    ),
-                    Duration.of(35, ChronoUnit.DAYS)
-            );
-        }
-        else { // У нас загружано расписание для осени. Ищем начало.
-            search = dateSettings.searchBeforeAfter(
-                    ZonedDateTime.of(
-                            LocalDate.of(now.getYear(), Month.DECEMBER, 10),
-                            LocalTime.NOON,
-                            now.getZone()
-                    ),
-                    Duration.of(35, ChronoUnit.DAYS)
-            );
-        }
-
-        return search.getRight() == null ? guessStartTime(now) : search.getRight();
+        Уточнить использование файла настроек;
     }
 
 

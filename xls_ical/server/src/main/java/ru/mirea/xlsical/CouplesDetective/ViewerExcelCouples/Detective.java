@@ -18,7 +18,7 @@ import java.util.List;
  * просмотра расписания как и для семестра, так и для экзаменов.
  * В последствии будет переименован в {@code Detective}.
 */
-public abstract class Detective implements Closeable {
+public abstract class Detective implements IDetective {
 
     /**
      * Файл, в котором требуется искать пары занятий.
@@ -69,31 +69,6 @@ public abstract class Detective implements Closeable {
                 output.addAll(d.startAnInvestigation(start, finish));
         return output;
     }
-
-    /**
-     * Функция ищет занятия для seeker в файле File.
-     * @param start Дата и время начала составления расписания.
-     * @param finish Дата и время конца составления раписания.
-     * @throws DetectiveException Появилась проблема, связанная с обработкой Excel файла.
-     * @throws IOException Во время работы с Excel file - файл стал недоступен.
-     */
-    public abstract List<CoupleInCalendar> startAnInvestigation(ZonedDateTime start, ZonedDateTime finish) throws DetectiveException, IOException;
-
-    /**
-     * Функция расчитывает рекомендуемое время начала построения текущего расписания.
-     * @param now Момент времени, который считается настоящим.
-     * @return Время начала занятий.
-     * @see #getFinishTime(ZonedDateTime)
-     */
-    public abstract ZonedDateTime getStartTime(ZonedDateTime now);
-
-    /**
-     * Функция расчитывает рекомендуемое время конца построения текущего расписания.
-     * @param now Момент времени, который считается настоящим.
-     * @return Время конца занятий.
-     * @see #getStartTime(ZonedDateTime)
-     */
-    public abstract ZonedDateTime getFinishTime(ZonedDateTime now);
 
     /**
      * Функция решает, какой именно требуется способ просмотра Excel таблицы.
