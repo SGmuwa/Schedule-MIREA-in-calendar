@@ -1,5 +1,7 @@
 package ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples;
 
+import ru.mirea.xlsical.CouplesDetective.BinarySearch;
+
 import java.io.*;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -61,7 +63,7 @@ public class DetectiveDate {
         try (BufferedReader br = new BufferedReader(new FileReader(settings))) {
 
             for (String str = br.readLine(); str != null; str = br.readLine()) {
-                if (str.length() > 6 || str.charAt(0) == '!')
+                if (str.length() > 6 && str.charAt(0) != '!')
                     try {
                         add(str);
                     } catch (DateTimeParseException e) {
@@ -95,12 +97,21 @@ public class DetectiveDate {
         }
         else {
             left = ~left;
-            if(0 <= left && left < points.size()) {
-                ZonedDateTime leftValue = ZonedDateTime.of(points.get(left), LocalTime.of(0, 0, 0), dateToNeed.getZone());
+            if(left < points.size()) {
+                ZonedDateTime leftValue;
+                do {
+                    leftValue = ZonedDateTime.of(points.get(left), LocalTime.of(0, 0, 0), dateToNeed.getZone());
+                    if(leftValue.compareTo(dateToNeed) > 0) {
+                        System.out.println("DetectiveDate.java: left move");
+                        left--;
+                        continue;
+                    }
+                    break;
+                } while(true);
                 if(Duration.between(leftValue, dateToNeed).compareTo(allow) < 0)
                     out.left = leftValue;
             }
-            if(0<= left + 1 && left + 1 < points.size()) {
+            if(0 <= left + 1 && left + 1 < points.size()) {
                 ZonedDateTime rightValue = ZonedDateTime.of(points.get(left + 1), LocalTime.of(0, 0, 0), dateToNeed.getZone());
                 if(Duration.between(dateToNeed, rightValue).compareTo(allow) < 0)
                     out.right = rightValue;
@@ -143,43 +154,6 @@ public class DetectiveDate {
          */
         public ZonedDateTime getRight() {
             return right;
-        }
-    }
-
-    private static class BinarySearch {
-        private static <T extends Comparable<? super T>> int BinarySearch_Iter(ArrayList<T> array, boolean descendingOrder, T key) {
-            int left = 0;
-            int right = array.size();
-            int mid = 0;
-
-            while (!(left >= right))
-            {
-                mid = left + (right - left) / 2;
-
-                if (array.get(mid) == key)
-                    return mid;
-
-                if ((array.get(mid).compareTo(key) > 0) ^ descendingOrder)
-                    right = mid;
-                else
-                    left = mid + 1;
-            }
-
-            return ~left;
-        }
-
-        /**
-         * Бинарный поиск. Если не нашёл - показывает ближайший индекс.
-         * @param array
-         * @param key
-         * @param <E>
-         * @return
-         */
-        public static <E extends Comparable<? super E>> int BinarySearch_Iter_Wrapper(ArrayList<E> array, E key)
-        {
-            if (array.size() == 0)
-                return -1;
-            return BinarySearch_Iter(array, array.get(0).compareTo(array.get(array.size() - 1)) > 0, key);
         }
     }
 }

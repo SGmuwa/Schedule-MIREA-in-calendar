@@ -27,11 +27,15 @@ import static ru.mirea.xlsical.CouplesDetective.Teacher.ConvertNameFromStrToArra
  */
 public class ExternalDataUpdater {
 
+    public ExternalDataUpdater(boolean isNeedDownload) throws IOException {
+        this("cache/excel/", isNeedDownload);
+    }
+
     /**
      * Создаёт новый экземпляр синхронизатора расписания и имён преподавателей.
      */
     public ExternalDataUpdater() throws IOException {
-        this("cache/excel/");
+        this("cache/excel/", true);
     }
 
     /**
@@ -41,13 +45,25 @@ public class ExternalDataUpdater {
      * возникает неудачная попытка создать данную папку и её родительские каталоги.
      */
     public ExternalDataUpdater(String path) throws IOException {
-        this(new File(path).getAbsoluteFile());
+        this(new File(path).getAbsoluteFile(), true);
     }
 
-    public ExternalDataUpdater(File path) throws IOException {
+    /**
+     * Создаёт новый экземпляр синхронизатора расписания и имён преподавателей.
+     * @param path Путь до каталога, где должны содержаться excel файлы.
+     * @param isNeedDownload Укажите True, если надо скачать базу данных файлов.
+     * @throws IOException Возникает тогда, когда при отсутсвии заданной папки
+     * возникает неудачная попытка создать данную папку и её родительские каталоги.
+     */
+    public ExternalDataUpdater(String path, boolean isNeedDownload) throws IOException {
+        this(new File(path).getAbsoluteFile(), isNeedDownload);
+    }
+
+    public ExternalDataUpdater(File path, boolean isNeedDownload) throws IOException {
         pathToCache = path;
         createCacheDir();
-        download(); // first download
+        if(isNeedDownload)
+            download(); // first download
     }
 
     private void createCacheDir() throws IOException {
@@ -271,16 +287,8 @@ public class ExternalDataUpdater {
         Iterator<String> it = excelUrls.iterator();
         for(int i = 0; i < size; i++) {
             String url = it.next();
-            if(!url.substring(url.lastIndexOf("/") + 1).equals("2-kurs-MAGISTRY.xlsx")
-            && !url.substring(url.lastIndexOf("/") + 1).equals("Institut-INTEGU-2-kurs.xlsx")) {
-                excelFilesPaths.add(new File(pathToCache, LocalDateTime.now().toString().replace(':', '-').replace('.', '_') + "_" + random.nextLong() + "_" + url.substring(url.lastIndexOf("/") + 1)));
-                System.out.print(ZonedDateTime.now() + " ExternalDataUpdater.java: " + excelFilesPaths.get(i).toString() + ";\t");
-            }
-            else {
-                System.out.println("\nIgnore...");
-                i--;
-                size--;
-            }
+            excelFilesPaths.add(new File(pathToCache, LocalDateTime.now().toString().replace(':', '-').replace('.', '_') + "_" + random.nextLong() + "_" + url.substring(url.lastIndexOf("/") + 1)));
+            System.out.print(ZonedDateTime.now() + " ExternalDataUpdater.java: " + excelFilesPaths.get(i).toString() + ";\t");
         }
         System.out.println();
         it = excelUrls.iterator();

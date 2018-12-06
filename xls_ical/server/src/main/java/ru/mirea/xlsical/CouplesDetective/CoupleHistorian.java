@@ -25,7 +25,7 @@ public class CoupleHistorian {
 
     private ExternalDataUpdater edUpdater = null;
     private LinkedList<CoupleInCalendar> cache;
-    private DetectiveDate settingDates;
+    private DetectiveDate settingDates = new DetectiveDate();
 
     public CoupleHistorian() {
         try {
@@ -48,11 +48,11 @@ public class CoupleHistorian {
     }
 
     /**
-     * Фильтрует пары по типу запроса.
+     * Фильтрует пары по типу запроса. Оставляет только тех, кто нужен.
      * @param seeker Критерий. Регулярное выражение искателя.
      * @return Отфильтрованный по критерию.
      */
-    private List<CoupleInCalendar> filterCouplesBySeekerType(Seeker seeker) throws PatternSyntaxException {
+    private List<CoupleInCalendar> filterCouplesBySeekerName(Seeker seeker) throws PatternSyntaxException {
         List<CoupleInCalendar> output = new LinkedList<>();
         Pattern p = Pattern.compile(seeker.nameOfSeeker);
         for (CoupleInCalendar couple : cache) {

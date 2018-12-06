@@ -1,9 +1,14 @@
 package ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Test;
+import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
+import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
 
+import java.io.IOException;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 
 import static org.junit.Assert.*;
 import static ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.Detective.addBusinessDaysToDate;
@@ -144,6 +149,35 @@ public class DetectiveTest {
             );
             assertEquals(getCounts6Days(a, b), getCounts6Days(a, addBusinessDaysToDate(a, getCounts6Days(a, b) - 1)));
         }
+    }
+
+    @Test
+    public void StartAndFinishDays() throws IOException, InvalidFormatException {
+        DetectiveDate detectiveDate = new DetectiveDate();
+        IDetective detective = new DetectiveSemester(null, detectiveDate);
+        ZonedDateTime current = ZonedDateTime.of(
+                LocalDate.of(2018, 12, 10),
+                LocalTime.NOON,
+                ZoneId.of("Europe/Minsk")
+        );
+
+        assertEquals(
+                ZonedDateTime.of
+                        (
+                                LocalDate.of(2018, 9, 3),
+                                LocalTime.of(0, 0, 0),
+                                ZoneId.of("Europe/Minsk")
+                ), detective.getStartTime(current));
+
+
+
+        assertEquals(
+                ZonedDateTime.of
+                        (
+                                LocalDate.of(2018, 12, 22),
+                                LocalTime.of(23, 59, 59),
+                                ZoneId.of("Europe/Minsk")
+                        ), detective.getFinishTime(current));
     }
 
 }

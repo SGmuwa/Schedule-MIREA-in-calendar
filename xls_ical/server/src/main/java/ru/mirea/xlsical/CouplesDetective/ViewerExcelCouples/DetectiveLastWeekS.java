@@ -52,6 +52,7 @@ public class DetectiveLastWeekS implements IDetective {
      */
     protected static ZonedDateTime static_getStartTime(DetectiveDate dateSettings, ZonedDateTime now) {
         ZonedDateTime current = static_getFinishTime(dateSettings, now).minus(7, ChronoUnit.DAYS);
+        current = Detective.addBusinessDaysToDate(current, 1);
         return ZonedDateTime.of(
                 current.toLocalDate(),
                 LocalTime.MIN,

@@ -4,16 +4,21 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import ru.mirea.xlsical.CouplesDetective.CoupleHistorian;
 import ru.mirea.xlsical.CouplesDetective.CoupleInCalendar;
 import ru.mirea.xlsical.CouplesDetective.ExportCouplesToICal;
+import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.*;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
 import ru.mirea.xlsical.interpreter.PackageToClient;
 import ru.mirea.xlsical.interpreter.PackageToServer;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Класс, который выступает в роле исполнителя обработчика.
@@ -86,7 +91,64 @@ public class TaskExecutor implements Runnable {
      * @return Пакет от обработчика.
      */
     public PackageToClient monoStep(PackageToServer pkg) {
+        if(pkg.excelsFiles != null && pkg.excelsFiles.length > 0) {
+            System.out.println("Попытка использовать forceStep из monoStep!");
+            return forceStep(pkg);
+        }
         List<CoupleInCalendar> couples = coupleHistorian.getCouples(pkg.queryCriteria);
+        return new PackageToClient(
+                pkg.ctx,
+                pkg.percentReady,
+                ExportCouplesToICal.start(couples),
+                couples.size(),
+                "ok.");
+    }
+
+    public static PackageToClient forceStep(PackageToServer pkg) {
+        if(pkg.excelsFiles == null || pkg.excelsFiles.length == 0) {
+            return new PackageToClient(pkg.ctx, null, 0, "Error: use Step! I did not find any excel files!");
+        }
+        DetectiveDate detectiveDate = new DetectiveDate();
+        ZonedDateTime now = ZonedDateTime.now();
+        List<CoupleInCalendar> couples = new LinkedList<>();
+        ArrayList<IDetective> fs = new ArrayList<>();
+        try {
+                for(ExcelFileInterface file : openExcelFiles(pkg.excelsFiles)) {
+                    fs.add(Detective.chooseDetective(file, detectiveDate));
+                }
+                for(IDetective detective : fs) {
+                    try {
+                        couples.addAll(detective.startAnInvestigation(detective.getStartTime(now), detective.getFinishTime(now)));
+                    } catch (DetectiveException exD) {
+                        // В случае, если один из файлов не правильно оформлен, то его игнорируем.
+                        System.out.println("DetectiveException");
+                        fs.remove(detective);
+                    }
+                }
+
+        } catch (IOException error) {
+            error.printStackTrace();
+            pkg.percentReady.setReady(1);
+            return new PackageToClient(pkg.ctx, pkg.percentReady, null, 0, "Ошибка внутри сервера.");
+        } finally {
+            if (fs != null)
+                for (Closeable file : fs)
+                    if (file != null)
+                        try {
+                            file.close();
+                        } catch (IOException err) {
+                            //err.printStackTrace();
+                            System.out.println("Can't close file into error.");
+                        }
+        }
+        try {
+            Pattern pattern = Pattern.compile(pkg.queryCriteria.nameOfSeeker);
+            couples.removeIf((elm) -> !pattern.matcher(elm.nameOfGroup).find()
+                    && !pattern.matcher(elm.nameOfTeacher).find());
+        } catch (PatternSyntaxException e) {
+            couples.removeIf((elm) -> !pkg.queryCriteria.nameOfSeeker.equals(elm.nameOfTeacher)
+            && !pkg.queryCriteria.nameOfSeeker.equals(elm.nameOfGroup));
+        }
         return new PackageToClient(
                 pkg.ctx,
                 pkg.percentReady,

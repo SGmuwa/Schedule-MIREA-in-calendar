@@ -115,7 +115,7 @@ public class DetectiveSemester extends Detective {
             );
         }
         if(search.getLeft() == null)
-            guessStartTime(now); // Не нашёл? Давай гадать!
+            return guessStartTime(now); // Не нашёл? Давай гадать!
 
         return search.getLeft();
     }
@@ -193,7 +193,10 @@ public class DetectiveSemester extends Detective {
          * Мы отнимаем секунду и получаем последнюю секунду, когда могут проводится
          * семестровые занятия.
          */
-        return DetectiveLastWeekS.static_getStartTime(this.dateSettings, now).minus(1, ChronoUnit.SECONDS);
+        ZonedDateTime current = DetectiveLastWeekS.static_getStartTime(this.dateSettings, now).minus(1, ChronoUnit.SECONDS);
+        if(current.getDayOfWeek().equals(DayOfWeek.SUNDAY))
+            current = current.minus(1, ChronoUnit.DAYS);
+        return current;
     }
 
 
@@ -255,7 +258,7 @@ public class DetectiveSemester extends Detective {
      * @throws IOException Файл excel не доступен.
      */
     private HashMap<Point, String> getDefaultAddressesPoints() throws IOException {
-        ArrayList<Point> points = seekInLeftUpAll("занятия в капусе по адресу", 3*2, 82*2);
+        ArrayList<Point> points = seekInLeftUpAll("занятия в кампусе по адресу", 3*2, 82*2);
         HashMap<Point, String> out = new HashMap<>();
         for(Point p : points)
             out.put(p, getNormalAddressFromCell(p));
@@ -318,7 +321,11 @@ public class DetectiveSemester extends Detective {
         System.out.println("Warning: address not found.\n");
         for(StackTraceElement ste : Thread.currentThread().getStackTrace())
             System.out.printf("at %s/n", ste.getMethodName());
-        return addresses.values().iterator().next() + "?";
+        Iterator<String> it = addresses.values().iterator();
+        if(it.hasNext())
+            return it.next() + "?";
+        else
+            return "";
     }
 
     /**
