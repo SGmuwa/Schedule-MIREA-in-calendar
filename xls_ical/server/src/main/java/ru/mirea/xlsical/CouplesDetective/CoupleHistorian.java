@@ -45,21 +45,7 @@ public class CoupleHistorian {
                 }
             } while(edUpdater == null);
         }
-    }
-
-    /**
-     * Фильтрует пары по типу запроса. Оставляет только тех, кто нужен.
-     * @param seeker Критерий. Регулярное выражение искателя.
-     * @return Отфильтрованный по критерию.
-     */
-    private List<CoupleInCalendar> filterCouplesBySeekerName(Seeker seeker) throws PatternSyntaxException {
-        List<CoupleInCalendar> output = new LinkedList<>();
-        Pattern p = Pattern.compile(seeker.nameOfSeeker);
-        for (CoupleInCalendar couple : cache) {
-            if(p.matcher(couple.nameOfGroup).find() || p.matcher(couple.nameOfTeacher).find())
-                output.add(couple);
-        }
-        return output;
+        updateCache();
     }
 
     /**
@@ -68,18 +54,22 @@ public class CoupleHistorian {
      * Анализирует будущие пары.
      * Сохраняет на диск.
      */
-    private void updateCache() throws IOException, DetectiveException, InvalidFormatException {
+    private void updateCache() {
         LinkedList<CoupleInCalendar> outCache = new LinkedList<>(); // Итоговый кэш
         LinkedList<CoupleInCalendar> newCache = new LinkedList<>(); // То, что получили из МИРЭА
         ZonedDateTime now = ZonedDateTime.now();
         for (Iterator<ExcelFileInterface> it = edUpdater.openTablesFromExternal(); it.hasNext(); ) {
             ExcelFileInterface file = it.next();
             Detective detective = Detective.chooseDetective(file, settingDates);
-            newCache.addAll(detective.startAnInvestigation(
-                    detective.getStartTime(now),
-                    detective.getFinishTime(now)
-            ));
-            file.close();
+            try {
+                newCache.addAll(detective.startAnInvestigation(
+                        detective.getStartTime(now),
+                        detective.getFinishTime(now)
+                ));
+                file.close();
+            } catch (IOException | DetectiveException e) {
+                System.out.println(ZonedDateTime.now() + " CoupleHistorian.java: ignore detective: " + e.getLocalizedMessage());
+            }
         }
         // Всё, что позже этой метки - можно менять. Всё, что раньше - нелья.
         ZonedDateTime deadLine = now.minus(1, ChronoUnit.DAYS);

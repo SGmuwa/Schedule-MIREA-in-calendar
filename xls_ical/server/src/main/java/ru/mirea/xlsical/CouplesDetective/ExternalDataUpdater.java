@@ -112,7 +112,7 @@ public class ExternalDataUpdater {
      * Если вам по-середине понадобилось закрыть все файлы, вам всё равно придётся все элементы перебрать и закрыть.
      * @return Возвращает все таблицы из сайта <a href="https://www.mirea.ru/education/schedule-main/schedule/">mirea.ru</a>. Вызвать метод .close обязательно.
      */
-    public Iterator<ExcelFileInterface> openTablesFromExternal() throws IOException, InvalidFormatException {
+    public Iterator<ExcelFileInterface> openTablesFromExternal() {
         return new Iterator<ExcelFileInterface>() {
             Iterator<File> FilesIterator = ((ArrayList<File>) excelFiles.clone()).iterator();
             Iterator<? extends ExcelFileInterface> nextElm = null;
