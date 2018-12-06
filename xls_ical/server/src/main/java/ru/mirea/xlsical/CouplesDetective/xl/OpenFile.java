@@ -27,7 +27,11 @@ public class OpenFile implements ExcelFileInterface {
     @Override
     public String toString() {
         return "OpenFile{" +
-                "wb=" + wb +
+                "needToClose=" + needToClose +
+                ", closed=" + closed +
+                ", fileName='" + fileName + '\'' +
+                ", isOpen=" + isOpen +
+                ", wb=" + wb +
                 ", numberSheet=" + numberSheet +
                 '}';
     }
@@ -35,6 +39,8 @@ public class OpenFile implements ExcelFileInterface {
     private int needToClose;
 
     private SetInt closed;
+
+    private final String fileName;
 
     /**
      * Открывает Excel файл вместе со всеми его листами.
@@ -53,7 +59,7 @@ public class OpenFile implements ExcelFileInterface {
         first.closed = setInt;
 
         for(int i = 1; i < size; i++) {
-            out.add(new OpenFile(first.wb, i, size, setInt));
+            out.add(new OpenFile(first.wb, i, size, setInt, fileName));
         }
         return out;
     }
@@ -132,6 +138,7 @@ public class OpenFile implements ExcelFileInterface {
     private OpenFile(String fileName, int numberSheet) throws IOException, InvalidFormatException {
         wb = WorkbookFactory.create(new File(fileName));
         this.numberSheet = numberSheet;
+        this.fileName = fileName;
     }
 
     /**
@@ -143,11 +150,12 @@ public class OpenFile implements ExcelFileInterface {
      * @throws InvalidFormatException Ошибка распознования файла.
      * @see #newInstances(String)
      */
-    private OpenFile(Workbook workbook, int numberSheet, int needToClose, SetInt closed) throws IOException, InvalidFormatException {
+    private OpenFile(Workbook workbook, int numberSheet, int needToClose, SetInt closed, String fileName) throws IOException, InvalidFormatException {
         this.needToClose = needToClose;
         this.closed = closed;
         this.wb = workbook;
         this.numberSheet = numberSheet;
+        this.fileName = fileName;
     }
 
     /**

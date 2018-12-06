@@ -10,4 +10,9 @@ public class DetectiveException extends Exception {
         super(message);
         excelFile = file;
     }
+
+    @Override
+    public String getLocalizedMessage() {
+        return super.getLocalizedMessage() + " file: " + excelFile.toString();
+    }
 }
