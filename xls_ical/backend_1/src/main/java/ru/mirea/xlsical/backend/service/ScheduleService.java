@@ -45,7 +45,7 @@ public class ScheduleService {
 
         Seeker seeker = new Seeker(name, start, finish, zoneid);
         String[] files = new String[1];
-        files[0] = "/Users/artemy/Downloads/IIT-3k-18_19-osen.xlsx";
+        files[0] = "backend_1/testsFiles/IIT-3k-18_19-osen.xlsx";
         PackageToServer p2s = new PackageToServer(status.getId(), pr, files, seeker);
 
         this.taskExecutor.add(p2s);
