@@ -662,32 +662,45 @@ public class DetectiveSemester extends Detective {
          */
         private static List<Integer> getWeeks(String itemTitle, int startWeek, int limitWeek, boolean isOdd) {
             if (limitWeek < startWeek) return new ArrayList<>(1);
-            ArrayList<Integer> goodWeeks = new ArrayList<>(limitWeek / 2 + 1); // Контейнер с хорошими неделями
-            List<Integer> exc = getAllExceptionWeeks(itemTitle);
+            Set<Integer> goodWeeks = new HashSet<>(limitWeek / 2 + 1); // Контейнер с хорошими неделями
             List<Integer> onlyWeeks = null;
-            if (exc.size() == 0) {
-                onlyWeeks = getAllOnlyWeeks(itemTitle);
-            }
+            List<Integer> ignoreWeeks = new ArrayList<>(2);
             // Изменение входных параметров в зависимости от itemTitle.
-            {
-                Integer startWeekFromString = getFromStringStartWeek(itemTitle); // Получаем, с какой недели идут пары.
-                if (startWeekFromString != null && startWeekFromString > startWeek) startWeek = startWeekFromString;
-                Integer finishWeekFromString = getFromStringFinishWeek(itemTitle); // Получаем, с какой недели идут пары.
-                if (finishWeekFromString != null && finishWeekFromString < limitWeek) limitWeek = finishWeekFromString;
+
+            Integer startWeekFromString = getFromStringStartWeek(itemTitle); // Получаем, с какой недели идут пары.
+            if (startWeekFromString != null) {
+                ignoreWeeks.add(startWeekFromString);
+                if (startWeekFromString > startWeek)
+                    startWeek = startWeekFromString;
             }
-            if (onlyWeeks != null)
-                for (Integer week : onlyWeeks) {
-                    if (week < startWeek || week > limitWeek)
-                        continue;
-                    goodWeeks.add(week);
-                }
-            if (goodWeeks.size() == 0)
+            Integer finishWeekFromString = getFromStringFinishWeek(itemTitle); // Получаем, с какой недели идут пары.
+            if (finishWeekFromString != null) {
+                ignoreWeeks.add(finishWeekFromString);
+                if (finishWeekFromString < limitWeek)
+                    limitWeek = finishWeekFromString;
+            }
+
+            List<Integer> exc = getAllExceptionWeeks(itemTitle);
+            onlyWeeks = getAllOnlyWeeks(itemTitle);
+            if (startWeekFromString != null) {
+                exc.remove(startWeekFromString);
+                onlyWeeks.remove(startWeekFromString);
+            }
+            if (finishWeekFromString != null) {
+                exc.remove(finishWeekFromString);
+                onlyWeeks.remove(finishWeekFromString);
+            }
+            goodWeeks.addAll(onlyWeeks);
+            int sw = startWeek, lw = limitWeek;
+            goodWeeks.removeIf((week) -> week < sw || week > lw);
+            if (goodWeeks.size() == 0) {
                 for (int i = startWeek % 2 == 0 ? isOdd ? startWeek + 1 : startWeek : isOdd ? startWeek : startWeek + 1;
                      i < limitWeek + 1; i += 2) {
                     if (!exc.contains(i)) // Если это не исключение
                         goodWeeks.add(i); // Пусть все недели - хорошие.
                 }
-            return goodWeeks;
+            }
+            return new ArrayList<>(goodWeeks);
         }
 
         /**
