@@ -25,7 +25,7 @@ public class TimezoneDisplayApp {
                 .map(ZoneId::of)
                 .sorted(new ZoneComparator())
                 .map(id -> String.format(
-                        "%s%s %s",
+                        "(%s%s) %s",
                         base, getOffset(now, id), id.getId()))
                 .collect(Collectors.toList());
     }
