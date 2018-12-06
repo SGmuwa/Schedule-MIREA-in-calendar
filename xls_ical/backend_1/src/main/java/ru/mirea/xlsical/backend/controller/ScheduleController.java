@@ -10,6 +10,7 @@ import ru.mirea.xlsical.backend.entity.ScheduleStatus;
 import ru.mirea.xlsical.backend.service.ScheduleService;
 import ru.mirea.xlsical.backend.utils.ExceptionHandlerController;
 import ru.mirea.xlsical.backend.utils.RestException;
+import ru.mirea.xlsical.backend.utils.TimezoneDisplayApp;
 
 
 import javax.servlet.http.HttpServletResponse;
@@ -19,7 +20,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
+import java.util.TimeZone;
 
 @Controller
 public class ScheduleController extends ExceptionHandlerController {
@@ -27,7 +30,7 @@ public class ScheduleController extends ExceptionHandlerController {
     @Autowired
     private ScheduleService scheduleService;
 
-//    @RequestMapping(value = "schedule", method = RequestMethod.POST)
+    //    @RequestMapping(value = "schedule", method = RequestMethod.POST)
     public @ResponseBody
     ScheduleStatus getSchedule(@RequestBody ScheduleQuery sq) throws RestException {
         try {
@@ -43,7 +46,7 @@ public class ScheduleController extends ExceptionHandlerController {
         }
     }
 
-//    @RequestMapping(value = "status/{id}", method = RequestMethod.GET)
+    //    @RequestMapping(value = "status/{id}", method = RequestMethod.GET)
     @ResponseBody
     public Optional<ScheduleStatus> item(@PathVariable("id") long id) {
         return scheduleService.get(id);
@@ -52,7 +55,7 @@ public class ScheduleController extends ExceptionHandlerController {
     @RequestMapping(value = "schedule", method = RequestMethod.GET)
     public void getFile(
             @RequestParam("name") String name,
-            @RequestParam(name = "dateStart" , required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate start,
+            @RequestParam(name = "dateStart", required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate start,
             @RequestParam(name = "dateFinish", required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate finish,
             @RequestParam("timezoneStart") ZoneId zoneid,
             HttpServletResponse response) {
@@ -79,6 +82,12 @@ public class ScheduleController extends ExceptionHandlerController {
             System.out.println(e);
         }
     }
-}
 
-// TODO: эндпоинт с часовыми поясами
+    @RequestMapping(value = "timezone", method = RequestMethod.GET)
+    @ResponseBody
+    public List<String> tz() {
+        TimezoneDisplayApp tda = new TimezoneDisplayApp();
+        return tda.getTimeZoneList(TimezoneDisplayApp.OffsetBase.GMT);
+    }
+
+}
