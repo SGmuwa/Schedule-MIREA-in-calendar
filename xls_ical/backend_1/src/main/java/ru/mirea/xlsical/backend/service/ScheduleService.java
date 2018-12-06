@@ -26,6 +26,7 @@ public class ScheduleService {
         ScheduleService s;
 
         public void uncaughtException(Thread th, Throwable ex) {
+            System.out.println(th + ": " + ex);
         }
     };
 
