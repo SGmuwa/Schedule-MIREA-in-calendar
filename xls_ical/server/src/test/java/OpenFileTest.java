@@ -8,10 +8,41 @@ import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import static org.junit.Assert.*;
 
 public class OpenFileTest {
+
+    @Test
+    public void testOpenBadFile() throws Exception {
+        File test = new File("tests/badExcel.xlsx");
+        String message = "";
+        for(int i = 0; i < 1000; i++) {
+            assertTrue(test.exists());
+            ArrayList<? extends ExcelFileInterface> files = null;
+            try {
+                files = OpenFile.newInstances(test.getAbsolutePath());
+                fail();
+            } catch (Exception e) {
+                message = e.getLocalizedMessage();
+                // good
+            }
+            assertNull(files);
+        }
+        System.out.println(message);
+    }
+
+    @Test
+    public void testHeapSpace() throws Exception {
+
+    }
+
+    @Test
+    public void testOpenBadAndGoodFile() throws Exception {
+
+    }
+
     @Test
     public void testOpenXLS() throws Exception {
         HSSFWorkbook workbook = new HSSFWorkbook();

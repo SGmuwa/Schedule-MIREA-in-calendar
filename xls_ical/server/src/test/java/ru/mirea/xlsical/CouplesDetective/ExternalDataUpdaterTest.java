@@ -50,7 +50,6 @@ public class ExternalDataUpdaterTest {
             if(count % 20 == 0)
                 System.out.println(count);
             count++;
-            System.gc();
         }
         assertTrue(count > 100);
         //assertEquals(101, count);
