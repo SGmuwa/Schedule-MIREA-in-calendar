@@ -9,6 +9,7 @@ import ru.mirea.xlsical.interpreter.PackageToServer;
 import ru.mirea.xlsical.interpreter.PercentReady;
 import ru.mirea.xlsical.interpreter.Seeker;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Optional;
@@ -17,7 +18,16 @@ import java.util.Optional;
 public class ScheduleService {
     public int threadNumber = 10;
     TaskExecutor taskExecutor = new TaskExecutor();
-    Thread[] threadExecutorArr = new Thread[threadNumber];
+    Thread[] taskExecutorArr = new Thread[threadNumber];
+    Thread[] runnableExecutorArr = new Thread[threadNumber];
+
+    public Thread.UncaughtExceptionHandler h = new Thread.UncaughtExceptionHandler() {
+        @Autowired
+        ScheduleService s;
+
+        public void uncaughtException(Thread th, Throwable ex) {
+        }
+    };
 
     @Autowired
     StatusRunnable sr;
@@ -25,15 +35,19 @@ public class ScheduleService {
     @Autowired
     StatusRepository sp;
 
-    // должно запускаться при инициализации
+    @PostConstruct
     public void start() throws Exception
     {
-        for (int i=0; i<threadNumber;++i)
-            threadExecutorArr[i] = new Thread(taskExecutor);
+        for (int i=0; i<threadNumber;++i) {
+            taskExecutorArr[i] = new Thread(taskExecutor);
+            runnableExecutorArr[i] = new Thread(sr);
+        }
 
-        for (int i=0; i<threadNumber;++i)
-            threadExecutorArr[i].start();
-
+        for (int i=0; i<threadNumber;++i) {
+            taskExecutorArr[i].setUncaughtExceptionHandler(h);
+            taskExecutorArr[i].start();
+            runnableExecutorArr[i].start();
+        }
     }
 
     public ScheduleStatus add(String name, LocalDate start, LocalDate finish, ZoneId zoneid) {

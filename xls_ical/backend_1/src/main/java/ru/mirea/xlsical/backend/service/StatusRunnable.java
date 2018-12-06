@@ -19,11 +19,11 @@ public class StatusRunnable implements Runnable {
     @Autowired
     StatusRepository sp;
 
+
     @Override
     public void run() {
         try {
             PackageToClient p2c = this.scheduleService.taskExecutor.take();
-
             ScheduleStatus s = sp.findById((long) p2c.ctx).get();
             s.setStatus("Success");
             s.setFile(p2c.CalFile);
@@ -31,10 +31,6 @@ public class StatusRunnable implements Runnable {
             s.setMessages(p2c.Messages);
             sp.save(s);
         } catch (Exception e) {
-//            ScheduleStatus s = sp.findById((long) p2c.ctx).get();
-//            s.setStatus("failure");
-            // schedule status set err
-            System.out.println("caught");
-        }
-    }
+
+        }}
 }
