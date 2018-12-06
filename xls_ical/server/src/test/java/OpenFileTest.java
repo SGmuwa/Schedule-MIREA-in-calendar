@@ -34,8 +34,35 @@ public class OpenFileTest {
     }
 
     @Test
-    public void testHeapSpace() throws Exception {
+    public void testOpenNormalFile() throws Exception {
+        File file = new File("tests/IIT-3k-18_19-osen.xlsx");
+        assertTrue(file.exists());
+        for(int i = 0; i < 200; i++) {
+            System.out.println(i);
+            ArrayList<? extends ExcelFileInterface> files =
+                    OpenFile.newInstances(file.getAbsolutePath());
+            for (ExcelFileInterface aFile : files) {
+                aFile.close();
+            }
+        }
+    }
 
+    @Test
+    public void testHeapSpace() throws Exception {
+        File[] heap = {new File("tests/heap1.xlsx"), new File("tests/heap2.xlsx")};
+        String message = "";
+        for(int i = 0; i < 10; i++) {
+            System.out.println(i);
+            for (File aHeap : heap) {
+                assertTrue(aHeap.exists());
+                ArrayList<? extends ExcelFileInterface> files =
+                        OpenFile.newInstances(aHeap.getAbsolutePath());
+                for (ExcelFileInterface file : files) {
+                    file.close();
+                }
+            }
+        }
+        System.out.println(message);
     }
 
     @Test

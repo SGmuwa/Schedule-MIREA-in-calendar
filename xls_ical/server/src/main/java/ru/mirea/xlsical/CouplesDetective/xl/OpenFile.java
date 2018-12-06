@@ -53,7 +53,7 @@ public class OpenFile implements ExcelFileInterface {
         first.closed = setInt;
 
         for(int i = 1; i < size; i++) {
-            out.add(new OpenFile(fileName, i, size, setInt));
+            out.add(new OpenFile(first.wb, i, size, setInt));
         }
         return out;
     }
@@ -137,16 +137,16 @@ public class OpenFile implements ExcelFileInterface {
     /**
      * Создаёт экземпляр открытия файла.
      * Для открытия всех листов Excel файла используйте {@link #newInstances(String)}.
-     * @param fileName Имя файла, который необходимо открыть.
+     * @param workbook Открытая книга.
      * @param numberSheet Номер страницы книги Excel.
      * @throws IOException Ошибка доступа к файлу.
      * @throws InvalidFormatException Ошибка распознования файла.
      * @see #newInstances(String)
      */
-    private OpenFile(String fileName, int numberSheet, int needToClose, SetInt closed) throws IOException, InvalidFormatException {
+    private OpenFile(Workbook workbook, int numberSheet, int needToClose, SetInt closed) throws IOException, InvalidFormatException {
         this.needToClose = needToClose;
         this.closed = closed;
-        this.wb = WorkbookFactory.create(new File(fileName));
+        this.wb = workbook;
         this.numberSheet = numberSheet;
     }
 
