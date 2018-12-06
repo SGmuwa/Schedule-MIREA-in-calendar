@@ -5,11 +5,10 @@ import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.Detective;
 import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveDate;
 import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveException;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
+import ru.mirea.xlsical.interpreter.PackageToClient;
 import ru.mirea.xlsical.interpreter.Seeker;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -45,7 +44,9 @@ public class CoupleHistorian {
                 }
             } while(edUpdater == null);
         }
+        loadCache();
         updateCache();
+        saveCache();
     }
 
     /**
@@ -66,9 +67,13 @@ public class CoupleHistorian {
                         detective.getStartTime(now),
                         detective.getFinishTime(now)
                 ));
-                file.close();
             } catch (IOException | DetectiveException e) {
                 System.out.println(ZonedDateTime.now() + " CoupleHistorian.java: ignore detective: " + e.getLocalizedMessage());
+            }
+            try {
+                file.close();
+            } catch (IOException e) {
+                System.out.println("can't close file: " + file.toString());
             }
         }
         // Всё, что позже этой метки - можно менять. Всё, что раньше - нелья.
@@ -78,8 +83,10 @@ public class CoupleHistorian {
             if (deadLine.compareTo(couple.dateAndTimeOfCouple) < 0) { // Раньше
                 outCache.add(couple);
             }
+            else break;
         }
         // Добавим то, что нового.
+
         for(CoupleInCalendar couple : newCache) {
             if (deadLine.compareTo(couple.dateAndTimeOfCouple) >= 0) { // Позже
                 outCache.add(couple);
@@ -88,7 +95,18 @@ public class CoupleHistorian {
         sortByDateTime(outCache);
         mergeCouples(outCache);
         cache = outCache;
-        saveCache();
+    }
+
+    private void loadCache() {
+        try {
+            ObjectInputStream inObj = new ObjectInputStream(new FileInputStream("ArrayListOfCouplesInCalendar.dat"));
+            Object object = inObj.readObject();
+            LinkedList<CoupleInCalendar> out = (LinkedList<CoupleInCalendar>) object;
+            inObj.close();
+            cache = out;
+        } catch(Exception error) {
+            System.out.println(error.getLocalizedMessage());
+        }
     }
 
     private void saveCache() {
@@ -102,8 +120,7 @@ public class CoupleHistorian {
                 break;
             } catch (IOException e) {
                 e.printStackTrace();
-                System.out.println("I can't save baseData! Again?");
-                new Scanner(System.in).next();
+                System.out.println("CoupleHistorian.java: I can't save baseData! " + e.getLocalizedMessage());
             }
         } while(true);
     }

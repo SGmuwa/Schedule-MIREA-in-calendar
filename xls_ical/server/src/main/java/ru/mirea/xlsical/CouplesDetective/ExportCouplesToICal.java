@@ -52,10 +52,10 @@ public class ExportCouplesToICal {
         if(!count)
             return null;
 
-        String nameFile = "icals\\" + java.time.Instant.now().getLong(ChronoField.INSTANT_SECONDS) + "_" + ran.nextLong() + ".ics";
+        if(!new File("cache/icals").exists())
+            new File("cache/icals").mkdirs();
 
-        if(!new File("icals").exists())
-            new File("icals").mkdir();
+        File nameFile = new File(new File("cache/icals"), java.time.Instant.now().getLong(ChronoField.INSTANT_SECONDS) + "_" + ran.nextLong() + ".ics");
 
         FileOutputStream file = null;
         try {
@@ -69,7 +69,7 @@ public class ExportCouplesToICal {
                 try {file.close(); } catch (IOException e1) { return null; }
             return null;
         }
-        return nameFile;
+        return nameFile.getParent();
     }
 
     /**
