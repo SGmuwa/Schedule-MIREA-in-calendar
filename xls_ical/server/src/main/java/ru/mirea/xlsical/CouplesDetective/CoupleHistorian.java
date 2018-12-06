@@ -105,6 +105,8 @@ public class CoupleHistorian {
             inObj.close();
             cache = out;
         } catch(Exception error) {
+            if(cache == null)
+                cache = new LinkedList<>();
             System.out.println(error.getLocalizedMessage());
         }
     }

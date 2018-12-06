@@ -1,5 +1,6 @@
 package ru.mirea.xlsical.CouplesDetective;
 
+import java.io.Serializable;
 import java.time.*;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -11,7 +12,7 @@ import java.util.NoSuchElementException;
  * Время начала и конца пары, название группы и имя преподавателя,
  * название предмета, аудитория, адрес, тип пары.
  */
-public class CoupleInCalendar extends Couple implements Iterable<CoupleInCalendar> {
+public class CoupleInCalendar extends Couple implements Iterable<CoupleInCalendar>, Serializable {
 
     public CoupleInCalendar(String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address, ZonedDateTime dateAndTimeOfCouple, ZonedDateTime dateAndTimeFinishOfCouple) {
         super(itemTitle, typeOfLesson, nameOfGroup, nameOfTeacher, audience, address);

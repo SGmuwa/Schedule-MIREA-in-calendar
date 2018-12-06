@@ -13,8 +13,9 @@ public class TestPackage {
 
     @Test
     public void StartTestClient() throws ClassNotFoundException {
-        PackageToClient a = PackageToClient.fromByteArray(new PackageToClient(123, null, "My Testing из изи", 777, "Всё ок!").toByteArray());
+        PackageToClient a = PackageToClient.fromByteArray(new PackageToClient(123, "My Testing из изи", 777, "Всё ок!").toByteArray());
 
+        assertNotNull(a);
         assertEquals(123, a.ctx);
         assertEquals("My Testing из изи", a.CalFile);
         assertEquals(777, a.Count);

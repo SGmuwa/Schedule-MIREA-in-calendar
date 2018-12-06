@@ -13,6 +13,7 @@ import ru.mirea.xlsical.interpreter.PackageToServer;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
@@ -91,6 +92,10 @@ public class TaskExecutor implements Runnable {
      * @return Пакет от обработчика.
      */
     public PackageToClient monoStep(PackageToServer pkg) {
+        if(pkg == null)
+            return new PackageToClient(null, null, 0, "Ошибка: была предпринята попытка обработать пустой пакет.");
+        if(pkg.queryCriteria == null)
+            return new PackageToClient(pkg.ctx, null, 0, "Ошибка: отстствуют критерии поиска.");
         if(pkg.excelsFiles != null && pkg.excelsFiles.length > 0) {
             System.out.println("Попытка использовать forceStep из monoStep!");
             return forceStep(pkg);
@@ -98,7 +103,6 @@ public class TaskExecutor implements Runnable {
         List<CoupleInCalendar> couples = coupleHistorian.getCouples(pkg.queryCriteria);
         return new PackageToClient(
                 pkg.ctx,
-                pkg.percentReady,
                 ExportCouplesToICal.start(couples),
                 couples.size(),
                 "ok.");
@@ -129,7 +133,7 @@ public class TaskExecutor implements Runnable {
         } catch (IOException error) {
             error.printStackTrace();
             pkg.percentReady.setReady(1);
-            return new PackageToClient(pkg.ctx, pkg.percentReady, null, 0, "Ошибка внутри сервера.");
+            return new PackageToClient(pkg.ctx, null, 0, "Ошибка внутри сервера.");
         } finally {
             if (fs != null)
                 for (Closeable file : fs)
@@ -151,7 +155,6 @@ public class TaskExecutor implements Runnable {
         }
         return new PackageToClient(
                 pkg.ctx,
-                pkg.percentReady,
                 ExportCouplesToICal.start(couples),
                 couples.size(),
                 "ok.");

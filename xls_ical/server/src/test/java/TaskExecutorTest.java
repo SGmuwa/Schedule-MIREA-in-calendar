@@ -21,7 +21,7 @@ public class TaskExecutorTest {
 
         assertNull(ptc.CalFile);
         assertEquals(0, ptc.Count);
-        assertEquals("Ошибка внутри обработчика. Не было передано множество excel файлов.", ptc.Messages);
+        assertEquals("Ошибка: отстствуют критерии поиска.", ptc.Messages);
     }
 
     @Test

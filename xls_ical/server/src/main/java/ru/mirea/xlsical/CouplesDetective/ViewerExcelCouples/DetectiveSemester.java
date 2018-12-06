@@ -208,7 +208,7 @@ public class DetectiveSemester extends Detective {
     protected LinkedList<CoupleInExcel> startViewer() throws DetectiveException, IOException {
         Point WeekPositionFirst = SeekInLeftUp("[Нн]еделя", 5*2, 3*2);
         LinkedList<Point> IgnoresCoupleTitle = new LinkedList<>();
-        int[] Times = GetTimes(WeekPositionFirst, file); // Узнать время начала и конца пар.
+        int[] Times = GetTimes(WeekPositionFirst); // Узнать время начала и конца пар.
         int CountCouples = Times.length / 2; // Узнать количество пар за день.
         Point basePos = SeekFirstCouple(); // Позиция первой записи "Предмет". Обычно на R3C6.
         // Ура! Мы нашли базовую позицию! Это basePos.
@@ -227,7 +227,7 @@ public class DetectiveSemester extends Detective {
                             && file.getCellData(posEntryX, basePos.y - 1).length() > 0
             ) {
                 lastEC = 15;
-                System.out.println("R" + basePos.y + "C" + posEntryX);
+                System.out.print(" R" + basePos.y + "C" + posEntryX);
                 // Выставляем курсор на название первой пары дня.
                 out.addAll(
                         GetCouplesFromAnchor(
@@ -243,6 +243,7 @@ public class DetectiveSemester extends Detective {
                 );
             }
         }
+        System.out.println();
         return out;
     }
 
@@ -318,9 +319,7 @@ public class DetectiveSemester extends Detective {
             if (file.isBackgroundColorsEquals(pointToGroupName.x, pointToGroupName.y, c.x, c.y))
                 return addresses.get(c);
         // Не получилось что-то найти... Влепим тогда хоть какой-нибудь. Сюда лучше не заходить java.
-        System.out.println("Warning: address not found.\n");
-        for(StackTraceElement ste : Thread.currentThread().getStackTrace())
-            System.out.printf("at %s/n", ste.getMethodName());
+        System.out.println("DetectiveSemester.java: Warning: address not found.");
         Iterator<String> it = addresses.values().iterator();
         if(it.hasNext())
             return it.next() + "?";
@@ -523,10 +522,9 @@ public class DetectiveSemester extends Detective {
     /**
      * Функция, которая извлекает из указанного участка Excel файла времена начала и конца пар в минутах.
      * @param CR Столбец и строка, где находится якорь. Якорём является самая первая запись "Неделя".
-     * @param file Excel файл.
      * @return Возвращает список времён в формате минут: {начало пары, конец пары}.
      */
-    public static int[] GetTimes(Point CR, ExcelFileInterface file) throws DetectiveException, IOException {
+    public int[] GetTimes(Point CR) throws DetectiveException, IOException {
         int[] output = new int[2 * GetCountCoupleInDay(CR, file)];
         if(output.length == 0)
             throw new DetectiveException("Ошибка при поиске время начала и конца пар -> Пока программа спускалась вниз по строкам, считая, сколько пар в одном дне, она прошла окола 100 строк и сказала идити вы все, я столько не хочу обрабатывать.", file);
@@ -544,11 +542,13 @@ public class DetectiveSemester extends Detective {
      * @param inputT Входящее время в строковом представлении.
      * @return Возвращает время в минутах.
      */
-    public static int GetMinutesFromTimeString(String inputT) {
+    public int GetMinutesFromTimeString(String inputT) throws DetectiveException {
         if(inputT == null || inputT.isEmpty()) return 0;
         String[] HHMM = inputT.trim().split("-");
         if(HHMM.length == 1) HHMM = inputT.trim().split(":");
-        return Integer.parseInt(HHMM[0]) * 60 + Integer.parseInt(HHMM[1]);
+        if(HHMM.length == 2)
+            return Integer.parseInt(HHMM[0]) * 60 + Integer.parseInt(HHMM[1]);
+        throw new DetectiveException("Не получилось узнать время по записи: " + inputT, file);
     }
 
     /**
@@ -664,24 +664,21 @@ public class DetectiveSemester extends Detective {
             if (limitWeek < startWeek) return new ArrayList<>(1);
             Set<Integer> goodWeeks = new HashSet<>(limitWeek / 2 + 1); // Контейнер с хорошими неделями
             List<Integer> onlyWeeks = null;
-            List<Integer> ignoreWeeks = new ArrayList<>(2);
             // Изменение входных параметров в зависимости от itemTitle.
 
             Integer startWeekFromString = getFromStringStartWeek(itemTitle); // Получаем, с какой недели идут пары.
             if (startWeekFromString != null) {
-                ignoreWeeks.add(startWeekFromString);
                 if (startWeekFromString > startWeek)
                     startWeek = startWeekFromString;
             }
             Integer finishWeekFromString = getFromStringFinishWeek(itemTitle); // Получаем, с какой недели идут пары.
             if (finishWeekFromString != null) {
-                ignoreWeeks.add(finishWeekFromString);
                 if (finishWeekFromString < limitWeek)
                     limitWeek = finishWeekFromString;
             }
 
             List<Integer> exc = getAllExceptionWeeks(itemTitle);
-            onlyWeeks = getAllOnlyWeeks(itemTitle);
+            onlyWeeks = exc.size() == 0 ? getAllOnlyWeeks(itemTitle) : new ArrayList<>(0);
             if (startWeekFromString != null) {
                 exc.remove(startWeekFromString);
                 onlyWeeks.remove(startWeekFromString);
@@ -700,7 +697,9 @@ public class DetectiveSemester extends Detective {
                         goodWeeks.add(i); // Пусть все недели - хорошие.
                 }
             }
-            return new ArrayList<>(goodWeeks);
+            ArrayList<Integer> out = new ArrayList<>(goodWeeks);
+            out.sort(Integer::compareTo);
+            return out;
         }
 
         /**

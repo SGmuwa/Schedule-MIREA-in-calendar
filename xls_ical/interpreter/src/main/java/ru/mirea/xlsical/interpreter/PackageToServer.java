@@ -20,6 +20,10 @@ public class PackageToServer extends Package {
      * Тут содержатся критерии запроса.
      */
     public final Seeker queryCriteria;
+    /**
+     * Содержится процент готовности пакета
+     */
+    public final PercentReady percentReady;
 
     /**
     Строит данные отправляемые на сервер.
@@ -29,9 +33,13 @@ public class PackageToServer extends Package {
      @param queryCriteria Тут содержатся критерии запроса.
      */
     public PackageToServer(Object ctx, PercentReady percentReady, String[] excelsFiles, Seeker queryCriteria) {
-        super(ctx, percentReady);
+        super(ctx);
         this.excelsFiles = excelsFiles;
         this.queryCriteria = queryCriteria;
+        if (percentReady != null)
+            this.percentReady = percentReady;
+        else
+            this.percentReady = new PercentReady();
     }
 
     /**
