@@ -1,9 +1,17 @@
 package ru.mirea.xlsical.backend.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.mirea.xlsical.Server.TaskExecutor;
-import ru.mirea.xlsical.interpreter.PackageToClient;
+import ru.mirea.xlsical.backend.entity.ScheduleStatus;
+import ru.mirea.xlsical.backend.repository.StatusRepository;
 import ru.mirea.xlsical.interpreter.PackageToServer;
+import ru.mirea.xlsical.interpreter.PercentReady;
+import ru.mirea.xlsical.interpreter.Seeker;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Optional;
 
 @Service
 public class ScheduleService {
@@ -11,7 +19,13 @@ public class ScheduleService {
     TaskExecutor taskExecutor = new TaskExecutor();
     Thread[] threadExecutorArr = new Thread[threadNumber];
 
+    @Autowired
+    StatusRunnable sr;
 
+    @Autowired
+    StatusRepository sp;
+
+    // должно запускаться при инициализации
     public void start() throws Exception
     {
         for (int i=0; i<threadNumber;++i)
@@ -22,14 +36,23 @@ public class ScheduleService {
 
     }
 
-    public PackageToClient add(PackageToServer p2s) {
-        this.taskExecutor.add(p2s);
-        try {
-            PackageToClient p2c = this.taskExecutor.take();
-            return p2c;
-        } catch (Exception e) {
+    public ScheduleStatus add(String name, LocalDate start, LocalDate finish, ZoneId zoneid) {
 
-        }
-        return null;
+        PercentReady pr = new PercentReady();
+        ScheduleStatus status = new ScheduleStatus();
+        status.setStatus("Pending");
+        sp.save(status);
+
+        Seeker seeker = new Seeker(name, start, finish, zoneid);
+        String[] files = new String[1];
+        files[0] = "/Users/artemy/Downloads/IIT-3k-18_19-osen.xlsx";
+        PackageToServer p2s = new PackageToServer(status.getId(), pr, files, seeker);
+
+        this.taskExecutor.add(p2s);
+        return status;
+    }
+
+    public Optional<ScheduleStatus> get(long id) {
+        return sp.findById(id);
     }
 }

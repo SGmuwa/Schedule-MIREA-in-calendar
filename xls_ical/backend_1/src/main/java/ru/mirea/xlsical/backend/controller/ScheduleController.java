@@ -4,17 +4,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.mirea.xlsical.backend.entity.ScheduleQuery;
+import ru.mirea.xlsical.backend.entity.ScheduleStatus;
 import ru.mirea.xlsical.backend.service.ScheduleService;
 import ru.mirea.xlsical.backend.utils.ExceptionHandlerController;
 import ru.mirea.xlsical.backend.utils.RestException;
-import ru.mirea.xlsical.interpreter.Seeker;
-import ru.mirea.xlsical.interpreter.PercentReady;
-import ru.mirea.xlsical.interpreter.PackageToServer;
 import ru.mirea.xlsical.interpreter.PackageToClient;
 
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Optional;
 
 @Controller
 public class ScheduleController extends ExceptionHandlerController {
@@ -24,45 +23,38 @@ public class ScheduleController extends ExceptionHandlerController {
 
     @RequestMapping(value = "schedule", method = RequestMethod.POST)
     public @ResponseBody
-    PackageToClient getSchedule(@RequestBody ScheduleQuery sq) throws RestException {
-        // добавляет задание и возвращает статус и id
-
+    ScheduleStatus getSchedule(@RequestBody ScheduleQuery sq) throws RestException {
         try {
-            System.out.println(0);
             scheduleService.start();
-            System.out.println(10);
+            String name = sq.getName();
 
-            String name = sq.name;
 
+            // TODO: сериализация из реального запроса
             LocalDate start = LocalDate.of(Integer.parseInt("2018"), Integer.parseInt("9"), Integer.parseInt("1"));
             LocalDate finish = LocalDate.of(Integer.parseInt("2018"), Integer.parseInt("12"), Integer.parseInt("31"));
-
 //            LocalDate start = sq.dateStart;
 //            LocalDate finish = sq.dateFinish;
-
 //            ZoneId zoneid = ZoneId.of(sq.timezoneStart);
             ZoneId zoneid = ZoneId.of("UTC");
-            PercentReady pr = new PercentReady();
-            Seeker seeker = new Seeker(name, start, finish, zoneid);
 
-            // TODO: Завести новую запись в таблице, присвоить p2s id этой записи
-            // TODO: эндпоинт для получения статуса записи
-
-            String[] files = new String[1];
-            files[0] = "/Users/artemy/Downloads/IIT-3k-18_19-osen.xlsx";
-
-            PackageToServer p2s = new PackageToServer(1, pr, files, seeker);
-
-            System.out.println(11);
-            return scheduleService.add(p2s);
+            try {
+                ScheduleStatus res = scheduleService.add(name, start, finish, zoneid);
+                return res;
+            } catch (Exception e) {
+                return null;
+            }
 
         } catch (Exception e) {
             throw new RestException(e);
         }
     }
 
-}
+    @RequestMapping(value = "status/{id}", method = RequestMethod.GET)
+    @ResponseBody
+    public Optional<ScheduleStatus> item(@PathVariable("id") long id) {
+        return scheduleService.get(id);
+    }
 
-// TODO: эндпоинт, возвращающий статус задачи по Id
+}
 
 // TODO: эндпоинт с часовыми поясами
