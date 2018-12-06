@@ -26,15 +26,9 @@ public class ScheduleController extends ExceptionHandlerController {
         try {
             scheduleService.start();
             String name = sq.getName();
-
-
-            // TODO: сериализация из реального запроса
-            LocalDate start = LocalDate.of(Integer.parseInt("2018"), Integer.parseInt("9"), Integer.parseInt("1"));
-            LocalDate finish = LocalDate.of(Integer.parseInt("2018"), Integer.parseInt("12"), Integer.parseInt("31"));
-//            LocalDate start = sq.dateStart;
-//            LocalDate finish = sq.dateFinish;
-//            ZoneId zoneid = ZoneId.of(sq.timezoneStart);
-            ZoneId zoneid = ZoneId.of("UTC");
+            LocalDate start = sq.dateStart;
+            LocalDate finish = sq.dateFinish;
+            ZoneId zoneid = sq.timezoneStart;
 
             return scheduleService.add(name, start, finish, zoneid);
 
