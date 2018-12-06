@@ -8,7 +8,6 @@ import ru.mirea.xlsical.backend.entity.ScheduleStatus;
 import ru.mirea.xlsical.backend.service.ScheduleService;
 import ru.mirea.xlsical.backend.utils.ExceptionHandlerController;
 import ru.mirea.xlsical.backend.utils.RestException;
-import ru.mirea.xlsical.interpreter.PackageToClient;
 
 
 import java.time.LocalDate;
@@ -37,12 +36,7 @@ public class ScheduleController extends ExceptionHandlerController {
 //            ZoneId zoneid = ZoneId.of(sq.timezoneStart);
             ZoneId zoneid = ZoneId.of("UTC");
 
-            try {
-                ScheduleStatus res = scheduleService.add(name, start, finish, zoneid);
-                return res;
-            } catch (Exception e) {
-                return null;
-            }
+            return scheduleService.add(name, start, finish, zoneid);
 
         } catch (Exception e) {
             throw new RestException(e);
