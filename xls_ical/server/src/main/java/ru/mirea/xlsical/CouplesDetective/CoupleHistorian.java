@@ -47,6 +47,7 @@ public class CoupleHistorian {
 
     public CoupleHistorian() {
         try {
+            this.settingDates = new DetectiveDate();
             this.edUpdater = new ExternalDataUpdater();
         } catch (IOException e) {
             // Что делать, если не удаётся создать директорию кэша?

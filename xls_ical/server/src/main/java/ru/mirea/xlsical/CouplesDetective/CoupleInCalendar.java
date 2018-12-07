@@ -21,6 +21,17 @@ public class CoupleInCalendar extends Couple implements Iterable<CoupleInCalenda
     }
 
     /**
+     * Конструктор используется для сериализации
+     */
+    public CoupleInCalendar(String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address, ZonedDateTime dateAndTimeOfCouple, ZonedDateTime dateAndTimeFinishOfCouple, CoupleInCalendar next, Duration durationToNext) {
+        super(itemTitle, typeOfLesson, nameOfGroup, nameOfTeacher, audience, address);
+        this.dateAndTimeOfCouple = dateAndTimeOfCouple;
+        this.dateAndTimeFinishOfCouple = dateAndTimeFinishOfCouple;
+        this.next = next;
+        this.durationToNext = durationToNext;
+    }
+
+    /**
      * Дата и время пары.
      */
     public final ZonedDateTime dateAndTimeOfCouple;
