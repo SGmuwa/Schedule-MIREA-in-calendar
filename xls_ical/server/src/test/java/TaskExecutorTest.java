@@ -79,7 +79,6 @@ public class TaskExecutorTest {
 
         TaskExecutor a = new TaskExecutor(historian);
         a.add(new PackageToServer(null,
-                new PercentReady(), null,
                 new Seeker(
                         "ИКБО-04-16",
                         LocalDate.of(2018, 9, 1),
