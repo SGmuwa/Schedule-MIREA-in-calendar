@@ -11,10 +11,40 @@ public class PercentReady {
     /**
      * Создание нового экземпляра управления процентом готовности.
      */
-    public PercentReady(){}
+    public PercentReady(){
+        whole = null;
+        coefficient = 1.0f;
+    }
 
+    /**
+     * Создание ребёнка, который изменяет общий сумматор.
+     * @param whole Ссылка на целую часть.
+     * @param coefficient Коэфициент взаимодействя на целую часть. Допустимые значения: от 0 до 1.
+     */
+    public PercentReady(PercentReady whole, float coefficient) {
+        this.whole = whole;
+        if(0.0f <= coefficient && coefficient <= 1.0f)
+            this.coefficient = coefficient;
+        else
+            throw new IllegalArgumentException("Коэффициент должен быть от 0 до 1 включительно!");
+    }
+
+    /**
+     * На сколько готов текущий загрузчик?
+     */
     private float ready = 0.0f;
+    /**
+     * Объект синхронизации
+     */
     private final Object sc = new Object();
+    /**
+     * Ссылка на родителя
+     */
+    private final PercentReady whole;
+    /**
+     * Коэффициент.
+     */
+    public final float coefficient;
 
     /**
      * Возвращает процент готовности от 0 до 1.
@@ -32,9 +62,16 @@ public class PercentReady {
      */
     public void setReady(float ready) {
         synchronized (sc) {
-            if (0.0f <= ready && ready <= 1.0f)
-                this.ready = ready;
-            throw new IllegalArgumentException("float ready can be only 0.0f ... 1.0f!");
+            if (whole == null)
+                if (0.0f <= ready && ready <= 1.0f)
+                    this.ready = ready;
+                else
+                    throw new IllegalArgumentException("float ready can be only 0.0f ... 1.0f!");
+            else {
+                synchronized (whole.sc) {
+
+                }
+            }
         }
     }
 }

@@ -5,11 +5,13 @@ import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.*;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.*;
+import ru.mirea.xlsical.interpreter.PercentReady;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.temporal.ChronoField;
+import java.util.Collection;
 import java.util.Random;
 
 public class ExportCouplesToICal {
@@ -19,9 +21,11 @@ public class ExportCouplesToICal {
     /**
      * Конвектирует список пар в "*.ical" формат.
      * @param couples Перечисление пар, которые необходимо перевести в .ical.
+     * @param percentReady Указатель, куда отправлять процент готовности.
      * @return Путь до .ical файла. Файл может быть удалён, если он старше 24 часов.
      */
-    public static String start(Iterable<CoupleInCalendar> couples) {
+    public static String start(Collection<CoupleInCalendar> couples, PercentReady percentReady) {
+        percentReady.setReady(0.0f);
         if(ran.nextInt() % 1000 == 0)
             clearCashOlder24H(); // Очистка кэша.
         Calendar cal = new Calendar();
@@ -31,6 +35,8 @@ public class ExportCouplesToICal {
         cal.getProperties().add(CalScale.GREGORIAN);
         boolean count = false;
 
+        int ready = 0;
+        float size = couples.size();
         for(CoupleInCalendar c : couples) {
             count = true;
             VEvent ev = new VEvent();
@@ -48,14 +54,23 @@ public class ExportCouplesToICal {
             ev.getProperties().add(date);
 
             cal.getComponents().add(ev);
+            percentReady.setReady(ready/size * 0.75f);
         }
-        if(!count)
+        if(!count) {
+            percentReady.setReady(1.0f);
             return null;
+        }
 
-        if(!new File("cache/icals").exists())
-            new File("cache/icals").mkdirs();
+        File cachePath = new File("cache/icals");
 
-        File nameFile = new File(new File("cache/icals"), java.time.Instant.now().getLong(ChronoField.INSTANT_SECONDS) + "_" + ran.nextLong() + ".ics");
+        if(!cachePath.exists()) {
+            if(!cachePath.mkdirs()) {
+                // Не были созданы.
+                cachePath = new File("");
+            }
+        }
+
+        File nameFile = new File(cachePath, java.time.Instant.now().getLong(ChronoField.INSTANT_SECONDS) + "_" + ran.nextLong() + ".ics");
 
         FileOutputStream file = null;
         try {
@@ -64,11 +79,13 @@ public class ExportCouplesToICal {
             file.close();
         } catch (IOException e)
         {
+            percentReady.setReady(1.0f);
             e.printStackTrace();
             if(file != null)
                 try {file.close(); } catch (IOException e1) { return null; }
             return null;
         }
+        percentReady.setReady(1.0f);
         return nameFile.getPath();
     }
 

@@ -102,7 +102,7 @@ public class TaskExecutor implements Runnable {
             return new PackageToClient(null, null, 0, "Ошибка: была предпринята попытка обработать пустой пакет.");
         if(pkg.queryCriteria == null)
             return new PackageToClient(pkg.ctx, null, 0, "Ошибка: отстствуют критерии поиска.");
-        List<CoupleInCalendar> couples = coupleHistorian.getCouples(pkg.queryCriteria);
+        List<CoupleInCalendar> couples = coupleHistorian.getCouples(pkg.queryCriteria, pkg.percentReady);
         return new PackageToClient(
                 pkg.ctx,
                 ExportCouplesToICal.start(couples),

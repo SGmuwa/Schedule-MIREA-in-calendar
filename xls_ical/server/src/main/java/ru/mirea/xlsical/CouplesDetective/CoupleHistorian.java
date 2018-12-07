@@ -6,6 +6,7 @@ import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveDate;
 import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveException;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import ru.mirea.xlsical.interpreter.PackageToClient;
+import ru.mirea.xlsical.interpreter.PercentReady;
 import ru.mirea.xlsical.interpreter.Seeker;
 
 import java.io.*;
@@ -158,10 +159,12 @@ public class CoupleHistorian {
     /**
      * Получение календарного расписания по заданным критериям.
      * @param queryCriteria Критерии запроса, по которым будет происходить выборка данных.
+     * @param percentReady Указатель, куда помещать % готовности.
      * @return Новый список с календарными парами определённой группы или определённого
      *         преподавателя. Начиная с даты начала и заканчивая датой конца.
      */
-    public ArrayList<CoupleInCalendar> getCouples(Seeker queryCriteria) {
+    public ArrayList<CoupleInCalendar> getCouples(Seeker queryCriteria, PercentReady percentReady) {
+        percentReady.setReady(0.0f);
         ArrayList<CoupleInCalendar> out = new ArrayList<>(cache.size());
         Pattern p;
         try {
@@ -169,6 +172,8 @@ public class CoupleHistorian {
         } catch (PatternSyntaxException e) {
             p = null;
         }
+        int ready = 0;
+        int size = cache.size();
         for (CoupleInCalendar couple :
                 cache) {
             /*
@@ -197,7 +202,10 @@ public class CoupleHistorian {
                     // if by equals.
                     out.add(couple);
             }
+            ready++;
+            percentReady.setReady((float)ready/(float)size);
         }
+        percentReady.setReady(1.0f);
         return out;
     }
 
