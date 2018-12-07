@@ -24,7 +24,26 @@ public class CoupleHistorian {
 
     private ExternalDataUpdater edUpdater = null;
     private LinkedList<CoupleInCalendar> cache;
-    private DetectiveDate settingDates = new DetectiveDate();
+    private DetectiveDate settingDates;
+
+
+
+    public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, boolean isNeedLoadSaveCache) {
+        this(edUpdater, detectiveDate, isNeedLoadSaveCache, null);
+    }
+
+    public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, boolean isNeedLoadSaveCache, ZonedDateTime now) {
+        this.edUpdater = edUpdater;
+        this.settingDates = detectiveDate;
+        if(this.settingDates == null)
+            this.settingDates = new DetectiveDate();
+        if(isNeedLoadSaveCache)
+            loadCache();
+        this.now = now;
+        updateCache();
+        if(isNeedLoadSaveCache)
+            saveCache();
+    }
 
     public CoupleHistorian() {
         try {
@@ -49,6 +68,12 @@ public class CoupleHistorian {
         saveCache();
     }
 
+    private ZonedDateTime now = null;
+
+    public void setNow(ZonedDateTime now) {
+        this.now = now;
+    }
+
     /**
      * Скачивает с сайта МИРЭА расписание.
      * Сортирует пары по дате-времени.
@@ -58,7 +83,9 @@ public class CoupleHistorian {
     private void updateCache() {
         LinkedList<CoupleInCalendar> outCache = new LinkedList<>(); // Итоговый кэш
         LinkedList<CoupleInCalendar> newCache = new LinkedList<>(); // То, что получили из МИРЭА
-        ZonedDateTime now = ZonedDateTime.now();
+        if(this.cache == null)
+            this.cache = new LinkedList<>();
+        ZonedDateTime now = this.now == null ? ZonedDateTime.now() : this.now;
         for (Iterator<ExcelFileInterface> it = edUpdater.openTablesFromExternal(); it.hasNext(); ) {
             ExcelFileInterface file = it.next();
             Detective detective = Detective.chooseDetective(file, settingDates);
@@ -77,10 +104,10 @@ public class CoupleHistorian {
             }
         }
         // Всё, что позже этой метки - можно менять. Всё, что раньше - нелья.
-        ZonedDateTime deadLine = now.minus(1, ChronoUnit.DAYS);
+        ZonedDateTime deadLine = now.minus(4, ChronoUnit.DAYS);
         // Добавим то, что было раньше.
         for(CoupleInCalendar couple : cache) {
-            if (deadLine.compareTo(couple.dateAndTimeOfCouple) < 0) { // Раньше
+            if (couple.dateAndTimeOfCouple.compareTo(deadLine) < 0) { // Добавим то, что было до обновления.
                 outCache.add(couple);
             }
             else break;
@@ -88,7 +115,7 @@ public class CoupleHistorian {
         // Добавим то, что нового.
 
         for(CoupleInCalendar couple : newCache) {
-            if (deadLine.compareTo(couple.dateAndTimeOfCouple) >= 0) { // Позже
+            if (deadLine.compareTo(couple.dateAndTimeOfCouple) <= 0) { // Добавим новые данные
                 outCache.add(couple);
             }
         }
@@ -182,20 +209,21 @@ public class CoupleHistorian {
      * @see CoupleInCalendar#equals(Object) Подробнее об сравнении пар между собой.
      */
     private static void mergeCouples(LinkedList<CoupleInCalendar> listNeedMerge) {
+        /*
         List<CoupleInCalendar> needDelete = new ArrayList<>();
         ArrayList<CoupleInCalendar> couplesInDay = new ArrayList<>();
-        for(CoupleInCalendar couple : listNeedMerge) {
+        for(CoupleInCalendar couple : listNeedMerge) {*/
             /*
             Если в масиве ничего нет, то добавить пару в список пар дня.
             Если текущая пара есть в тот же день, что и все в списке пар конкретного дня,
             то добавить текущую пару в список пар дня.
-             */
+             *//*
             if(couplesInDay.size() == 0 || couplesInDay.get(couplesInDay.size() - 1).dateAndTimeOfCouple.toLocalDate().equals(couple.dateAndTimeOfCouple.toLocalDate()))
                 couplesInDay.add(couple);
             else {
                 // Требуется
             }
-        }
+        }*/
     }
 
     /**

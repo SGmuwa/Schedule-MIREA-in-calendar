@@ -35,6 +35,12 @@ public class TaskExecutor implements Runnable {
     private final BlockingQueue<PackageToClient> qOut;
     private final CoupleHistorian coupleHistorian;
 
+    public TaskExecutor(CoupleHistorian manualHistorian) {
+        this.qIn = new LinkedBlockingQueue<>();
+        this.qOut = new LinkedBlockingQueue<>();
+        this.coupleHistorian = manualHistorian;
+    }
+
     public TaskExecutor() {
         this.qIn = new LinkedBlockingQueue<>();
         this.qOut = new LinkedBlockingQueue<>();
@@ -149,8 +155,8 @@ public class TaskExecutor implements Runnable {
             couples.removeIf((elm) -> (!pattern.matcher(elm.nameOfGroup).find()
                     && !pattern.matcher(elm.nameOfTeacher).find())
             ||
-                    (pkg.queryCriteria.dateStart.compareTo(elm.dateAndTimeOfCouple) < 0
-                    || pkg.queryCriteria.dateFinish.compareTo(elm.dateAndTimeFinishOfCouple) > 0));
+                    (pkg.queryCriteria.dateStart.compareTo(elm.dateAndTimeOfCouple) > 0
+                            || elm.dateAndTimeFinishOfCouple.compareTo(pkg.queryCriteria.dateFinish) > 0));
         } catch (PatternSyntaxException e) {
             couples.removeIf((elm) -> !pkg.queryCriteria.nameOfSeeker.equals(elm.nameOfTeacher)
             && !pkg.queryCriteria.nameOfSeeker.equals(elm.nameOfGroup));

@@ -45,7 +45,14 @@ public class ExternalDataUpdater {
      * возникает неудачная попытка создать данную папку и её родительские каталоги.
      */
     public ExternalDataUpdater(String path) throws IOException {
-        this(new File(path).getAbsoluteFile(), true);
+        if(path != null) {
+            pathToCache = new File(path);
+            createCacheDir();
+            download();
+        }
+        else {
+            pathToCache = null;
+        }
     }
 
     /**
@@ -56,14 +63,24 @@ public class ExternalDataUpdater {
      * возникает неудачная попытка создать данную папку и её родительские каталоги.
      */
     public ExternalDataUpdater(String path, boolean isNeedDownload) throws IOException {
-        this(new File(path).getAbsoluteFile(), isNeedDownload);
+        if(path != null) {
+            pathToCache = new File(path);
+            createCacheDir();
+            if(isNeedDownload)
+                download();
+        }
+        else {
+            pathToCache = null;
+        }
     }
 
     public ExternalDataUpdater(File path, boolean isNeedDownload) throws IOException {
         pathToCache = path;
-        createCacheDir();
-        if(isNeedDownload)
-            download(); // first download
+        if(path != null) {
+            createCacheDir();
+            if (isNeedDownload)
+                download(); // first download
+        }
     }
 
     private void createCacheDir() throws IOException {
@@ -77,6 +94,18 @@ public class ExternalDataUpdater {
         else if(!pathToCache.canWrite())
             throw new IOException("I can't write in path " + pathToCache.toString() + " directory.");
 
+    }
+
+    public ExternalDataUpdater(ArrayList<File> excelFiles, ArrayList<Teacher> teachers) {
+        pathToCache = null;
+        if(excelFiles != null)
+            this.excelFiles = excelFiles;
+        else
+            this.excelFiles = new ArrayList<>();
+        if(teachers != null)
+            this.teachers = teachers;
+        else
+            this.teachers = new ArrayList<>();
     }
 
     /**
@@ -181,25 +210,28 @@ public class ExternalDataUpdater {
     }
 
     private void threadBody() {
-        try {
-            while (!Thread.currentThread().isInterrupted()) {
-                Thread.sleep(1000 * 60 * 60 * 8); // Проверка три раза в день.
-                download();
+        if (this.pathToCache != null)
+            try {
+                while (!Thread.currentThread().isInterrupted()) {
+                    Thread.sleep(1000 * 60 * 60 * 8); // Проверка три раза в день.
+                    download();
+                }
+            } catch (InterruptedException e) {
+                // finish.
             }
-        } catch (InterruptedException e) {
-            // finish.
-        }
     }
 
     /**
      * Функция скачивает необходимый контент в папку кэша.
      */
     private synchronized void download() {
+        if(pathToCache == null) {
+            System.out.println("Can't update: pathToCache is null.");
+            return;
+        }
         Stream<String> htmlExcels = downloadHTML("https://www.mirea.ru/education/schedule-main/schedule/");
 
         ArrayList<String> excelUrls = findAllExcelURLs(htmlExcels);
-        String debug = excelUrls.get(0);
-        excelUrls = new ArrayList<>(1); excelUrls.add(debug);
         htmlExcels.close();
         // ---- https -> http
         String elm;

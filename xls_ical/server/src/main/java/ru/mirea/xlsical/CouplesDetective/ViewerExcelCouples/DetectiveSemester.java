@@ -360,7 +360,7 @@ public class DetectiveSemester extends Detective {
                     if (p.matcher(file.getCellData(x, y)).find())
                         return new Point(x, y);
         }
-        throw new DetectiveException("Невозможно найти заданное слово Word. Word = " + regex, file);
+        throw new DetectiveException("DetectiveSemester.java: Невозможно найти заданное слово Word. Word = '" + regex + "', sX = " + sizeX + ", sY = " + sizeY, file);
     }
 
     /**

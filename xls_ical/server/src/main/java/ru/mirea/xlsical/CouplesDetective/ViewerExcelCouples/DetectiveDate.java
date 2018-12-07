@@ -20,6 +20,10 @@ public class DetectiveDate {
         this(new File("settings_DetectiveDate.cfg"));
     }
 
+    /**
+     * Запускаете загрузчик контрольных дат.
+     * @param filename Файл, с которого надо прочитать данные. Отправьте null, чтобы создать класс-пустышку.
+     */
     public DetectiveDate(File filename) {
         if(filename == null)
             return;
