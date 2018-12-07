@@ -27,7 +27,8 @@ public class StatusRunnable implements Runnable {
             ScheduleStatus s = sp.findById((long) p2c.ctx).get();
             s.setStatus("Success");
             s.setFile(p2c.CalFile);
-            s.setPercentReady(p2c.percentReady.getReady());
+            s.setPercentReady(1);
+            // s.setPercentReady(p2c.percentReady.getReady()); percentReady в таком случае равен всегда 1.
             s.setMessages(p2c.Messages);
             sp.save(s);
         } catch (Exception e) {

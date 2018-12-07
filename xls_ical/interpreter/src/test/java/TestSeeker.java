@@ -24,9 +24,9 @@ public class TestSeeker {
         );
 
         assertEquals("name", test.nameOfSeeker);
-        assertEquals(LocalDate.of(2000, 5, 5), test.dateStart);
-        assertEquals(LocalDate.of(2000, 5, 10), test.dateFinish);
-        assertEquals(ZoneId.systemDefault(), test.timezoneStart);
+        assertEquals(LocalDate.of(2000, 5, 5), test.dateStart.toLocalDate());
+        assertEquals(LocalDate.of(2000, 5, 10), test.dateFinish.toLocalDate());
+        assertEquals(ZoneId.systemDefault(), test.dateStart.getZone());
 
         PackageToClient cl = new PackageToClient(0, "", 0, "Всё ок");
         assertEquals("", cl.CalFile);

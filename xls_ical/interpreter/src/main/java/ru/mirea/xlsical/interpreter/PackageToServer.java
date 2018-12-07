@@ -53,6 +53,7 @@ public class PackageToServer extends Package {
         super(ctx);
         this.excelsFiles = null;
         this.queryCriteria = queryCriteria;
+        this.percentReady = new PercentReady();
     }
 
     /**
