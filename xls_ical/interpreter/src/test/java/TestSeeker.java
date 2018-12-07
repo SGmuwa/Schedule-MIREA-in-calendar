@@ -33,10 +33,9 @@ public class TestSeeker {
         assertEquals(0, cl.Count);
         assertEquals("Всё ок", cl.Messages);
 
-        PackageToServer sv = new PackageToServer(0, new String[]{""}, test);
+        PackageToServer sv = new PackageToServer(0, test);
 
         assertEquals(test, sv.queryCriteria);
-        assertArrayEquals(new String[]{""}, sv.excelsFiles);
     }
 
 

@@ -6,6 +6,7 @@ import ru.mirea.xlsical.interpreter.SeekerType;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 
 import static org.junit.Assert.*;
 
@@ -29,31 +30,24 @@ public class TestPackage {
                         new PackageToServer
                                 (
                                         312423,
-                                        new String[]{"My Testing из изи",
-                                                "VERY"},
                                         new Seeker
                                                 (
                                                         "1",
-                                                        SeekerType.Teacher,
                                                         LocalDate.MIN,
-                                                        LocalDate.MAX,
-                                                        ZoneId.systemDefault(),
-                                                        "МУУУУУУ",
-                                                        1)
+                                                        LocalDate.MAX.minus(1, ChronoUnit.DAYS),
+                                                        ZoneId.systemDefault()
+                                                )
                                 ).
                                 toByteArray()
                 );
 
-        assertArrayEquals(new String[]{"My Testing из изи", "VERY"},
-                a.excelsFiles);
+        assertNotNull(a);
         assertEquals(new Seeker
                 (
                         "1",
-                        SeekerType.Teacher,
                         LocalDate.MIN,
-                        LocalDate.MAX,
-                        ZoneId.systemDefault(),
-                        "МУУУУУУ",
-                        1), a.queryCriteria);
+                        LocalDate.MAX.minus(1, ChronoUnit.DAYS),
+                        ZoneId.systemDefault()
+                ), a.queryCriteria);
     }
 }
