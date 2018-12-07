@@ -129,7 +129,6 @@ public class TaskExecutor implements Runnable {
                         fs.remove(detective);
                     }
                 }
-
         } catch (IOException error) {
             error.printStackTrace();
             pkg.percentReady.setReady(1);
@@ -147,8 +146,11 @@ public class TaskExecutor implements Runnable {
         }
         try {
             Pattern pattern = Pattern.compile(pkg.queryCriteria.nameOfSeeker);
-            couples.removeIf((elm) -> !pattern.matcher(elm.nameOfGroup).find()
-                    && !pattern.matcher(elm.nameOfTeacher).find());
+            couples.removeIf((elm) -> (!pattern.matcher(elm.nameOfGroup).find()
+                    && !pattern.matcher(elm.nameOfTeacher).find())
+            ||
+                    (pkg.queryCriteria.dateStart.compareTo(elm.dateAndTimeOfCouple) < 0
+                    || pkg.queryCriteria.dateFinish.compareTo(elm.dateAndTimeFinishOfCouple) > 0));
         } catch (PatternSyntaxException e) {
             couples.removeIf((elm) -> !pkg.queryCriteria.nameOfSeeker.equals(elm.nameOfTeacher)
             && !pkg.queryCriteria.nameOfSeeker.equals(elm.nameOfGroup));

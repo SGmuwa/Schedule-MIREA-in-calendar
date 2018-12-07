@@ -69,7 +69,7 @@ public class ExportCouplesToICal {
                 try {file.close(); } catch (IOException e1) { return null; }
             return null;
         }
-        return nameFile.getParent();
+        return nameFile.getPath();
     }
 
     /**

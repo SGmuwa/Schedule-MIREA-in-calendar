@@ -31,12 +31,9 @@ public class TaskExecutorTest {
                 new String[]{"tests\\IIT-3k-18_19-osen (2).xlsx"},
                 new Seeker(
                         "ИКБО-04-16",
-                        SeekerType.StudyGroup,
                         LocalDate.of(2018, 9, 1),
                         LocalDate.of(2018, 9, 1),
-                        ZoneId.of("Europe/Minsk"),
-                        "Москва, Проспект Вернадского, 78",
-                        0
+                        ZoneId.of("Europe/Minsk")
                 )
         ));
 
@@ -65,6 +62,6 @@ public class TaskExecutorTest {
         PackageToClient b = a.take();
         System.out.println(b.CalFile);
         assertNotNull(b.CalFile);
-        assertEquals(222, b.Count);
+        assertEquals(252, b.Count);
     }
 }

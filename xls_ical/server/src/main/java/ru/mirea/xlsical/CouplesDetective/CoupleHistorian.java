@@ -107,7 +107,7 @@ public class CoupleHistorian {
         } catch(Exception error) {
             if(cache == null)
                 cache = new LinkedList<>();
-            System.out.println(error.getLocalizedMessage());
+            System.out.println(ZonedDateTime.now() + "CoupleHistorian.java#loadCache(): " + error.getLocalizedMessage());
         }
     }
 

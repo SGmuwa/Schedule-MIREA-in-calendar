@@ -198,6 +198,8 @@ public class ExternalDataUpdater {
         Stream<String> htmlExcels = downloadHTML("https://www.mirea.ru/education/schedule-main/schedule/");
 
         ArrayList<String> excelUrls = findAllExcelURLs(htmlExcels);
+        String debug = excelUrls.get(0);
+        excelUrls = new ArrayList<>(1); excelUrls.add(debug);
         htmlExcels.close();
         // ---- https -> http
         String elm;
