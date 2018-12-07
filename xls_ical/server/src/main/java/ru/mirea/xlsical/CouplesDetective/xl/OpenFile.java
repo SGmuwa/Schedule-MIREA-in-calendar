@@ -5,6 +5,7 @@ import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.*;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -136,7 +137,7 @@ public class OpenFile implements ExcelFileInterface {
      * @see #newInstances(String)
      */
     private OpenFile(String fileName, int numberSheet) throws IOException, InvalidFormatException {
-        wb = WorkbookFactory.create(new File(fileName));
+        wb = WorkbookFactory.create(new FileInputStream(new File(fileName)));
         this.numberSheet = numberSheet;
         this.fileName = fileName;
     }

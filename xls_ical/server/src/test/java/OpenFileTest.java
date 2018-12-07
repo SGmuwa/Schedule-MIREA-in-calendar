@@ -1,11 +1,15 @@
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.junit.Test;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -72,8 +76,8 @@ public class OpenFileTest {
 
     @Test
     public void testOpenXLS() throws Exception {
-        HSSFWorkbook workbook = new HSSFWorkbook();
-        HSSFSheet sheet = workbook.createSheet("1");
+        Workbook workbook = new HSSFWorkbook();
+        Sheet sheet = workbook.createSheet("1");
 
         // создаем подписи к столбцам (это будет первая строчка в листе Excel файла)
         Row row = sheet.createRow(0);
@@ -85,26 +89,61 @@ public class OpenFileTest {
         row1.createCell(0).setCellValue("АБ");
         row1.createCell(1).setCellValue("Груша");
 
-        try (FileOutputStream out = new FileOutputStream(new File("delete1.xls"))) {
+        File testFile = new File("delete1.xls");
+        if(testFile.exists())
+            assertTrue(testFile.delete());
+
+        try (FileOutputStream out = new FileOutputStream(testFile)) {
             workbook.write(out);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
+        assertTrue(testFile.exists());
+        assertTrue(testFile.delete());
 
-        ExcelFileInterface openFile = OpenFile.newInstances("delete1.xls").get(0);
-        assertEquals("Error 1:1(AA)", "АА", openFile.getCellData(1,1));
-        assertEquals("Error 1:2(AБ)", "АБ", openFile.getCellData(1,2));
-        assertEquals("Error 2:1(БА)", "БА", openFile.getCellData(2,1));
-        assertEquals("Error 2:2(Груша)", "Груша", openFile.getCellData(2,2));
-        try {
-            assertEquals("Error -1:-1(null)", "", openFile.getCellData(-1, -1));
-            fail();
-        } catch (Exception e) {
-            // good.
+        try (FileOutputStream out = new FileOutputStream(testFile)) {
+            workbook.write(out);
         }
-        assertEquals("Error 999:999( )", "", openFile.getCellData(999,999));
-        openFile.close();
-        new File("delete1.xls").delete();
+
+        assertTrue(testFile.exists());
+
+        Workbook wb = WorkbookFactory.create(new FileInputStream(testFile));
+        wb.close();
+
+        assertTrue(testFile.exists());
+        assertTrue(testFile.delete());
+
+        try (FileOutputStream out = new FileOutputStream(testFile)) {
+            workbook.write(out);
+        }
+
+        assertTrue(testFile.exists());
+
+        OpenFile.newInstances(testFile.getPath()).get(0).close();
+
+        assertTrue(testFile.exists());
+        assertTrue(testFile.delete());
+
+        try (FileOutputStream out = new FileOutputStream(testFile)) {
+            workbook.write(out);
+        }
+
+        assertTrue(testFile.exists());
+
+        for(int i = 0; i < 2; i++) {
+            ExcelFileInterface openFile = OpenFile.newInstances(testFile.getPath()).get(0);
+            assertEquals("Error 1:1(AA)", "АА", openFile.getCellData(1, 1));
+            assertEquals("Error 1:2(AБ)", "АБ", openFile.getCellData(1, 2));
+            assertEquals("Error 2:1(БА)", "БА", openFile.getCellData(2, 1));
+            assertEquals("Error 2:2(Груша)", "Груша", openFile.getCellData(2, 2));
+            try {
+                assertEquals("Error -1:-1(null)", "", openFile.getCellData(-1, -1));
+                fail();
+            } catch (Exception e) {
+                // good.
+            }
+            assertEquals("Error 999:999( )", "", openFile.getCellData(999, 999));
+            openFile.close();
+        }
+        assertTrue("Ошибка при последнем удалении файла", testFile.delete());
     }
 }
