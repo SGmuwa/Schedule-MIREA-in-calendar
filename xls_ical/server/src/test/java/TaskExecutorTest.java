@@ -20,7 +20,7 @@ public class TaskExecutorTest {
     @Test
     public void pullPollStep() throws InterruptedException {
         TaskExecutor te = new TaskExecutor();
-        te.add(new PackageToServer(null, null, null));
+        te.add(new PackageToServer(null, new PercentReady(), null));
         te.step();
         PackageToClient ptc = te.take();
 
