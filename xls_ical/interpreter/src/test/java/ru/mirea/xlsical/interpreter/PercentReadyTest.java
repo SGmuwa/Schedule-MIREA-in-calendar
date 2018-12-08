@@ -77,5 +77,12 @@ public class PercentReadyTest {
             new PercentReady(big, 0.6f);
             fail();
         } catch (IllegalArgumentException e) {/*good!*/}
+
+        try {
+            PercentReady big = new PercentReady();
+            new PercentReady(big, 0.5f);
+            big.setReady(1.0f);
+            fail();
+        } catch (IllegalAccessError e) {/*good!*/}
     }
 }

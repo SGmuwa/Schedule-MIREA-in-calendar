@@ -9,6 +9,7 @@ import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
 import ru.mirea.xlsical.interpreter.PackageToClient;
 import ru.mirea.xlsical.interpreter.PackageToServer;
+import ru.mirea.xlsical.interpreter.PercentReady;
 
 import java.io.Closeable;
 import java.io.File;
@@ -98,14 +99,17 @@ public class TaskExecutor implements Runnable {
      * @return Пакет от обработчика.
      */
     public PackageToClient monoStep(PackageToServer pkg) {
-        if(pkg == null)
+        if(pkg == null) {
             return new PackageToClient(null, null, 0, "Ошибка: была предпринята попытка обработать пустой пакет.");
-        if(pkg.queryCriteria == null)
+        }
+        if(pkg.queryCriteria == null) {
+            pkg.percentReady.setReady(1.0f);
             return new PackageToClient(pkg.ctx, null, 0, "Ошибка: отстствуют критерии поиска.");
-        List<CoupleInCalendar> couples = coupleHistorian.getCouples(pkg.queryCriteria, pkg.percentReady);
+        }
+        List<CoupleInCalendar> couples = coupleHistorian.getCouples(pkg.queryCriteria, new PercentReady(pkg.percentReady, 0.4f));
         return new PackageToClient(
                 pkg.ctx,
-                ExportCouplesToICal.start(couples),
+                ExportCouplesToICal.start(couples, new PercentReady(pkg.percentReady, 0.6f)),
                 couples.size(),
                 "ok.");
     }

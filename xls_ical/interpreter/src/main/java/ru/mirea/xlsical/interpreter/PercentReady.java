@@ -2,6 +2,7 @@ package ru.mirea.xlsical.interpreter;
 
 /**
  * Класс, который служит для управления процентом готовности задачи.
+ * Данный класс является потокобезопасным.
  * @since 18.11.2018
  * @version 2018-12-08
  * @author <a href="https://github.com/SGmuwa/">[SG]Muwa</a>
@@ -45,7 +46,7 @@ public class PercentReady {
             this.coefficient = coefficient;
             if(whole != null) {
                 synchronized (whole.sc) {
-                    if (whole.sumOfCoefficientInPieces + coefficient > 1.0f)
+                    if (whole.sumOfCoefficientInPieces + coefficient > 1.0000001f)
                         throw new IllegalArgumentException("Сумма коэффициентов целой части зашкаливает! Должно быть от 0 до 1 включительно! А получается: " + whole.sumOfCoefficientInPieces + coefficient);
                     else
                         whole.sumOfCoefficientInPieces += coefficient;
@@ -82,6 +83,17 @@ public class PercentReady {
     private float sumOfCoefficientInPieces = 0.0f;
 
     /**
+     * Получает сумму занятых коэффициентов частями.
+     * Используйте для того, чтобы вычислить свободное пространство.
+     * @return Сумма занятых коэффициентов частями
+     */
+    public float GetFreeCoefficient() {
+        synchronized (sc) {
+            return sumOfCoefficientInPieces - Float.MIN_VALUE + 1.0f;
+        }
+    }
+
+    /**
      * Возвращает процент готовности от 0 до 1.
      * @return Процент готовности от 0 до 1.
      */
@@ -98,6 +110,8 @@ public class PercentReady {
     public void setReady(float ready) {
         IllegalArgumentException error = null;
         synchronized (sc) { // Блокировка этого состояния.
+            if(sumOfCoefficientInPieces != 0.0f)
+                throw new IllegalAccessError("Вы потеряли доступ к изменению данного поля. Его можно получить используя его части.");
             if (0.0f <= ready && ready <= 1.0f) {
                 if (whole == null)
                     this.ready = ready;

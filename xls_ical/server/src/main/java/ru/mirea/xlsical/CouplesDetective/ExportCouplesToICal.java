@@ -25,18 +25,26 @@ public class ExportCouplesToICal {
      * @return Путь до .ical файла. Файл может быть удалён, если он старше 24 часов.
      */
     public static String start(Collection<CoupleInCalendar> couples, PercentReady percentReady) {
-        percentReady.setReady(0.0f);
+        PercentReady load = new PercentReady(percentReady, 0.05f);
+        load.setReady(0.01f);
+        PercentReady renderIcalPercentReady = new PercentReady(percentReady, 0.9f);
+        PercentReady FinishPercentReady = new PercentReady(percentReady, 0.05f);
         if(ran.nextInt() % 1000 == 0)
             clearCashOlder24H(); // Очистка кэша.
+        load.setReady(0.1f);
         Calendar cal = new Calendar();
+        load.setReady(0.25f);
         TimeZoneRegistry registry = new CalendarBuilder().getRegistry ();
+        load.setReady(0.5f);
         cal.getProperties().add(new ProdId("-//RTU Roflex Team//xls_ical//RU"));
         cal.getProperties().add(Version.VERSION_2_0);
         cal.getProperties().add(CalScale.GREGORIAN);
         boolean count = false;
+        load.setReady(0.75f);
 
         int ready = 0;
         float size = couples.size();
+        load.setReady(1.0f);
         for(CoupleInCalendar c : couples) {
             count = true;
             VEvent ev = new VEvent();
@@ -54,10 +62,12 @@ public class ExportCouplesToICal {
             ev.getProperties().add(date);
 
             cal.getComponents().add(ev);
-            percentReady.setReady(ready/size * 0.75f);
+            ready++;
+            renderIcalPercentReady.setReady(ready/size);
         }
         if(!count) {
-            percentReady.setReady(1.0f);
+            renderIcalPercentReady.setReady(1.0f);
+            FinishPercentReady.
             return null;
         }
 
