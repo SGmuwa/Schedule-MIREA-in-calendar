@@ -24,18 +24,7 @@ public class PercentReadyTest {
 
     @Test
     public void startWholePercent() throws InterruptedException {
-        PercentReady whole = new PercentReady(new ICanUsePercentReady() {
-            String old = "";
-
-            @Override
-            public void transferValue(PercentReady pr) {
-                String newStr = pr.toString();
-                if(!newStr.equals(old)) {
-                    old = newStr;
-                    System.out.println(newStr);
-                }
-            }
-        });
+        PercentReady whole = new PercentReady(new SampleConsoleTransferPercentReady());
         Thread a = new Thread(() -> function1(new PercentReady(whole, 1f/11f)));
         Thread b = new Thread(() -> function2(new PercentReady(whole, 10f/11f)));
         a.start();

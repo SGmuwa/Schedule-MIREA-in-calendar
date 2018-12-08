@@ -65,6 +65,7 @@ public class TaskExecutorTest {
     public void sendSampleExcelAllSem() throws InterruptedException {
         ArrayList<File> excels = new ArrayList<File>();
         excels.add(new File("tests\\IIT-3k-18_19-osen (2).xlsx"));
+        PercentReady pr = new PercentReady(new SampleConsoleTransferPercentReady("sendSampleExcelAllSem: "));
 
         ZonedDateTime now = ZonedDateTime.of(
                 LocalDate.of(2018, 9, 1),
@@ -78,7 +79,7 @@ public class TaskExecutorTest {
         ), new DetectiveDate(), false, now);
 
         TaskExecutor a = new TaskExecutor(historian);
-        a.add(new PackageToServer(null,
+        a.add(new PackageToServer(null, pr,
                 new Seeker(
                         "ИКБО-04-16",
                         LocalDate.of(2018, 9, 1),
@@ -103,13 +104,15 @@ public class TaskExecutorTest {
                 ZoneId.of("Europe/Minsk")
         );
 
+        PercentReady pr = new PercentReady(new SampleConsoleTransferPercentReady("sendExcelAllSem: "));
+
         // В этом тесте надо уточнить, чтобы код думал, что сейчас 1 сентября 2018 года,
         // чтобы построил расписание на осенний семестр 2018 года.
         CoupleHistorian historian = new CoupleHistorian(new ExternalDataUpdater(), new DetectiveDate(), false, now);
 
         TaskExecutor a = new TaskExecutor(historian);
         a.add(new PackageToServer(null,
-                new PercentReady(),
+                pr,
                 new Seeker(
                         "ИКБО-04-16",
                         LocalDate.of(2018, 9, 1),

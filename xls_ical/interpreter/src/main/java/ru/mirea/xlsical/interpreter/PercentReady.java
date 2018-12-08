@@ -164,14 +164,3 @@ public class PercentReady {
         return String.format("%3.0f%%", ready*100f);
     }
 }
-
-/**
- * Интерфейс говорит, что объект умеет принимать изменения percentReady
- */
-interface ICanUsePercentReady {
-    /**
-     * Вызывается всегда, когда используется setValue.
-     * @param percentReady Объект, который был изменён.
-     */
-    void transferValue(PercentReady percentReady);
-}

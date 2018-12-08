@@ -28,7 +28,7 @@ public class ExportCouplesToICal {
         PercentReady load = new PercentReady(percentReady, 0.05f);
         load.setReady(0.01f);
         PercentReady renderIcalPercentReady = new PercentReady(percentReady, 0.9f);
-        PercentReady FinishPercentReady = new PercentReady(percentReady, 0.05f);
+        PercentReady finishPercentReady = new PercentReady(percentReady, 0.05f);
         if(ran.nextInt() % 1000 == 0)
             clearCashOlder24H(); // Очистка кэша.
         load.setReady(0.1f);
@@ -65,9 +65,10 @@ public class ExportCouplesToICal {
             ready++;
             renderIcalPercentReady.setReady(ready/size);
         }
+        finishPercentReady.setReady(0.1f);
         if(!count) {
             renderIcalPercentReady.setReady(1.0f);
-            FinishPercentReady.
+            finishPercentReady.setReady(1.0f);
             return null;
         }
 
@@ -79,23 +80,25 @@ public class ExportCouplesToICal {
                 cachePath = new File("");
             }
         }
-
+        finishPercentReady.setReady(0.3f);
         File nameFile = new File(cachePath, java.time.Instant.now().getLong(ChronoField.INSTANT_SECONDS) + "_" + ran.nextLong() + ".ics");
-
+        finishPercentReady.setReady(0.4f);
         FileOutputStream file = null;
         try {
             file = new FileOutputStream(nameFile);
+            finishPercentReady.setReady(0.6f);
             new CalendarOutputter().output(cal, file);
+            finishPercentReady.setReady(0.8f);
             file.close();
         } catch (IOException e)
         {
-            percentReady.setReady(1.0f);
+            finishPercentReady.setReady(1.0f);
             e.printStackTrace();
             if(file != null)
                 try {file.close(); } catch (IOException e1) { return null; }
             return null;
         }
-        percentReady.setReady(1.0f);
+        finishPercentReady.setReady(1.0f);
         return nameFile.getPath();
     }
 

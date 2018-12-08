@@ -7,6 +7,7 @@ import ru.mirea.xlsical.backend.entity.ScheduleStatus;
 import ru.mirea.xlsical.backend.repository.StatusRepository;
 import ru.mirea.xlsical.interpreter.PackageToServer;
 import ru.mirea.xlsical.interpreter.PercentReady;
+import ru.mirea.xlsical.interpreter.SampleConsoleTransferPercentReady;
 import ru.mirea.xlsical.interpreter.Seeker;
 
 import javax.annotation.PostConstruct;
@@ -53,7 +54,7 @@ public class ScheduleService {
 
     public ScheduleStatus add(String name, LocalDate start, LocalDate finish, ZoneId zoneid) {
 
-        PercentReady pr = new PercentReady();
+        PercentReady pr = new PercentReady(new SampleConsoleTransferPercentReady("ScheduleService.java: "));
         ScheduleStatus status = new ScheduleStatus();
         status.setStatus("Pending");
         sp.save(status);

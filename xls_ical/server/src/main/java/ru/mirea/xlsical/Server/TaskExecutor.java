@@ -106,10 +106,12 @@ public class TaskExecutor implements Runnable {
             pkg.percentReady.setReady(1.0f);
             return new PackageToClient(pkg.ctx, null, 0, "Ошибка: отстствуют критерии поиска.");
         }
-        List<CoupleInCalendar> couples = coupleHistorian.getCouples(pkg.queryCriteria, new PercentReady(pkg.percentReady, 0.4f));
+        List<CoupleInCalendar> couples = coupleHistorian.getCouples(pkg.queryCriteria, new PercentReady(pkg.percentReady, 0.6f));
+        String iCalFile = ExportCouplesToICal.start(couples, new PercentReady(pkg.percentReady, 0.4f));
+        System.out.println(iCalFile);
         return new PackageToClient(
                 pkg.ctx,
-                ExportCouplesToICal.start(couples, new PercentReady(pkg.percentReady, 0.6f)),
+                iCalFile,
                 couples.size(),
                 "ok.");
     }
