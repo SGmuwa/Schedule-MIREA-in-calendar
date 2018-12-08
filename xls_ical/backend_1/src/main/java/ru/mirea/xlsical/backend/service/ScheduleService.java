@@ -18,7 +18,7 @@ import java.util.Optional;
 @Service
 public class ScheduleService {
     public int threadNumber = 10;
-    TaskExecutor taskExecutor = new TaskExecutor();
+    TaskExecutor taskExecutor = new TaskExecutor(new PercentReady(new SampleConsoleTransferPercentReady("new TaskExecutor: ")));
     Thread[] taskExecutorArr = new Thread[threadNumber];
     Thread[] runnableExecutorArr = new Thread[threadNumber];
 

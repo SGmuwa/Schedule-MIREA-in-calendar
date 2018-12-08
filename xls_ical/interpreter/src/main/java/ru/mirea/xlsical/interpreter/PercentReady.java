@@ -161,6 +161,6 @@ public class PercentReady {
 
     @Override
     public String toString() {
-        return String.format("%3.0f%%", ready*100f);
+        return String.format("%3.1f%%", ready*100f);
     }
 }

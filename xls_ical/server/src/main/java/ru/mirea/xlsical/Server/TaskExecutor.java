@@ -43,9 +43,11 @@ public class TaskExecutor implements Runnable {
     }
 
     public TaskExecutor() {
-        this.qIn = new LinkedBlockingQueue<>();
-        this.qOut = new LinkedBlockingQueue<>();
-        this.coupleHistorian = new CoupleHistorian();
+        this(new CoupleHistorian());
+    }
+
+    public TaskExecutor(PercentReady pr) {
+        this(new CoupleHistorian(pr, true));
     }
 
     /**

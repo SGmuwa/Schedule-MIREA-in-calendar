@@ -227,7 +227,7 @@ public class DetectiveSemester extends Detective {
                             && file.getCellData(posEntryX, basePos.y - 1).length() > 0
             ) {
                 lastEC = 15;
-                System.out.print(" R" + basePos.y + "C" + posEntryX);
+                //System.out.print(" R" + basePos.y + "C" + posEntryX);
                 // Выставляем курсор на название первой пары дня.
                 out.addAll(
                         GetCouplesFromAnchor(
@@ -243,7 +243,7 @@ public class DetectiveSemester extends Detective {
                 );
             }
         }
-        System.out.println();
+        //System.out.println();
         return out;
     }
 
@@ -319,7 +319,7 @@ public class DetectiveSemester extends Detective {
             if (file.isBackgroundColorsEquals(pointToGroupName.x, pointToGroupName.y, c.x, c.y))
                 return addresses.get(c);
         // Не получилось что-то найти... Влепим тогда хоть какой-нибудь. Сюда лучше не заходить java.
-        System.out.println("DetectiveSemester.java: Warning: address not found. file: " + file.toString());
+        //System.out.println("DetectiveSemester.java: Warning: address not found. file: " + file.toString());
         Iterator<String> it = addresses.values().iterator();
         if(it.hasNext())
             return it.next() + "?";

@@ -1,11 +1,9 @@
 package ru.mirea.xlsical.CouplesDetective;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.Detective;
 import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveDate;
 import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveException;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
-import ru.mirea.xlsical.interpreter.PackageToClient;
 import ru.mirea.xlsical.interpreter.PercentReady;
 import ru.mirea.xlsical.interpreter.Seeker;
 
@@ -13,6 +11,7 @@ import java.io.*;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -34,6 +33,10 @@ public class CoupleHistorian {
     }
 
     public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, boolean isNeedLoadSaveCache, ZonedDateTime now) {
+        this(edUpdater, detectiveDate, isNeedLoadSaveCache, null, new PercentReady());
+    }
+
+    public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, boolean isNeedLoadSaveCache, ZonedDateTime now, PercentReady pr) {
         this.edUpdater = edUpdater;
         this.settingDates = detectiveDate;
         if(this.settingDates == null)
@@ -41,15 +44,23 @@ public class CoupleHistorian {
         if(isNeedLoadSaveCache)
             loadCache();
         this.now = now;
-        updateCache();
+        updateCache(pr);
         if(isNeedLoadSaveCache)
             saveCache();
     }
 
     public CoupleHistorian() {
+        this(new PercentReady(), true);
+    }
+
+    public CoupleHistorian(PercentReady pr, boolean isNeedLoadSaveCache) {
+        PercentReady PR_constructor = new PercentReady(pr, 0.000025f);
+        PercentReady PR_external = new PercentReady(pr, 0.0025f - 0.000025f);
         try {
             this.settingDates = new DetectiveDate();
-            this.edUpdater = new ExternalDataUpdater();
+            PR_constructor.setReady(0.2f);
+            this.edUpdater = new ExternalDataUpdater(PR_external);
+            PR_constructor.setReady(0.4f);
         } catch (IOException e) {
             // Что делать, если не удаётся создать директорию кэша?
             // Переносим ответственность на администратора сервера.
@@ -59,15 +70,20 @@ public class CoupleHistorian {
             do {
                 try {
                     System.out.print("Write path cache dir: ");
-                    this.edUpdater = new ExternalDataUpdater(sc.nextLine());
+                    this.edUpdater = new ExternalDataUpdater(new File(sc.nextLine()), true, PR_external);
                 } catch (IOException er) {
                     System.out.println(er.getLocalizedMessage());
                 }
             } while(edUpdater == null);
         }
-        loadCache();
-        updateCache();
-        saveCache();
+        if(isNeedLoadSaveCache)
+            loadCache();
+        PR_constructor.setReady(0.6f);
+        updateCache(new PercentReady(pr, 1f-0.0025f));
+        PR_constructor.setReady(0.8f);
+        if(isNeedLoadSaveCache)
+            saveCache();
+        PR_constructor.setReady(1.0f);
     }
 
     private ZonedDateTime now = null;
@@ -82,46 +98,72 @@ public class CoupleHistorian {
      * Анализирует будущие пары.
      * Сохраняет на диск.
      */
-    private void updateCache() {
+    private void updateCache(PercentReady pr) {
+        PercentReady[] cycles = new PercentReady[] {
+                new PercentReady(pr, 12f/16f),
+                new PercentReady(pr, 1f/16f),
+                new PercentReady(pr, 1f/16f)
+        };
+        PercentReady sort = new PercentReady(pr, 2f/16f);
         LinkedList<CoupleInCalendar> outCache = new LinkedList<>(); // Итоговый кэш
         LinkedList<CoupleInCalendar> newCache = new LinkedList<>(); // То, что получили из МИРЭА
         if(this.cache == null)
             this.cache = new LinkedList<>();
         ZonedDateTime now = this.now == null ? ZonedDateTime.now() : this.now;
-        for (Iterator<ExcelFileInterface> it = edUpdater.openTablesFromExternal(); it.hasNext(); ) {
-            ExcelFileInterface file = it.next();
-            Detective detective = Detective.chooseDetective(file, settingDates);
-            try {
-                newCache.addAll(detective.startAnInvestigation(
-                        detective.getStartTime(now),
-                        detective.getFinishTime(now)
-                ));
-            } catch (IOException | DetectiveException e) {
-                System.out.println(ZonedDateTime.now() + " CoupleHistorian.java: ignore detective: " + e.getLocalizedMessage());
+
+        {
+            IteratorExcels it = edUpdater.openTablesFromExternal();
+            float size = it.size * 3;
+            int i = 0;
+            while(it.hasNext()) {
+                ExcelFileInterface file = it.next();
+                Detective detective = Detective.chooseDetective(file, settingDates);
+                try {
+                    newCache.addAll(detective.startAnInvestigation(
+                            detective.getStartTime(now),
+                            detective.getFinishTime(now)
+                    ));
+                } catch (IOException | DetectiveException e) {
+                    //System.out.println(ZonedDateTime.now() + " CoupleHistorian.java: ignore detective: " + e.getLocalizedMessage());
+                }
+                try {
+                    file.close();
+                } catch (IOException e) {
+                    System.out.println("can't close file: " + file.toString());
+                }
+                if(i + 1 < size)
+                    cycles[0].setReady(++i/size);
             }
-            try {
-                file.close();
-            } catch (IOException e) {
-                System.out.println("can't close file: " + file.toString());
-            }
+            cycles[0].setReady(1.0f);
         }
         // Всё, что позже этой метки - можно менять. Всё, что раньше - нелья.
         ZonedDateTime deadLine = now.minus(4, ChronoUnit.DAYS);
         // Добавим то, что было раньше.
-        for(CoupleInCalendar couple : cache) {
-            if (couple.dateAndTimeOfCouple.compareTo(deadLine) < 0) { // Добавим то, что было до обновления.
-                outCache.add(couple);
+        {
+            float size = cache.size();
+            int i = 0;
+            for (CoupleInCalendar couple : cache) {
+                if (couple.dateAndTimeOfCouple.compareTo(deadLine) < 0) { // Добавим то, что было до обновления.
+                    outCache.add(couple);
+                } else break;
+                cycles[1].setReady(++i/size);
             }
-            else break;
+            cycles[1].setReady(1.0f);
         }
         // Добавим то, что нового.
 
-        for(CoupleInCalendar couple : newCache) {
-            if (deadLine.compareTo(couple.dateAndTimeOfCouple) <= 0) { // Добавим новые данные
-                outCache.add(couple);
+        {
+            float size = newCache.size();
+            int i = 0;
+            for (CoupleInCalendar couple : newCache) {
+                if (deadLine.compareTo(couple.dateAndTimeOfCouple) <= 0) { // Добавим новые данные
+                    outCache.add(couple);
+                }
+                cycles[2].setReady(++i/size);
             }
+            cycles[2].setReady(1.0f);
         }
-        sortByDateTime(outCache);
+        sortByDateTime(outCache, sort);
         mergeCouples(outCache);
         cache = outCache;
     }
@@ -210,7 +252,7 @@ public class CoupleHistorian {
     }
 
     /**
-     * Объеденяет повторяющиеся пары в {@link #sortByDateTime(List) отсортированном} масиве.
+     * Объеденяет повторяющиеся пары в {@link #sortByDateTime(List, PercentReady) отсортированном} масиве.
      * Повторяющимися парами являются такая пара учебных занятий, где
      * совпадает аудитория, время начала и конца пары, заголовок и тип пары.
      * @param listNeedMerge Список пар, в которых надо найти эквивалентный пары
@@ -238,8 +280,17 @@ public class CoupleHistorian {
     /**
      * Данный метод сортирует входные даныне по возрастанию даты.
      * @param listNeedMerge Входные данные, которые необходимо отсортировать.
+     * @param pr Ссылка, куда надо отправлять отчёт о готовности.
      */
-    private static void sortByDateTime(List<CoupleInCalendar> listNeedMerge) {
-        listNeedMerge.sort(Comparator.comparing(coupleInCalendar -> coupleInCalendar.dateAndTimeOfCouple));
+    private static void sortByDateTime(List<CoupleInCalendar> listNeedMerge, PercentReady pr) {
+        float max = listNeedMerge.size() * (float)Math.log(listNeedMerge.size()) + 1;
+        AtomicInteger i = new AtomicInteger(0);
+        listNeedMerge.sort(Comparator.comparing(coupleInCalendar -> {
+            if(i.get() < max) {
+                pr.setReady(i.getAndIncrement() / max);
+            }
+            return coupleInCalendar.dateAndTimeOfCouple;
+        }));
+        pr.setReady(1.0f);
     }
 }

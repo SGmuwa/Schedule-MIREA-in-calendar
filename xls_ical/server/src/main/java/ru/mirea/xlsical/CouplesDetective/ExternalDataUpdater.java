@@ -3,6 +3,8 @@ package ru.mirea.xlsical.CouplesDetective;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
 import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
+import ru.mirea.xlsical.interpreter.PercentReady;
+import ru.mirea.xlsical.interpreter.SampleConsoleTransferPercentReady;
 
 import java.io.*;
 import java.net.URL;
@@ -35,7 +37,14 @@ public class ExternalDataUpdater {
      * Создаёт новый экземпляр синхронизатора расписания и имён преподавателей.
      */
     public ExternalDataUpdater() throws IOException {
-        this("cache/excel/", true);
+        this(new File("cache/excel/"), true, new PercentReady());
+    }
+
+    /**
+     * Создаёт новый экземпляр синхронизатора расписания и имён преподавателей.
+     */
+    public ExternalDataUpdater(PercentReady pr) throws IOException {
+        this(new File("cache/excel/"), true, pr);
     }
 
     /**
@@ -48,7 +57,7 @@ public class ExternalDataUpdater {
         if(path != null) {
             pathToCache = new File(path);
             createCacheDir();
-            download();
+            download(new PercentReady());
         }
         else {
             pathToCache = null;
@@ -67,19 +76,19 @@ public class ExternalDataUpdater {
             pathToCache = new File(path);
             createCacheDir();
             if(isNeedDownload)
-                download();
+                download(new PercentReady());
         }
         else {
             pathToCache = null;
         }
     }
 
-    public ExternalDataUpdater(File path, boolean isNeedDownload) throws IOException {
+    public ExternalDataUpdater(File path, boolean isNeedDownload, PercentReady pr) throws IOException {
         pathToCache = path;
         if(path != null) {
             createCacheDir();
             if (isNeedDownload)
-                download(); // first download
+                download(pr); // first download
         }
     }
 
@@ -141,33 +150,8 @@ public class ExternalDataUpdater {
      * Если вам по-середине понадобилось закрыть все файлы, вам всё равно придётся все элементы перебрать и закрыть.
      * @return Возвращает все таблицы из сайта <a href="https://www.mirea.ru/education/schedule-main/schedule/">mirea.ru</a>. Вызвать метод .close обязательно.
      */
-    public Iterator<ExcelFileInterface> openTablesFromExternal() {
-        return new Iterator<ExcelFileInterface>() {
-            Iterator<File> FilesIterator = ((ArrayList<File>) excelFiles.clone()).iterator();
-            Iterator<? extends ExcelFileInterface> nextElm = null;
-
-            @Override
-            public boolean hasNext() {
-                if(nextElm == null || !nextElm.hasNext()) {
-                    for (; FilesIterator.hasNext(); ) {
-                        File path = FilesIterator.next();
-                        try {
-                            nextElm = new ArrayList<>(OpenFile.newInstances(path.getPath())).iterator();
-                            return true;
-                        } catch (IOException | InvalidFormatException e) {
-                            System.out.println(e.getLocalizedMessage() + "\nfile: " + path);
-                        }
-                    }
-                    return false;
-                }
-                return true;
-            }
-
-            @Override
-            public ExcelFileInterface next() {
-                return nextElm.next();
-            }
-        };
+    public IteratorExcels openTablesFromExternal() {
+        return new IteratorExcels(excelFiles);
     }
 
     /**
@@ -214,7 +198,7 @@ public class ExternalDataUpdater {
             try {
                 while (!Thread.currentThread().isInterrupted()) {
                     Thread.sleep(1000 * 60 * 60 * 8); // Проверка три раза в день.
-                    download();
+                    download(new PercentReady(new SampleConsoleTransferPercentReady("ExternalDataUpdater.java: download xls: ")));
                 }
             } catch (InterruptedException e) {
                 // finish.
@@ -224,15 +208,20 @@ public class ExternalDataUpdater {
     /**
      * Функция скачивает необходимый контент в папку кэша.
      */
-    private synchronized void download() {
+    private synchronized void download(PercentReady pr) {
+        PercentReady PR_loader = new PercentReady(pr, 0.05f);
+        PercentReady PR_downloader = new PercentReady(pr, 0.95f);
         if(pathToCache == null) {
             System.out.println("Can't update: pathToCache is null.");
             return;
         }
+        PR_loader.setReady(0.1f);
         Stream<String> htmlExcels = downloadHTML("https://www.mirea.ru/education/schedule-main/schedule/");
-
+        PR_loader.setReady(0.2f);
         ArrayList<String> excelUrls = findAllExcelURLs(htmlExcels);
+        PR_loader.setReady(0.3f);
         htmlExcels.close();
+        PR_loader.setReady(0.4f);
         // ---- https -> http
         String elm;
         for(int i = excelUrls.size() - 1; i >= 0; i--) {
@@ -241,17 +230,23 @@ public class ExternalDataUpdater {
             elm = elm.replaceFirst("https:/", "http:/");
             excelUrls.set(i, elm);
         }
+        PR_loader.setReady(0.5f);
         System.out.println();
         // ----
         try {
-            excelFiles = downloadFilesToPath(excelUrls, this.pathToCache);
+            PR_loader.setReady(0.6f);
+            excelFiles = downloadFilesToPath(excelUrls, this.pathToCache, PR_downloader);
+            PR_loader.setReady(0.7f);
 
             Stream<String> htmlNames = downloadHTML("https://www.mirea.ru/sveden/employees/");
+            PR_loader.setReady(0.8f);
             teachers = getTeachers(htmlNames);
+            PR_loader.setReady(0.9f);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(e.getLocalizedMessage());
         }
+        PR_loader.setReady(1f);
     }
 
     /**
@@ -315,7 +310,11 @@ public class ExternalDataUpdater {
      * Загружает все файлы по URL и помещает в дерикторию кэша.
      * @param excelUrls Коллекция ссылок на скачивание.
      */
-    private ArrayList<File> downloadFilesToPath(Collection<String> excelUrls, File pathToCache) throws IOException {
+    private ArrayList<File> downloadFilesToPath(Collection<String> excelUrls, File pathToCache, PercentReady pr) throws IOException {
+        PercentReady PR_writerUrls = new PercentReady(pr, 0.2f);
+        PercentReady PR_downloader = new PercentReady(pr, 0.8f);
+
+
         int size = excelUrls.size();
         ArrayList<File> excelFilesPaths = new ArrayList<>(size);
         Iterator<String> it = excelUrls.iterator();
@@ -323,6 +322,7 @@ public class ExternalDataUpdater {
             String url = it.next();
             excelFilesPaths.add(new File(pathToCache, LocalDateTime.now().toString().replace(':', '-').replace('.', '_') + "_" + random.nextLong() + "_" + url.substring(url.lastIndexOf("/") + 1)));
             System.out.print(ZonedDateTime.now() + " ExternalDataUpdater.java: " + excelFilesPaths.get(i).toString() + ";\t");
+            PR_writerUrls.setReady(i/(float)size);
         }
         System.out.println();
         it = excelUrls.iterator();
@@ -336,11 +336,11 @@ public class ExternalDataUpdater {
                 System.out.println("ExternalDataUpdater.java: I can't save file " + excelFilesPaths.get(i));
                 excelFilesPaths.remove(i);
                 i--;
-                continue;
             }
-            if(i % 5 == 0)
-                System.out.println((int)((float)i / (float)size * 100f));
+            PR_downloader.setReady(i/((float)size));
         }
+        PR_downloader.setReady(1f);
+        PR_writerUrls.setReady(1f);
         return excelFilesPaths;
     }
 
@@ -406,5 +406,40 @@ public class ExternalDataUpdater {
 
         readableByteChannel.close();
         fileOutputStream.close();
+    }
+}
+
+class IteratorExcels implements Iterator<ExcelFileInterface> {
+
+    public IteratorExcels(ArrayList<File> excelFiles) {
+        ArrayList<File> clone = ((ArrayList<File>) excelFiles.clone());
+        size = clone.size();
+        FilesIterator = clone.iterator();
+    }
+
+    public final int size;
+    private final Iterator<File> FilesIterator;
+    private Iterator<? extends ExcelFileInterface> nextElm = null;
+
+    @Override
+    public boolean hasNext() {
+        if(nextElm == null || !nextElm.hasNext()) {
+            for (; FilesIterator.hasNext(); ) {
+                File path = FilesIterator.next();
+                try {
+                    nextElm = new ArrayList<>(OpenFile.newInstances(path.getPath())).iterator();
+                    return true;
+                } catch (IOException | InvalidFormatException e) {
+                    System.out.println(e.getLocalizedMessage() + "\nfile: " + path);
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public ExcelFileInterface next() {
+        return nextElm.next();
     }
 }

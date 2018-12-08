@@ -108,7 +108,10 @@ public class TaskExecutorTest {
 
         // В этом тесте надо уточнить, чтобы код думал, что сейчас 1 сентября 2018 года,
         // чтобы построил расписание на осенний семестр 2018 года.
-        CoupleHistorian historian = new CoupleHistorian(new ExternalDataUpdater(), new DetectiveDate(), false, now);
+        CoupleHistorian historian = new CoupleHistorian(
+                new PercentReady(new SampleConsoleTransferPercentReady("new historian: ")),
+                false
+        );
 
         TaskExecutor a = new TaskExecutor(historian);
         a.add(new PackageToServer(null,
