@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
 public class TaskExecutorTest {
 
     @Test
-    public void pullPollStep() throws InterruptedException {
+    public void pullPollStep() throws InterruptedException, IOException {
         TaskExecutor te = new TaskExecutor();
         te.add(new PackageToServer(null, new PercentReady(), null));
         te.step();
@@ -30,7 +30,7 @@ public class TaskExecutorTest {
     }
 
     @Test
-    public void sendSampleExcel() throws InterruptedException {
+    public void sendSampleExcel() throws InterruptedException, IOException {
         ArrayList<File> excels = new ArrayList<>();
         excels.add(new File("tests\\IIT-3k-18_19-osen (2).xlsx"));
 
@@ -43,7 +43,7 @@ public class TaskExecutorTest {
         TaskExecutor a = new TaskExecutor(new CoupleHistorian(new ExternalDataUpdater(
                 excels,
                 new ArrayList<>()
-        ), new DetectiveDate(null), false, now));
+        ), new DetectiveDate(), true, now, new PercentReady(new SampleConsoleTransferPercentReady("TaskExecutorTest.java: sendSampleExcel: ")), new File("tests/ArrayListOfCouplesInCalendar_GOOD.dat")));
         a.add(new PackageToServer(null,
                 new PercentReady(),
                 new Seeker(
@@ -62,7 +62,7 @@ public class TaskExecutorTest {
     }
 
     @Test
-    public void sendSampleExcelAllSem() throws InterruptedException {
+    public void sendSampleExcelAllSem() throws InterruptedException, IOException {
         ArrayList<File> excels = new ArrayList<File>();
         excels.add(new File("tests\\IIT-3k-18_19-osen (2).xlsx"));
         PercentReady pr = new PercentReady(new SampleConsoleTransferPercentReady("sendSampleExcelAllSem: "));
@@ -76,7 +76,7 @@ public class TaskExecutorTest {
         CoupleHistorian historian = new CoupleHistorian(new ExternalDataUpdater(
                 excels,
                 new ArrayList<>()
-        ), new DetectiveDate(), false, now);
+        ), new DetectiveDate(), true, now, new PercentReady(), new File("tests/ArrayListOfCouplesInCalendar_GOOD.dat"));
 
         TaskExecutor a = new TaskExecutor(historian);
         a.add(new PackageToServer(null, pr,
@@ -110,7 +110,7 @@ public class TaskExecutorTest {
         // чтобы построил расписание на осенний семестр 2018 года.
         CoupleHistorian historian = new CoupleHistorian(
                 new PercentReady(new SampleConsoleTransferPercentReady("new historian: ")),
-                false
+                new File("tests/ArrayListOfCouplesInCalendar_GOOD.dat")
         );
 
         TaskExecutor a = new TaskExecutor(historian);

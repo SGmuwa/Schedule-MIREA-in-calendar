@@ -25,18 +25,19 @@ public class CoupleHistorian {
     private ExternalDataUpdater edUpdater = null;
     private LinkedList<CoupleInCalendar> cache;
     private DetectiveDate settingDates;
+    public final File pathToCache;
 
 
-
-    public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, boolean isNeedLoadSaveCache) {
+    public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, boolean isNeedLoadSaveCache) throws IOException {
         this(edUpdater, detectiveDate, isNeedLoadSaveCache, null);
     }
 
-    public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, boolean isNeedLoadSaveCache, ZonedDateTime now) {
+    public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, boolean isNeedLoadSaveCache, ZonedDateTime now) throws IOException {
         this(edUpdater, detectiveDate, isNeedLoadSaveCache, null, new PercentReady());
     }
 
-    public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, boolean isNeedLoadSaveCache, ZonedDateTime now, PercentReady pr) {
+    public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, boolean isNeedLoadSaveCache, ZonedDateTime now, PercentReady pr) throws IOException {
+        this.pathToCache = new File("ArrayListOfCouplesInCalendar.dat");
         this.edUpdater = edUpdater;
         this.settingDates = detectiveDate;
         if(this.settingDates == null)
@@ -49,13 +50,44 @@ public class CoupleHistorian {
             saveCache();
     }
 
-    public CoupleHistorian() {
+    public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, boolean isNeedLoadSaveCache, ZonedDateTime now, PercentReady pr, File pathToCache) throws IOException {
+        if(pathToCache == null)
+            throw new NullPointerException();
+        if(!pathToCache.exists() || !pathToCache.canWrite())
+            throw new java.io.IOException();
+        this.pathToCache = pathToCache;
+        this.edUpdater = edUpdater;
+        this.settingDates = detectiveDate;
+        if(this.settingDates == null)
+            this.settingDates = new DetectiveDate();
+        if(isNeedLoadSaveCache)
+            loadCache();
+        this.now = now;
+        updateCache(pr);
+        if(isNeedLoadSaveCache)
+            saveCache();
+    }
+
+    public CoupleHistorian() throws IOException {
         this(new PercentReady(), true);
     }
 
-    public CoupleHistorian(PercentReady pr, boolean isNeedLoadSaveCache) {
+    public CoupleHistorian(PercentReady pr, boolean isNeedLoadSaveCache) throws IOException {
+        this(pr, isNeedLoadSaveCache, new File("ArrayListOfCouplesInCalendar.dat"));
+    }
+
+    public CoupleHistorian(PercentReady pr, File pathToCache) throws IOException {
+        this(pr, true, pathToCache);
+    }
+
+    protected CoupleHistorian(PercentReady pr, boolean isNeedLoadSaveCache, File pathToCache) throws IOException {
         PercentReady PR_constructor = new PercentReady(pr, 0.000025f);
         PercentReady PR_external = new PercentReady(pr, 0.0025f - 0.000025f);
+        if(pathToCache == null)
+            throw new NullPointerException();
+        if(!pathToCache.exists() || !pathToCache.canWrite())
+            throw new java.io.IOException();
+        this.pathToCache = pathToCache;
         try {
             this.settingDates = new DetectiveDate();
             PR_constructor.setReady(0.2f);
@@ -168,34 +200,24 @@ public class CoupleHistorian {
         cache = outCache;
     }
 
-    private void loadCache() {
+    private void loadCache() throws IOException {
         try {
-            ObjectInputStream inObj = new ObjectInputStream(new FileInputStream("ArrayListOfCouplesInCalendar.dat"));
+            ObjectInputStream inObj = new ObjectInputStream(new FileInputStream(pathToCache));
             Object object = inObj.readObject();
             LinkedList<CoupleInCalendar> out = (LinkedList<CoupleInCalendar>) object;
             inObj.close();
             cache = out;
-        } catch(Exception error) {
-            if(cache == null)
-                cache = new LinkedList<>();
-            System.out.println(ZonedDateTime.now() + "CoupleHistorian.java#loadCache(): " + error.getLocalizedMessage());
+        } catch (ClassNotFoundException e) {
+            throw new IOException(e.getLocalizedMessage());
         }
     }
 
-    private void saveCache() {
-        do {
-            try {
-                FileOutputStream fout = new FileOutputStream("ArrayListOfCouplesInCalendar.dat");
-                ObjectOutputStream oos = new ObjectOutputStream(fout);
-                oos.writeObject(cache);
-                oos.close();
-                fout.close();
-                break;
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println("CoupleHistorian.java: I can't save baseData! " + e.getLocalizedMessage());
-            }
-        } while(true);
+    private void saveCache() throws IOException {
+        FileOutputStream fout = new FileOutputStream(pathToCache);
+        ObjectOutputStream oos = new ObjectOutputStream(fout);
+        oos.writeObject(cache);
+        oos.close();
+        fout.close();
     }
 
     /**

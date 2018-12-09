@@ -1,5 +1,6 @@
 package ru.mirea.xlsical.CouplesDetective;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -10,7 +11,7 @@ import java.util.Objects;
  * @author <a href="https://github.com/SGmuwa/">[SG]Muwa</a>
  * @see CoupleInCalendar Пара для календаря
  */
-public class Couple {
+public class Couple implements Serializable {
 
     /**
      * Название пары.

@@ -66,11 +66,6 @@ public class ExportCouplesToICal {
             renderIcalPercentReady.setReady(ready/size);
         }
         finishPercentReady.setReady(0.1f);
-        if(!count) {
-            renderIcalPercentReady.setReady(1.0f);
-            finishPercentReady.setReady(1.0f);
-            return null;
-        }
 
         File cachePath = new File("cache/icals");
 
@@ -80,9 +75,27 @@ public class ExportCouplesToICal {
                 cachePath = new File("");
             }
         }
+
         finishPercentReady.setReady(0.3f);
         File nameFile = new File(cachePath, java.time.Instant.now().getLong(ChronoField.INSTANT_SECONDS) + "_" + ran.nextLong() + ".ics");
         finishPercentReady.setReady(0.4f);
+
+        if(!count) {
+            try {
+                if(
+                nameFile.createNewFile()) {
+                    renderIcalPercentReady.setReady(1.0f);
+                    finishPercentReady.setReady(1.0f);
+                    return nameFile.getPath();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println(e.getLocalizedMessage());
+            }
+            renderIcalPercentReady.setReady(1.0f);
+            finishPercentReady.setReady(1.0f);
+            return null;
+        }
         FileOutputStream file = null;
         try {
             file = new FileOutputStream(nameFile);

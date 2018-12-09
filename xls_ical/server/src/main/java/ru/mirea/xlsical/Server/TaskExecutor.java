@@ -42,11 +42,11 @@ public class TaskExecutor implements Runnable {
         this.coupleHistorian = manualHistorian;
     }
 
-    public TaskExecutor() {
+    public TaskExecutor() throws IOException {
         this(new CoupleHistorian());
     }
 
-    public TaskExecutor(PercentReady pr) {
+    public TaskExecutor(PercentReady pr) throws IOException {
         this(new CoupleHistorian(pr, true));
     }
 
@@ -111,11 +111,18 @@ public class TaskExecutor implements Runnable {
         List<CoupleInCalendar> couples = coupleHistorian.getCouples(pkg.queryCriteria, new PercentReady(pkg.percentReady, 0.6f));
         String iCalFile = ExportCouplesToICal.start(couples, new PercentReady(pkg.percentReady, 0.4f));
         System.out.println(iCalFile);
-        return new PackageToClient(
+        if(iCalFile != null)
+            return new PackageToClient(
                 pkg.ctx,
                 iCalFile,
                 couples.size(),
                 "ok.");
+        else
+            return new PackageToClient(
+                pkg.ctx,
+                null,
+                couples.size(),
+                "empty.");
     }
 
     /**
