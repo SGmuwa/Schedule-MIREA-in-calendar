@@ -42,7 +42,7 @@ public class CoupleHistorian {
         this.settingDates = detectiveDate;
         if(this.settingDates == null)
             this.settingDates = new DetectiveDate();
-        if(isNeedLoadSaveCache)
+        if(isNeedLoadSaveCache && this.pathToCache.exists())
             loadCache();
         this.now = now;
         updateCache(pr);
@@ -51,16 +51,14 @@ public class CoupleHistorian {
     }
 
     public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, boolean isNeedLoadSaveCache, ZonedDateTime now, PercentReady pr, File pathToCache) throws IOException {
-        if(pathToCache == null)
+        if(pathToCache == null && isNeedLoadSaveCache)
             throw new NullPointerException();
-        if(!pathToCache.exists() || !pathToCache.canWrite())
-            throw new java.io.IOException();
         this.pathToCache = pathToCache;
         this.edUpdater = edUpdater;
         this.settingDates = detectiveDate;
         if(this.settingDates == null)
             this.settingDates = new DetectiveDate();
-        if(isNeedLoadSaveCache)
+        if(isNeedLoadSaveCache && this.pathToCache.exists())
             loadCache();
         this.now = now;
         updateCache(pr);
@@ -80,13 +78,16 @@ public class CoupleHistorian {
         this(pr, true, pathToCache);
     }
 
+    public CoupleHistorian(PercentReady pr, File pathToCache, ZonedDateTime now) throws IOException {
+        this(pr, true, pathToCache);
+        this.now = now;
+    }
+
     protected CoupleHistorian(PercentReady pr, boolean isNeedLoadSaveCache, File pathToCache) throws IOException {
         PercentReady PR_constructor = new PercentReady(pr, 0.000025f);
         PercentReady PR_external = new PercentReady(pr, 0.0025f - 0.000025f);
         if(pathToCache == null)
             throw new NullPointerException();
-        if(!pathToCache.exists() || !pathToCache.canWrite())
-            throw new java.io.IOException();
         this.pathToCache = pathToCache;
         try {
             this.settingDates = new DetectiveDate();
@@ -108,7 +109,7 @@ public class CoupleHistorian {
                 }
             } while(edUpdater == null);
         }
-        if(isNeedLoadSaveCache)
+        if(isNeedLoadSaveCache && this.pathToCache.exists())
             loadCache();
         PR_constructor.setReady(0.6f);
         updateCache(new PercentReady(pr, 1f-0.0025f));
@@ -116,6 +117,10 @@ public class CoupleHistorian {
         if(isNeedLoadSaveCache)
             saveCache();
         PR_constructor.setReady(1.0f);
+    }
+
+    protected LinkedList<CoupleInCalendar> getCache() {
+        return cache;
     }
 
     private ZonedDateTime now = null;
@@ -200,7 +205,7 @@ public class CoupleHistorian {
         cache = outCache;
     }
 
-    private void loadCache() throws IOException {
+    protected void loadCache() throws IOException {
         try {
             ObjectInputStream inObj = new ObjectInputStream(new FileInputStream(pathToCache));
             Object object = inObj.readObject();
@@ -212,7 +217,7 @@ public class CoupleHistorian {
         }
     }
 
-    private void saveCache() throws IOException {
+    protected void saveCache() throws IOException {
         FileOutputStream fout = new FileOutputStream(pathToCache);
         ObjectOutputStream oos = new ObjectOutputStream(fout);
         oos.writeObject(cache);
@@ -259,7 +264,7 @@ public class CoupleHistorian {
                             // couple.dateAndTimeOfCouple раньше или равно queryCriteria.dateFinish
                             && couple.dateAndTimeOfCouple.compareTo(queryCriteria.dateFinish) <= 0
             ) {
-                if (p != null && (p.matcher(couple.nameOfGroup).find() || p.matcher(couple.nameOfTeacher).find())) {
+                if (p != null && (couple.nameOfGroup != null && p.matcher(couple.nameOfGroup).find() || couple.nameOfTeacher != null && p.matcher(couple.nameOfTeacher).find())) {
                     // if by regex.
                     out.add(couple);
                 } else if (queryCriteria.nameOfSeeker.equals(couple.nameOfGroup) || queryCriteria.nameOfSeeker.equals(couple.nameOfTeacher))

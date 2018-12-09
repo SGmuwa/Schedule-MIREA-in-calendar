@@ -135,12 +135,12 @@ public class ExternalDataUpdater {
     /**
      * Расположение доступных файлов Excel
      */
-    private ArrayList<File> excelFiles;
+    private ArrayList<File> excelFiles = new ArrayList<>();
 
     /**
      * Список преподавателей.
      */
-    private ArrayList<Teacher> teachers;
+    private ArrayList<Teacher> teachers = new ArrayList<>();
 
     /**
      * Функция отвечает за то, чтобы получить таблицы из сайта <a href="https://www.mirea.ru/education/schedule-main/schedule/">mirea.ru</a>.
