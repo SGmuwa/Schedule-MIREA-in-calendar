@@ -20,11 +20,11 @@ public class CoupleHistorianTest extends CoupleHistorian {
     private final File pathToExcelFile = new File("tests/IIT-3k-18_19-osen.xlsx");
     private final File pathToDBFile = new File("tests/coupleHistorianTest.dat");
     private final File pathToBigDBFile = new File("tests/coupleHistorianTest_big.dat");
-    private static final PercentReady ready2 = new PercentReady(GlobalPercentReady.percentReady, 1f/3f);
+    private static final PercentReady ready2_4 = new PercentReady(GlobalPercentReady.percentReady, 1f/4f);
 
 
     public CoupleHistorianTest() throws IOException {
-        super(new ExternalDataUpdater(false), new DetectiveDate(), false, ZonedDateTime.now(), new PercentReady(ready2, 1f/3f));
+        super(new ExternalDataUpdater(false), new DetectiveDate(), false, ZonedDateTime.now(), new PercentReady(ready2_4, 1f/3f));
     }
 
     private CoupleHistorian newInstance(ZonedDateTime now, PercentReady pr) throws IOException {
@@ -41,7 +41,7 @@ public class CoupleHistorianTest extends CoupleHistorian {
 
     @Test
     public void testCache() throws IOException {
-        PercentReady pr = new PercentReady(ready2, 1f/3f);
+        PercentReady pr = new PercentReady(ready2_4, 1f/3f);
         ZonedDateTime TimeForInstance = ZonedDateTime.of(
                 LocalDate.of(2018, 9, 1),
                 LocalTime.MIN,
@@ -64,7 +64,7 @@ public class CoupleHistorianTest extends CoupleHistorian {
 
     @Test
     public void testBigCache() throws IOException {
-        PercentReady pr = new PercentReady(ready2, 1f/3f);
+        PercentReady pr = new PercentReady(ready2_4, 1f/3f);
         PercentReady prEquals = new PercentReady(pr, 0.2f);
         ZonedDateTime TimeForInstance = ZonedDateTime.of(
                 LocalDate.of(2018, 9, 1),

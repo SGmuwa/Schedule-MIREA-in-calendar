@@ -79,16 +79,20 @@ public class CoupleHistorian {
     }
 
     public CoupleHistorian(PercentReady pr, File pathToCache, ZonedDateTime now) throws IOException {
-        this(pr, true, pathToCache);
-        this.now = now;
+        this(pr, true, pathToCache, now);
     }
 
     protected CoupleHistorian(PercentReady pr, boolean isNeedLoadSaveCache, File pathToCache) throws IOException {
+        this(pr, isNeedLoadSaveCache, pathToCache, null);
+    }
+
+    protected CoupleHistorian(PercentReady pr, boolean isNeedLoadSaveCache, File pathToCache, ZonedDateTime now) throws IOException {
         PercentReady PR_constructor = new PercentReady(pr, 0.000025f);
         PercentReady PR_external = new PercentReady(pr, 0.0025f - 0.000025f);
         if(pathToCache == null)
             throw new NullPointerException();
         this.pathToCache = pathToCache;
+        this.now = now;
         try {
             this.settingDates = new DetectiveDate();
             PR_constructor.setReady(0.2f);

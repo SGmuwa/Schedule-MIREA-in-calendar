@@ -17,12 +17,12 @@ import static org.junit.Assert.*;
 
 public class TaskExecutorTest {
 
-    private static final PercentReady ready1 =
-            new PercentReady(GlobalPercentReady.percentReady, 1f/3f);
+    private static final PercentReady ready1_4 =
+            new PercentReady(GlobalPercentReady.percentReady, 1f/4f);
 
     @Test
     public void pullPollStep() throws InterruptedException, IOException {
-        PercentReady pr = new PercentReady(ready1, 1f/4f);
+        PercentReady pr = new PercentReady(ready1_4, 1f/4f);
         TaskExecutor te = new TaskExecutor(new PercentReady(pr, 0.99f));
         te.add(new PackageToServer(null, new PercentReady(pr, 0.01f), null));
         te.step();
@@ -35,7 +35,7 @@ public class TaskExecutorTest {
 
     @Test
     public void sendSampleExcel() throws InterruptedException, IOException {
-        PercentReady pr = new PercentReady(ready1, 1f/4f);
+        PercentReady pr = new PercentReady(ready1_4, 1f/4f);
         ArrayList<File> excels = new ArrayList<>();
         excels.add(new File("tests\\IIT-3k-18_19-osen (2).xlsx"));
 
@@ -68,7 +68,7 @@ public class TaskExecutorTest {
 
     @Test
     public void sendSampleExcelAllSem() throws InterruptedException, IOException {
-        PercentReady pr = new PercentReady(ready1, 1f/4f);
+        PercentReady pr = new PercentReady(ready1_4, 1f/4f);
         ArrayList<File> excels = new ArrayList<File>();
         excels.add(new File("tests\\IIT-3k-18_19-osen (2).xlsx"));
 
@@ -102,7 +102,7 @@ public class TaskExecutorTest {
 
     @Test
     public void sendExcelAllSem() throws InterruptedException, IOException {
-        PercentReady pr = new PercentReady(ready1, 1f/4f);
+        PercentReady pr = new PercentReady(ready1_4, 1f/4f);
         ZonedDateTime now = ZonedDateTime.of(
                 LocalDate.of(2018, 9, 1),
                 LocalTime.MIN,
