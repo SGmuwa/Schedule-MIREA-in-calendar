@@ -4,6 +4,7 @@ import org.junit.Test;
 import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveDate;
 import ru.mirea.xlsical.interpreter.PercentReady;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.LinkedList;
@@ -17,6 +18,20 @@ public class CoupleHistorianTest
     public CoupleHistorianTest() throws IOException {
         super(new ExternalDataUpdater(false), new DetectiveDate(), false, ZonedDateTime.now(), new PercentReady());
     }
+
+    /*
+    @Test
+    public void testRemove40from90() throws IOException {
+        LinkedList<CoupleInCalendar> a = CoupleHistorian.static_loadCache(new File("tests/big/small.dat"));
+        LinkedList<CoupleInCalendar> b = CoupleHistorian.static_loadCache(new File("tests/big/GlobalTaskExecutor.java21740.dat"));
+        System.out.println(b.size());
+        b.removeIf((coup) -> coup.nameOfGroup.charAt(0) != '1');
+        System.out.println(b.size());
+        for (CoupleInCalendar coup :
+                b) {
+            System.out.println(coup);
+        }
+    }*/
 
     @Test
     public void testBigCache() throws IOException {

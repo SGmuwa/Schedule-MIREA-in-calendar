@@ -210,12 +210,16 @@ public class CoupleHistorian {
     }
 
     protected void loadCache() throws IOException {
+        cache = static_loadCache(pathToCache);
+    }
+
+    protected static LinkedList<CoupleInCalendar> static_loadCache(File pathToCache) throws IOException {
         try {
             ObjectInputStream inObj = new ObjectInputStream(new FileInputStream(pathToCache));
             Object object = inObj.readObject();
             LinkedList<CoupleInCalendar> out = (LinkedList<CoupleInCalendar>) object;
             inObj.close();
-            cache = out;
+            return out;
         } catch (ClassNotFoundException e) {
             throw new IOException(e.getLocalizedMessage());
         }
