@@ -14,6 +14,7 @@ import ru.mirea.xlsical.interpreter.SampleConsoleTransferPercentReady;
 import ru.mirea.xlsical.interpreter.Seeker;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ import java.util.Optional;
 @Service
 public class ScheduleService {
     public int threadNumber = 10;
-    TaskExecutor taskExecutor = new TaskExecutor(new CoupleHistorian(new ExternalDataUpdater(new ArrayList<>(), new ArrayList<>()), new DetectiveDate(), false));
+    TaskExecutor taskExecutor = new TaskExecutor(new PercentReady(new SampleConsoleTransferPercentReady("new TaskExecutor: ")));
     Thread[] taskExecutorArr = new Thread[threadNumber];
     Thread[] runnableExecutorArr = new Thread[threadNumber];
 
@@ -40,6 +41,9 @@ public class ScheduleService {
 
     @Autowired
     StatusRepository sp;
+
+    public ScheduleService() throws IOException {
+    }
 
     @PostConstruct
     public void start() throws Exception

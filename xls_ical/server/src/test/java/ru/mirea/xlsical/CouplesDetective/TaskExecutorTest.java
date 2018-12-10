@@ -17,14 +17,10 @@ import static org.junit.Assert.*;
 
 public class TaskExecutorTest {
 
-    private static final PercentReady ready1_4 =
-            new PercentReady(GlobalPercentReady.percentReady, 1f/4f);
-
     @Test
-    public void pullPollStep() throws InterruptedException, IOException {
-        PercentReady pr = new PercentReady(ready1_4, 1f/4f);
-        TaskExecutor te = new TaskExecutor(new PercentReady(pr, 0.99f));
-        te.add(new PackageToServer(null, new PercentReady(pr, 0.01f), null));
+    public void pullPollStep() throws InterruptedException {
+        TaskExecutor te = GlobalTaskExecutor.taskExecutor;
+        te.add(new PackageToServer(null, null));
         te.step();
         PackageToClient ptc = te.take();
 
@@ -34,23 +30,9 @@ public class TaskExecutorTest {
     }
 
     @Test
-    public void sendSampleExcel() throws InterruptedException, IOException {
-        PercentReady pr = new PercentReady(ready1_4, 1f/4f);
-        ArrayList<File> excels = new ArrayList<>();
-        excels.add(new File("tests\\IIT-3k-18_19-osen (2).xlsx"));
-
-        ZonedDateTime now = ZonedDateTime.of(
-                LocalDate.of(2018, 9, 1),
-                LocalTime.MIN,
-                ZoneId.of("Europe/Minsk")
-        );
-
-        TaskExecutor a = new TaskExecutor(new CoupleHistorian(new ExternalDataUpdater(
-                excels,
-                new ArrayList<>()
-        ), new DetectiveDate(), true, now, new PercentReady(pr, 0.1f), new File("tests/ArrayListOfCouplesInCalendar_GOOD.dat")));
+    public void sendSampleExcel() throws InterruptedException {
+        TaskExecutor a = GlobalTaskExecutor.taskExecutor;
         a.add(new PackageToServer(null,
-                new PercentReady(pr, 0.9f),
                 new Seeker(
                         "ИКБО-04-16",
                         LocalDate.of(2018, 9, 1),
@@ -68,23 +50,8 @@ public class TaskExecutorTest {
 
     @Test
     public void sendSampleExcelAllSem() throws InterruptedException, IOException {
-        PercentReady pr = new PercentReady(ready1_4, 1f/4f);
-        ArrayList<File> excels = new ArrayList<File>();
-        excels.add(new File("tests\\IIT-3k-18_19-osen (2).xlsx"));
-
-        ZonedDateTime now = ZonedDateTime.of(
-                LocalDate.of(2018, 9, 1),
-                LocalTime.MIN,
-                ZoneId.of("Europe/Minsk")
-        );
-
-        CoupleHistorian historian = new CoupleHistorian(new ExternalDataUpdater(
-                excels,
-                new ArrayList<>()
-        ), new DetectiveDate(), true, now, new PercentReady(pr, 0.9f), new File("tests/ArrayListOfCouplesInCalendar_GOOD.dat"));
-
-        TaskExecutor a = new TaskExecutor(historian);
-        a.add(new PackageToServer(null, new PercentReady(pr, 0.1f),
+        TaskExecutor a = new TaskExecutor(GlobalTaskExecutor.coupleHistorian);
+        a.add(new PackageToServer(null,
                 new Seeker(
                         "ИКБО-04-16",
                         LocalDate.of(2018, 9, 1),
@@ -102,24 +69,12 @@ public class TaskExecutorTest {
 
     @Test
     public void sendExcelAllSem() throws InterruptedException, IOException {
-        PercentReady pr = new PercentReady(ready1_4, 1f/4f);
-        ZonedDateTime now = ZonedDateTime.of(
-                LocalDate.of(2018, 9, 1),
-                LocalTime.MIN,
-                ZoneId.of("Europe/Minsk")
-        );
-
         // В этом тесте надо уточнить, чтобы код думал, что сейчас 1 сентября 2018 года,
         // чтобы построил расписание на осенний семестр 2018 года.
-        CoupleHistorian historian = new CoupleHistorian(
-                new PercentReady(pr, 0.9f),
-                new File("tests/ArrayListOfCouplesInCalendar_test.dat"),
-                now
-        );
+        CoupleHistorian historian = GlobalTaskExecutor.coupleHistorian;
 
         TaskExecutor a = new TaskExecutor(historian);
         a.add(new PackageToServer(null,
-                new PercentReady(pr, 0.1f),
                 new Seeker(
                         "ИКБО-04-16",
                         LocalDate.of(2018, 9, 1),

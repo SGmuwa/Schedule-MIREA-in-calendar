@@ -1,9 +1,7 @@
 package ru.mirea.xlsical.CouplesDetective;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Test;
 import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
-import ru.mirea.xlsical.interpreter.PercentReady;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -12,12 +10,9 @@ import static org.junit.Assert.*;
 
 public class ExternalDataUpdaterTest {
 
-    private final static PercentReady ready3_4 =
-            new PercentReady(GlobalPercentReady.percentReady, 1f/4f);
-
     @Test
     public void run() throws IOException {
-        ExternalDataUpdater edu = new ExternalDataUpdater(ready3_4);
+        ExternalDataUpdater edu = GlobalTaskExecutor.externalDataUpdater;
         assertNotNull(edu.pathToCache);
         assertTrue(edu.pathToCache.canWrite());
         edu.run();
