@@ -26,6 +26,7 @@ public class CoupleHistorian {
     private LinkedList<CoupleInCalendar> cache;
     private DetectiveDate settingDates;
     public final File pathToCache;
+    private final boolean isNeedLoadSaveCache;
 
 
     public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, boolean isNeedLoadSaveCache) throws IOException {
@@ -33,37 +34,53 @@ public class CoupleHistorian {
     }
 
     public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, boolean isNeedLoadSaveCache, ZonedDateTime now) throws IOException {
-        this(edUpdater, detectiveDate, isNeedLoadSaveCache, null, new PercentReady());
+        this(edUpdater, detectiveDate, isNeedLoadSaveCache, now, new PercentReady());
     }
 
     public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, boolean isNeedLoadSaveCache, ZonedDateTime now, PercentReady pr) throws IOException {
         this.pathToCache = new File("ArrayListOfCouplesInCalendar.dat");
         this.edUpdater = edUpdater;
+        this.edUpdater.setNeedUpdate(this::updateCache);
         this.settingDates = detectiveDate;
         if(this.settingDates == null)
             this.settingDates = new DetectiveDate();
         if(isNeedLoadSaveCache && this.pathToCache.exists())
-            loadCache();
+            try {
+                loadCache();
+            }
+            catch (IOException e) {
+                cache = null;
+            }
         this.now = now;
-        updateCache(pr);
-        if(isNeedLoadSaveCache)
-            saveCache();
+        this.isNeedLoadSaveCache = isNeedLoadSaveCache;
+        if(cache == null || cache.size() == 0)
+            updateCache(pr);
     }
 
     public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, boolean isNeedLoadSaveCache, ZonedDateTime now, PercentReady pr, File pathToCache) throws IOException {
-        if(pathToCache == null && isNeedLoadSaveCache)
+        PercentReady PR_loadCache = new PercentReady(pr, 0.1f);
+        PercentReady PR_updateCache = new PercentReady(pr, 0.9f);
+        if (pathToCache == null && isNeedLoadSaveCache)
             throw new NullPointerException();
         this.pathToCache = pathToCache;
         this.edUpdater = edUpdater;
         this.settingDates = detectiveDate;
-        if(this.settingDates == null)
+        if (this.settingDates == null)
             this.settingDates = new DetectiveDate();
-        if(isNeedLoadSaveCache && this.pathToCache.exists())
-            loadCache();
+        PR_loadCache.setReady(0f);
+        if (isNeedLoadSaveCache && this.pathToCache.exists()) {
+            try {
+                loadCache();
+            } catch (IOException e) {
+                cache = null;
+            }
+        }
+        PR_loadCache.setReady(1f);
         this.now = now;
-        updateCache(pr);
-        if(isNeedLoadSaveCache)
-            saveCache();
+        this.isNeedLoadSaveCache = isNeedLoadSaveCache;
+        if(cache == null || cache.size() == 0)
+            updateCache(PR_updateCache);
+        PR_updateCache.setReady(1f);
     }
 
     public CoupleHistorian() throws IOException {
@@ -93,10 +110,12 @@ public class CoupleHistorian {
             throw new NullPointerException();
         this.pathToCache = pathToCache;
         this.now = now;
+        this.isNeedLoadSaveCache = isNeedLoadSaveCache;
         try {
             this.settingDates = new DetectiveDate();
             PR_constructor.setReady(0.2f);
             this.edUpdater = new ExternalDataUpdater(PR_external);
+            this.edUpdater.setNeedUpdate(this::updateCache);
             PR_constructor.setReady(0.4f);
         } catch (IOException e) {
             // Что делать, если не удаётся создать директорию кэша?
@@ -113,13 +132,17 @@ public class CoupleHistorian {
                 }
             } while(edUpdater == null);
         }
-        if(isNeedLoadSaveCache && this.pathToCache.exists())
-            loadCache();
-        PR_constructor.setReady(0.6f);
-        updateCache(new PercentReady(pr, 1f-0.0025f));
-        PR_constructor.setReady(0.8f);
-        if(isNeedLoadSaveCache)
-            saveCache();
+        if(isNeedLoadSaveCache && this.pathToCache.exists()) {
+            try {
+                loadCache();
+            } catch (IOException e) {
+                cache = null;
+            }
+        }
+        PR_constructor.setReady(0.75f);
+        if(cache == null || cache.size() == 0) {
+            updateCache(new PercentReady(pr, 1f - 0.0025f));
+        } else new PercentReady(pr, 1f - 0.0025f).setReady(1f);
         PR_constructor.setReady(1.0f);
     }
 
@@ -127,7 +150,7 @@ public class CoupleHistorian {
         return cache;
     }
 
-    private ZonedDateTime now = null;
+    private ZonedDateTime now;
 
     public void setNow(ZonedDateTime now) {
         this.now = now;
@@ -139,7 +162,7 @@ public class CoupleHistorian {
      * Анализирует будущие пары.
      * Сохраняет на диск.
      */
-    private void updateCache(PercentReady pr) {
+    private void updateCache(PercentReady pr) throws IOException {
         PercentReady[] cycles = new PercentReady[] {
                 new PercentReady(pr, 12f/16f),
                 new PercentReady(pr, 1f/16f),
@@ -207,6 +230,8 @@ public class CoupleHistorian {
         sortByDateTime(outCache, sort);
         mergeCouples(outCache);
         cache = outCache;
+        if(isNeedLoadSaveCache)
+            saveCache();
     }
 
     protected void loadCache() throws IOException {

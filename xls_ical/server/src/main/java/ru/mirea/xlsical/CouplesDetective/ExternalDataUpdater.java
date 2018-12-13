@@ -143,6 +143,11 @@ public class ExternalDataUpdater {
     private ArrayList<Teacher> teachers = new ArrayList<>();
 
     /**
+     * Объект, который надо обновлять после получения обновлений.
+     */
+    private ICacheUpdater needUpdate;
+
+    /**
      * Функция отвечает за то, чтобы получить таблицы из сайта <a href="https://www.mirea.ru/education/schedule-main/schedule/">mirea.ru</a>.
      * Стоит отметить, что если в кэше есть не устаревшие таблицы, то функция
      * вернёт таблицы из кэша.
@@ -210,7 +215,8 @@ public class ExternalDataUpdater {
      */
     private synchronized void download(PercentReady pr) {
         PercentReady PR_loader = new PercentReady(pr, 0.05f);
-        PercentReady PR_downloader = new PercentReady(pr, 0.95f);
+        PercentReady PR_downloader = new PercentReady(pr, 0.25f);
+        PercentReady PR_install = new PercentReady(pr, 0.70f);
         if(pathToCache == null) {
             System.out.println("Can't update: pathToCache is null.");
             return;
@@ -245,6 +251,14 @@ public class ExternalDataUpdater {
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(e.getLocalizedMessage());
+        }
+        if(needUpdate != null) {
+            try {
+                needUpdate.update(PR_install);
+            } catch (IOException e) {
+                System.out.println(ZonedDateTime.now() + " ExternalDataUpdater.java: " + e.getLocalizedMessage());
+            }
+            PR_install.setReady(1f);
         }
         PR_loader.setReady(1f);
     }
@@ -406,6 +420,10 @@ public class ExternalDataUpdater {
 
         readableByteChannel.close();
         fileOutputStream.close();
+    }
+
+    public void setNeedUpdate(ICacheUpdater needUpdate) {
+        this.needUpdate = needUpdate;
     }
 }
 
