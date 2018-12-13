@@ -7,6 +7,10 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+/**
+ * Интерфейс обозначает, что класс умеет строить календарное
+ * расписание из расписания внешнего источника.
+ */
 public interface IDetective extends Closeable {
 
     /**

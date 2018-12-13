@@ -8,6 +8,10 @@ import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+/**
+ * Данный класс отвечает за просмотр пар из Excel расписания.
+ * Данный класс может видеть только расписание зачётной недели.
+ */
 public class DetectiveLastWeekS implements IDetective {
 
     private DetectiveSemester detectiveSemester;
