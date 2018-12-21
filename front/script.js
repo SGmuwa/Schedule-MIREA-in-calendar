@@ -696,9 +696,11 @@ $('document').ready(function(){
 		obj.dateFinish = obj.dateFinish.charAt(6) + obj.dateFinish.charAt(7) + obj.dateFinish.charAt(8) + obj.dateFinish.charAt(9) + '-' + obj.dateFinish.charAt(0) + obj.dateFinish.charAt(1) + '-' + obj.dateFinish.charAt(3) + obj.dateFinish.charAt(4);
 		if(obj.timeZone.charAt(4) == 'Z'){
 
-			obj.timeZone = obj.timeZone.charAt(1) + obj.timeZone.charAt(2) + obj.timeZone.charAt(3) + obj.timeZone.charAt(4);
+			obj.timeZone = obj.timeZone.replace('(GMTZ) ', '');
 		}else{
-			obj.timeZone = obj.timeZone.charAt(1) + obj.timeZone.charAt(2) + obj.timeZone.charAt(3) + obj.timeZone.charAt(4) + obj.timeZone.charAt(5) + obj.timeZone.charAt(6) + obj.timeZone.charAt(7) + obj.timeZone.charAt(8) + obj.timeZone.charAt(9);
+
+			let tmp = obj.timeZone.charAt(0) + obj.timeZone.charAt(1) + obj.timeZone.charAt(2) + obj.timeZone.charAt(3) + obj.timeZone.charAt(4) + obj.timeZone.charAt(5) + obj.timeZone.charAt(6) + obj.timeZone.charAt(7) + obj.timeZone.charAt(8) + obj.timeZone.charAt(9) + obj.timeZone.charAt(10) + obj.timeZone.charAt(11);
+			obj.timeZone = obj.timeZone.replace(tmp, '');
 		}
 		var srcForInput = document.location.href + 'schedule?name=' + obj.name + '&dateStart=' + obj.dateStart + '&dateFinish=' + obj.dateFinish + '&timezoneStart=' + obj.timeZone;
 
