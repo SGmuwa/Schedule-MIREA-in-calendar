@@ -22,29 +22,28 @@ import java.util.regex.PatternSyntaxException;
  */
 public class CoupleHistorian {
 
-    private ExternalDataUpdater edUpdater = null;
+    private final ExternalDataUpdater edUpdater;
     private LinkedList<CoupleInCalendar> cache;
     private DetectiveDate settingDates;
     public final File pathToCache;
-    private final boolean isNeedLoadSaveCache;
 
 
-    public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, boolean isNeedLoadSaveCache) throws IOException {
-        this(edUpdater, detectiveDate, isNeedLoadSaveCache, null);
+    public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate) throws IOException {
+        this(edUpdater, detectiveDate, null);
     }
 
-    public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, boolean isNeedLoadSaveCache, ZonedDateTime now) throws IOException {
-        this(edUpdater, detectiveDate, isNeedLoadSaveCache, now, new PercentReady());
+    public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, ZonedDateTime now) throws IOException {
+        this(edUpdater, detectiveDate, now, new PercentReady());
     }
 
-    public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, boolean isNeedLoadSaveCache, ZonedDateTime now, PercentReady pr) throws IOException {
+    public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, ZonedDateTime now, PercentReady pr) throws IOException {
         this.pathToCache = new File("ArrayListOfCouplesInCalendar.dat");
         this.edUpdater = edUpdater;
         this.edUpdater.setNeedUpdate(this::updateCache);
         this.settingDates = detectiveDate;
         if(this.settingDates == null)
             this.settingDates = new DetectiveDate();
-        if(isNeedLoadSaveCache && this.pathToCache.exists())
+        if(this.pathToCache.exists())
             try {
                 loadCache();
             }
@@ -52,23 +51,20 @@ public class CoupleHistorian {
                 cache = null;
             }
         this.now = now;
-        this.isNeedLoadSaveCache = isNeedLoadSaveCache;
-        if(cache == null || cache.size() == 0)
-            updateCache(pr);
+        updateCache(pr);
     }
 
-    public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, boolean isNeedLoadSaveCache, ZonedDateTime now, PercentReady pr, File pathToCache) throws IOException {
+    public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, ZonedDateTime now, PercentReady pr, File pathToCache) throws IOException {
         PercentReady PR_loadCache = new PercentReady(pr, 0.1f);
         PercentReady PR_updateCache = new PercentReady(pr, 0.9f);
-        if (pathToCache == null && isNeedLoadSaveCache)
-            throw new NullPointerException();
         this.pathToCache = pathToCache;
         this.edUpdater = edUpdater;
+        this.edUpdater.setNeedUpdate(this::updateCache);
         this.settingDates = detectiveDate;
         if (this.settingDates == null)
             this.settingDates = new DetectiveDate();
         PR_loadCache.setReady(0f);
-        if (isNeedLoadSaveCache && this.pathToCache.exists()) {
+        if (this.pathToCache.exists()) {
             try {
                 loadCache();
             } catch (IOException e) {
@@ -77,62 +73,39 @@ public class CoupleHistorian {
         }
         PR_loadCache.setReady(1f);
         this.now = now;
-        this.isNeedLoadSaveCache = isNeedLoadSaveCache;
-        if(cache == null || cache.size() == 0)
-            updateCache(PR_updateCache);
-        PR_updateCache.setReady(1f);
+        updateCache(PR_updateCache);
     }
 
     public CoupleHistorian() throws IOException {
-        this(new PercentReady(), true);
+        this(new PercentReady());
     }
 
-    public CoupleHistorian(PercentReady pr, boolean isNeedLoadSaveCache) throws IOException {
-        this(pr, isNeedLoadSaveCache, new File("ArrayListOfCouplesInCalendar.dat"));
+    public CoupleHistorian(PercentReady pr) throws IOException {
+        this(pr, new File("ArrayListOfCouplesInCalendar.dat"));
     }
 
-    public CoupleHistorian(PercentReady pr, File pathToCache) throws IOException {
-        this(pr, true, pathToCache);
+    protected CoupleHistorian(PercentReady pr, File pathToCache) throws IOException {
+        this(pr, pathToCache, null);
     }
 
-    public CoupleHistorian(PercentReady pr, File pathToCache, ZonedDateTime now) throws IOException {
-        this(pr, true, pathToCache, now);
-    }
-
-    protected CoupleHistorian(PercentReady pr, boolean isNeedLoadSaveCache, File pathToCache) throws IOException {
-        this(pr, isNeedLoadSaveCache, pathToCache, null);
-    }
-
-    protected CoupleHistorian(PercentReady pr, boolean isNeedLoadSaveCache, File pathToCache, ZonedDateTime now) throws IOException {
+    protected CoupleHistorian(PercentReady pr, File pathToCache, ZonedDateTime now) throws IOException {
         PercentReady PR_constructor = new PercentReady(pr, 0.000025f);
         PercentReady PR_external = new PercentReady(pr, 0.0025f - 0.000025f);
-        if(pathToCache == null)
-            throw new NullPointerException();
         this.pathToCache = pathToCache;
         this.now = now;
-        this.isNeedLoadSaveCache = isNeedLoadSaveCache;
-        try {
-            this.settingDates = new DetectiveDate();
-            PR_constructor.setReady(0.2f);
-            this.edUpdater = new ExternalDataUpdater(PR_external);
-            this.edUpdater.setNeedUpdate(this::updateCache);
-            PR_constructor.setReady(0.4f);
-        } catch (IOException e) {
-            // Что делать, если не удаётся создать директорию кэша?
-            // Переносим ответственность на администратора сервера.
-            e.printStackTrace();
-            System.out.println(e.getLocalizedMessage());
-            Scanner sc = new Scanner(System.in);
-            do {
-                try {
-                    System.out.print("Write path cache dir: ");
-                    this.edUpdater = new ExternalDataUpdater(new File(sc.nextLine()), true, PR_external);
-                } catch (IOException er) {
-                    System.out.println(er.getLocalizedMessage());
-                }
-            } while(edUpdater == null);
-        }
-        if(isNeedLoadSaveCache && this.pathToCache.exists()) {
+
+        //
+        // Создание сслыки на внешние данные.
+        //
+
+        this.settingDates = new DetectiveDate();
+        PR_constructor.setReady(0.2f);
+        this.edUpdater = new ExternalDataUpdater(PR_external);
+        this.edUpdater.setNeedUpdate(this::updateCache);
+        PR_constructor.setReady(0.4f);
+
+
+        if(this.pathToCache != null && this.pathToCache.exists()) {
             try {
                 loadCache();
             } catch (IOException e) {
@@ -140,10 +113,8 @@ public class CoupleHistorian {
             }
         }
         PR_constructor.setReady(0.75f);
-        if(cache == null || cache.size() == 0) {
-            updateCache(new PercentReady(pr, 1f - 0.0025f));
-        } else new PercentReady(pr, 1f - 0.0025f).setReady(1f);
-        PR_constructor.setReady(1.0f);
+        // Всегда нужно обновить кэш после простоя.
+        updateCache(new PercentReady(pr, 1f - 0.0025f));
     }
 
     protected LinkedList<CoupleInCalendar> getCache() {
@@ -230,7 +201,7 @@ public class CoupleHistorian {
         sortByDateTime(outCache, sort);
         mergeCouples(outCache);
         cache = outCache;
-        if(isNeedLoadSaveCache)
+        if(pathToCache != null)
             saveCache();
     }
 

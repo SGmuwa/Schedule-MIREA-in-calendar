@@ -16,7 +16,7 @@ public class CoupleHistorianTest
 
 
     public CoupleHistorianTest() throws IOException {
-        super(new ExternalDataUpdater(false), new DetectiveDate(), false, ZonedDateTime.now(), new PercentReady());
+        super(new ExternalDataUpdater(false), new DetectiveDate(), ZonedDateTime.now(), new PercentReady());
     }
 
     /*

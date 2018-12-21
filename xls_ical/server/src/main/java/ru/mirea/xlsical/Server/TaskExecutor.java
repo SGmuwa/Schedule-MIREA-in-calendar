@@ -48,7 +48,7 @@ public class TaskExecutor implements Runnable {
     }
 
     public TaskExecutor(PercentReady pr) throws IOException {
-        this(new CoupleHistorian(pr, true));
+        this(new CoupleHistorian(pr));
     }
 
     /**
