@@ -206,7 +206,10 @@ public class CoupleHistorian {
     }
 
     protected void loadCache() throws IOException {
-        cache = static_loadCache(pathToCache);
+        LinkedList<CoupleInCalendar> outCache = static_loadCache(pathToCache);
+        sortByDateTime(outCache, new PercentReady());
+        mergeCouples(outCache);
+        cache = outCache;
     }
 
     protected static LinkedList<CoupleInCalendar> static_loadCache(File pathToCache) throws IOException {

@@ -35,7 +35,7 @@ xls_ical/interpreter/target/surefire-reports/TestSeeker.txt
 
 **/cache/excel/*
 xls_ical/server/ArrayListOfCouplesInCalendar.dat
-xls_ical/ArrayListOfCouplesInCalendar.dat
+# Пусть будет показано развитие файла. xls_ical/ArrayListOfCouplesInCalendar.dat
 xls_ical/settings_DetectiveDate.cfg
 xls_ical/server/settings_DetectiveDate.cfg
 # Включить надо чтобы были предыдущие версии xls_ical/backend_1/ArrayListOfCouplesInCalendar.dat
