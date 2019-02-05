@@ -294,6 +294,31 @@ public class CoupleHistorian {
      * @see CoupleInCalendar#equals(Object) Подробнее об сравнении пар между собой.
      */
     private static void mergeCouples(LinkedList<CoupleInCalendar> listNeedMerge) {
+        ListIterator<CoupleInCalendar> listIterator = listNeedMerge.listIterator();
+        if(!listIterator.hasNext())
+            return;
+        CoupleInCalendar previous = listIterator.next();
+        while(listIterator.hasNext()) {
+            CoupleInCalendar current = listIterator.next();
+            if(current.dateAndTimeOfCouple.equals(previous.dateAndTimeOfCouple)
+            && current.address.equals(previous.address)
+            && current.audience.equals(previous.audience)
+            && current.itemTitle.equals(previous.itemTitle)
+            && current.typeOfLesson.equals(previous.typeOfLesson)
+            && current.dateAndTimeFinishOfCouple.equals(previous.dateAndTimeFinishOfCouple)) {
+                // Если это одна и та же пара, но преподаватель или группа другие...
+                if(!current.nameOfGroup.equals(previous.nameOfGroup)) {
+                    previous.nameOfGroup += ", " + current.nameOfGroup;
+                }
+                if(!current.nameOfTeacher.equals(previous.nameOfTeacher)) {
+                    previous.nameOfTeacher += ", " + current.nameOfTeacher;
+                }
+                listIterator.remove();
+            }
+            else {
+                previous = current;
+            }
+        }
         /*
         List<CoupleInCalendar> needDelete = new ArrayList<>();
         ArrayList<CoupleInCalendar> couplesInDay = new ArrayList<>();

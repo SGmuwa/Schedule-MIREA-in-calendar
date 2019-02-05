@@ -24,11 +24,11 @@ public class Couple implements Serializable {
     /**
      * Название группы.
      */
-    public final String nameOfGroup;
+    public String nameOfGroup;
     /**
      * Имя преподавателя.
      */
-    public final String nameOfTeacher;
+    public String nameOfTeacher;
     /**
      * Номер аудитории.
      */
