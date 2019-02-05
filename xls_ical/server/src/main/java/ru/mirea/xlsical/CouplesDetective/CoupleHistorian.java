@@ -297,26 +297,46 @@ public class CoupleHistorian {
         ListIterator<CoupleInCalendar> listIterator = listNeedMerge.listIterator();
         if(!listIterator.hasNext())
             return;
-        CoupleInCalendar previous = listIterator.next();
+        Set<CoupleInCalendar> previouses = new LinkedHashSet<>();
+        previouses.add(listIterator.next());
         while(listIterator.hasNext()) {
             CoupleInCalendar current = listIterator.next();
-            if(current.dateAndTimeOfCouple.equals(previous.dateAndTimeOfCouple)
-            && current.address.equals(previous.address)
-            && current.audience.equals(previous.audience)
-            && current.itemTitle.equals(previous.itemTitle)
-            && current.typeOfLesson.equals(previous.typeOfLesson)
-            && current.dateAndTimeFinishOfCouple.equals(previous.dateAndTimeFinishOfCouple)) {
-                // Если это одна и та же пара, но преподаватель или группа другие...
-                if(!current.nameOfGroup.equals(previous.nameOfGroup)) {
-                    previous.nameOfGroup += ", " + current.nameOfGroup;
+            int flag = 0; // 0 = nothing. 1 = clear. 2 = add.
+            for (CoupleInCalendar previous:
+                 previouses) {
+                if (current.dateAndTimeOfCouple.equals(previous.dateAndTimeOfCouple)
+                        && current.address.equals(previous.address)
+                        && current.audience.equals(previous.audience)
+                        && current.itemTitle.equals(previous.itemTitle)
+                        && current.typeOfLesson.equals(previous.typeOfLesson)
+                        && current.dateAndTimeFinishOfCouple.equals(previous.dateAndTimeFinishOfCouple)) {
+                    // Если это одна и та же пара, но преподаватель или группа другие...
+                    if (!current.nameOfGroup.equals(previous.nameOfGroup)) {
+                        previous.nameOfGroup += ", " + current.nameOfGroup;
+                    }
+                    if (!current.nameOfTeacher.equals(previous.nameOfTeacher)) {
+                        previous.nameOfTeacher += ", " + current.nameOfTeacher;
+                    }
+                    listIterator.remove();
+                    flag = 0;
                 }
-                if(!current.nameOfTeacher.equals(previous.nameOfTeacher)) {
-                    previous.nameOfTeacher += ", " + current.nameOfTeacher;
+                else if(!current.dateAndTimeOfCouple.equals(previous.dateAndTimeOfCouple)) {
+                    flag = 1;
                 }
-                listIterator.remove();
+                else {
+                    flag = 2;
+                }
             }
-            else {
-                previous = current;
+            switch (flag) {
+                case 0:
+                    break;
+                case 1:
+                    previouses.clear();
+                    previouses.add(current);
+                    break;
+                case 2:
+                    previouses.add(current);
+                    break;
             }
         }
         /*
