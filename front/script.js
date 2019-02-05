@@ -702,7 +702,7 @@ $('document').ready(function(){
 			let tmp = obj.timeZone.charAt(0) + obj.timeZone.charAt(1) + obj.timeZone.charAt(2) + obj.timeZone.charAt(3) + obj.timeZone.charAt(4) + obj.timeZone.charAt(5) + obj.timeZone.charAt(6) + obj.timeZone.charAt(7) + obj.timeZone.charAt(8) + obj.timeZone.charAt(9) + obj.timeZone.charAt(10) + obj.timeZone.charAt(11);
 			obj.timeZone = obj.timeZone.replace(tmp, '');
 		}
-		var srcForInput = document.location.href + 'schedule?name=' + encodeURIComponent(obj.name) + '&dateStart=' + obj.dateStart + '&dateFinish=2019-05-31' + '&timezoneStart=Europe%2FMoscow';
+		var srcForInput = document.location.href + 'schedule?name=' + encodeURIComponent(obj.name) + '&dateStart=' + obj.dateStart + '&dateFinish=' + obj.dateFinish + '&timezoneStart=' + encodeURIComponent(obj.timeZone);
 
 		$('#copyDiv').attr('value', srcForInput);
 		$('#wrapperForSecondModal').fadeIn();
