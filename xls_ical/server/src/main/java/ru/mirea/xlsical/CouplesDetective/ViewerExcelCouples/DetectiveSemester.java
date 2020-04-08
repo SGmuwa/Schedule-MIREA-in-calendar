@@ -725,7 +725,7 @@ public class DetectiveSemester extends Detective {
             Pattern p = Pattern.compile("(^| )[СсCc] ?+\\d+");
             Matcher m = p.matcher(itemTitle);
             if(m.find())
-                return Integer.parseInt(m.group().substring(2));
+                return Integer.parseInt(m.group().substring(2).trim());
             else return null;
         }
 
