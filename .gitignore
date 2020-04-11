@@ -56,3 +56,6 @@ bld/
 msbuild.log
 msbuild.err
 msbuild.wrn
+.classpath
+.project
+.settings
