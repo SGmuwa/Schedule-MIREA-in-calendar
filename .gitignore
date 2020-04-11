@@ -41,3 +41,18 @@ xls_ical/server/settings_DetectiveDate.cfg
 # Включить надо чтобы были предыдущие версии xls_ical/backend_1/ArrayListOfCouplesInCalendar.dat
 xls_ical/backend_1/settings_DetectiveDate.cfg
 *.dat
+
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+msbuild.log
+msbuild.err
+msbuild.wrn
