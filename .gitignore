@@ -40,3 +40,4 @@ xls_ical/settings_DetectiveDate.cfg
 xls_ical/server/settings_DetectiveDate.cfg
 # Включить надо чтобы были предыдущие версии xls_ical/backend_1/ArrayListOfCouplesInCalendar.dat
 xls_ical/backend_1/settings_DetectiveDate.cfg
+*.dat
