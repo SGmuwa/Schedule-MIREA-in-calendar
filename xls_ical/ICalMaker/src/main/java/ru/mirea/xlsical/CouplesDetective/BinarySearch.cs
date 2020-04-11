@@ -27,16 +27,17 @@ namespace ru.mirea.xlsical.CouplesDetective
             return ~left;
         }
 
-        /**
-         * Бинарный поиск индекса элемента. Укажет индекс самого ближнего к индексу 0 соответствующего элемента. Если не нашёл - показывает ближайший индекс под оператором ~.
-         * @param array Входящий массив, в котором надо искать. Массив должен быть отсортирован.
-         * @param key То, что надо найти
-         * @param <E> Тим должен уметь сравниваться.
-         * @return Индекс элемента. Если не найден, то ищется ближайший элемент, который меньше {@code key},
-         * а затем результат инвертируется с помощью оператора {@code ~}. Если все элементы массива больше {@code key},
-         * то возвращается {@link Integer#MIN_VALUE}.
-         */
-        public static int BinarySearch_Iter_Wrapper<E>(List<E> array, E key) where E : IComparable<E>
+        /// <summary>
+        /// Бинарный поиск индекса элемента. Укажет индекс самого ближнего к индексу 0 соответствующего элемента.
+        /// Если не нашёл - показывает ближайший индекс под оператором ~.
+        /// </summary>
+        /// <param name="array">Входящий массив, в котором надо искать. Массив должен быть отсортирован.</param>
+        /// <param name="key">То, что надо найти</param>
+        /// <typeparam name="E">Тим должен уметь сравниваться.</typeparam>
+        /// <returns>Индекс элемента. Если не найден, то ищется ближайший элемент, который меньше {@code key},
+        /// а затем результат инвертируется с помощью оператора {@code ~}. Если все элементы массива больше {@code key},
+        /// то возвращается {@link Integer#MIN_VALUE}.</returns>
+        public static int BinarySearch_Iter_Wrapper<E>(IReadOnlyList<E> array, E key) where E : IComparable<E>
         {
             if (array == null)
                 throw new ArgumentNullException("array must be not null!");
@@ -53,40 +54,11 @@ namespace ru.mirea.xlsical.CouplesDetective
                 left++;
             if (left == -1)
             {
-                if (array[0].compareTo(key) == 0)
+                if (array[0].CompareTo(key) == 0)
                     return 0;
                 return int.MinValue;
             }
-            return array.get(left).compareTo(key) == 0 ? left : ~left;
+            return array[left].CompareTo(key) == 0 ? left : ~left;
         }
-
-        public static int BinarySearch_Iter_Wrapper<E>(E key, ICanGetValueByIndex<E> array, int size, IComparer<E> comparator)
-        {
-            if (array == null || comparator == null)
-                throw new ArgumentNullException("array must be not null!");
-            if (size == 0 || key == null)
-                return Integer.MIN_VALUE;
-            int left = BinarySearch_Iter(array::get, size, comparator.compare(array.get(0), array.get(size - 1)) > 0, key, comparator);
-            if (left < 0)
-                left = ~left;
-            if (left >= size)
-                left = size - 1;
-            while (left >= 0 && comparator.compare(array.get(left), key) >= 0)
-                left--;
-            if (left + 1 < size && comparator.compare(array.get(left + 1), key) == 0)
-                left++;
-            if (left == -1)
-            {
-                if (comparator.compare(array.get(0), key) == 0)
-                    return 0;
-                return Integer.MIN_VALUE;
-            }
-            return comparator.compare(array.get(left), key) == 0 ? left : ~left;
-        }
-    }
-
-    interface ICanGetValueByIndex<E>
-    {
-        E this[int index] { get; }
     }
 }
