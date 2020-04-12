@@ -36,14 +36,14 @@ namespace ru.mirea.xlsical.CouplesDetective
         /// <typeparam name="E">Тим должен уметь сравниваться.</typeparam>
         /// <returns>Индекс элемента. Если не найден, то ищется ближайший элемент, который меньше {@code key},
         /// а затем результат инвертируется с помощью оператора {@code ~}. Если все элементы массива больше {@code key},
-        /// то возвращается {@link Integer#MIN_VALUE}.</returns>
+        /// то возвращается <see cref="int.MinValue"/>.</returns>
         public static int BinarySearch_Iter_Wrapper<E>(IReadOnlyList<E> array, E key) where E : IComparable<E>
         {
             if (array == null)
                 throw new ArgumentNullException("array must be not null!");
             if (array.Count == 0 || key == null)
                 return int.MinValue;
-            int left = BinarySearch_Iter(array, array.Count, array[0].CompareTo(array[array.Count - 1]) > 0, key, (a, b)->a.compareTo(b));
+            int left = BinarySearch_Iter(array, array.Count, array[0].CompareTo(array[array.Count - 1]) > 0, key, Comparer<E>.Create((E a, E b) => a.CompareTo(b)));
             if (left < 0)
                 left = ~left;
             if (left >= array.Count)
