@@ -1,6 +1,6 @@
 /*
     Schedule MIREA in calendar.
-    Copyright (C) 2020  Mikhail Pavlovich Sidorenko (motherlode.muwa@gmail.com)
+    Copyright (C) 2020  Artemy Mikhailovich Urodovskikh
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,21 +15,41 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples;
 
-import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
+package ru.mirea.xlsical.backend.entity;
 
-public class DetectiveException extends Exception {
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
-    public final ExcelFileInterface excelFile;
+@Entity
+public class ScheduleQuery {
+    @Id
+    long id;
 
-    DetectiveException(String message, ExcelFileInterface file){
-        super(message);
-        excelFile = file;
+    public ScheduleQuery() {
+
     }
 
-    @Override
-    public String getLocalizedMessage() {
-        return super.getLocalizedMessage() + " file: " + excelFile.toString();
+    public String name;
+    public LocalDate dateStart;
+    public LocalDate dateFinish;
+    public ZoneId timezoneStart;
+
+    public String getName() {
+        return name;
+    }
+
+    public LocalDate getDateStart() {
+        return dateStart;
+    }
+
+    public LocalDate getDateFinish() {
+        return dateFinish;
+    }
+
+    public ZoneId getZoneId() {
+        return timezoneStart;
     }
 }

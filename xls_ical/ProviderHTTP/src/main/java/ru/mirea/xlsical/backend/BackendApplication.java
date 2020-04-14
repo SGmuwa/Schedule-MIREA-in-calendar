@@ -1,6 +1,6 @@
 /*
     Schedule MIREA in calendar.
-    Copyright (C) 2020  Mikhail Pavlovich Sidorenko (motherlode.muwa@gmail.com)
+    Copyright (C) 2020  Artemy Mikhailovich Urodovskikh
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,19 +16,20 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package ru.mirea.xlsical.CouplesDetective;
+package ru.mirea.xlsical.backend;
 
-import ru.mirea.xlsical.interpreter.PercentReady;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.io.IOException;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-/**
- * Интерфейс утверждает, что объект умеет обновлять.
- */
-public interface ICacheUpdater {
-    /**
-     * Вызывается, когда необходимо обработать новое обновление.
-     * @throws IOException В процессе работы с файловой системой произошла ошибка.
-     */
-    void update(PercentReady pr) throws IOException;
+@EnableJpaRepositories("ru.mirea.xlsical.backend.repository")
+@EntityScan("ru.mirea.xlsical.backend.entity")
+@SpringBootApplication
+public class BackendApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(BackendApplication.class, args);
+    }
 }

@@ -1,6 +1,7 @@
 /*
     Schedule MIREA in calendar.
-    Copyright (C) 2020  Mikhail Pavlovich Sidorenko (motherlode.muwa@gmail.com)
+    Copyright (C) 2020
+    Artemy Mikhailovich Urodovskikh
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,19 +17,18 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package ru.mirea.xlsical.CouplesDetective;
+package ru.mirea.xlsical.backend.utils;
 
-import ru.mirea.xlsical.interpreter.PercentReady;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.io.IOException;
+@Controller
+public class ExceptionHandlerController {
 
-/**
- * Интерфейс утверждает, что объект умеет обновлять.
- */
-public interface ICacheUpdater {
-    /**
-     * Вызывается, когда необходимо обработать новое обновление.
-     * @throws IOException В процессе работы с файловой системой произошла ошибка.
-     */
-    void update(PercentReady pr) throws IOException;
+    @ExceptionHandler(RestException.class)
+    public @ResponseBody
+    String handleException(RestException e) {
+        return "Ошибка: " + e.getMessage();
+    }
 }
