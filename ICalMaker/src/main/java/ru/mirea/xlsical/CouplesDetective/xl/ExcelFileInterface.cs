@@ -17,34 +17,33 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ru.mirea.xlsical.CouplesDetective.xl;
+using System;
 
-import java.io.Closeable;
-import java.io.IOException;
+namespace ru.mirea.xlsical.CouplesDetective.xl
+{
+    /// <summary>
+    /// Интерфейс по работе с Excel файлами. Экземпляр такого интерфейса должен хранит в себе дескриптор файла.
+    /// </summary>
+    public interface ExcelFileInterface : IDisposable
+    {
+        /// <summary>
+        /// Получение текстовых данных из файла.
+        /// </summary>
+        /// <param name="column">Порядковый номер столбца. Отсчёт начинается с 1.</param>
+        /// <param name="row">Порядковый номер строки. Отсчёт начинается с 1.</param>
+        /// <returns>Текстовые данные в ячейке. Не NULL.</returns>
+        /// <exception cref="System.IO.IOException">Потерян доступ к файлу.</exception>
+        string GetCellData(int column, int row);
 
-/**
- * Интерфейс по работе с Excel файлами. Экземпляр такого интерфейса должен хранит в себе дескриптор файла.
- */
-public interface ExcelFileInterface extends Closeable {
-
-    /**
-     * Получение текстовых данных из файла.
-     * @param column Порядковый номер столбца. Отсчёт начинается с 1.
-     * @param row Порядковый номер строки. Отсчёт начинается с 1.
-     * @return Текстовые данные в ячейке. Не NULL.
-     * @throws IOException Потерян доступ к файлу.
-     */
-    String getCellData(int column, int row) throws IOException;
-
-    /**
-     * Узнаёт фоновый цвет двух ячеек и отвечает на вопрос, одинаковый ли у них фоновый цвет.
-     * @param column1 Первая сравниваемая ячейка. Порядковый номер столбца. Отсчёт начинается с 1.
-     * @param row1 Первая сравниваемая ячейка. Порядковый номер строки. Отсчёт начинается с 1.
-     * @param column2 Вторая сравниваемая ячейка. Порядковый номер столбца. Отсчёт начинается с 1.
-     * @param row2 Вторая сравниваемая ячейка. Порядковый номер строки. Отсчёт начинается с 1.
-     * @return {@code True}, если цвета совпадают. Иначе - {@code false}.
-     * @throws IOException Потерян доступ к файлу.
-     */
-    boolean isBackgroundColorsEquals(int column1, int row1, int column2, int row2) throws IOException;
-
+        /// <summary>
+        /// Узнаёт фоновый цвет двух ячеек и отвечает на вопрос, одинаковый ли у них фоновый цвет.
+        /// </summary>
+        /// <param name="column1">Первая сравниваемая ячейка. Порядковый номер столбца. Отсчёт начинается с 1.</param>
+        /// <param name="row1">Первая сравниваемая ячейка. Порядковый номер строки. Отсчёт начинается с 1.</param>
+        /// <param name="column2">Вторая сравниваемая ячейка. Порядковый номер столбца. Отсчёт начинается с 1.</param>
+        /// <param name="row2">Вторая сравниваемая ячейка. Порядковый номер строки. Отсчёт начинается с 1.</param>
+        /// <returns><code>True</code>, если цвета совпадают. Иначе — <code>False</code>.</returns>
+        /// <exception cref="System.IO.IOException">Потерян доступ к файлу.</exception>
+        bool IsBackgroundColorsEquals(int column1, int row1, int column2, int row2);
+    }
 }
