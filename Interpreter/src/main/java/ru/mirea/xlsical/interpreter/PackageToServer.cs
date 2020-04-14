@@ -18,44 +18,34 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package ru.mirea.xlsical.interpreter;
+namespace ru.mirea.xlsical.interpreter
+{
+    /// <summary>
+    /// Класс указывает правило, какие данные будут переданы серверу.
+    /// </summary>
+    public class PackageToServer : Package
+    {
+        /// <summary>
+        /// Критерии запроса.
+        /// </summary>
+        public readonly Seeker queryCriteria;
 
-/**
- * Класс указывает правило, какие данные будут переданы серверу.
- * @author <a href="https://github.com/SGmuwa">[SG]Muwa</a>
- */
-public class PackageToServer extends Package {
+        /// <summary>
+        /// Процент готовности пакета.
+        /// </summary>
+        public readonly PercentReady percentReady;
 
-    /**
-     * Тут содержатся критерии запроса.
-     */
-    public final Seeker queryCriteria;
-    /**
-     * Содержится процент готовности пакета
-     */
-    public final PercentReady percentReady;
-
-    /**
-     * Строит данные отправляемые на сервер.
-     * @param ctx Уникальный идентификатор сообщения.
-     * @param queryCriteria Тут содержатся критерии запроса.
-     */
-    public PackageToServer(Object ctx, Seeker queryCriteria) {
-        this(ctx, null, queryCriteria);
-    }
-
-    /**
-     * Строит данные отправляемые на сервер.
-     * @param ctx Уникальный идентификатор
-     * @param percentReady Ссылка на класс, куда записывать процент готовности.
-     * @param queryCriteria Критерии запроса.
-     */
-    public PackageToServer(Object ctx, PercentReady percentReady, Seeker queryCriteria) {
-        super(ctx);
-        this.queryCriteria = queryCriteria;
-        if(percentReady != null)
-            this.percentReady = percentReady;
-        else
-            this.percentReady = new PercentReady();
+        /// <summary>
+        /// Строит данные отправляемые на сервер.
+        /// </summary>
+        /// <param name="ctx">Уникальный идентификатор или контекст сообщения.</param>
+        /// <param name="queryCriteria">Критерии запроса.</param>
+        /// <param name="percentReady">Ссылка на класс, куда записывать процент готовности.</param>
+        public PackageToServer(object ctx, Seeker queryCriteria, PercentReady percentReady = null)
+        : base(ctx)
+        {
+            this.queryCriteria = queryCriteria;
+            this.percentReady = percentReady == null ? new PercentReady() : percentReady;
+        }
     }
 }

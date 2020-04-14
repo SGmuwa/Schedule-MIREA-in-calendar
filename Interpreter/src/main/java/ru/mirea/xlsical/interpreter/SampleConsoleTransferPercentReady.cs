@@ -16,9 +16,10 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package ru.mirea.xlsical.interpreter;
+namespace ru.mirea.xlsical.interpreter
+{
 
-public class SampleConsoleTransferPercentReady implements ICanUsePercentReady {
+public class SampleConsoleTransferPercentReady : TransferValue {
 
     public SampleConsoleTransferPercentReady() {
 
@@ -34,12 +35,12 @@ public class SampleConsoleTransferPercentReady implements ICanUsePercentReady {
      *
      * @param pr Объект, который был изменён.
      */
-    @Override
-    public void transferValue(PercentReady pr) {
+    public override void transferValue(PercentReady pr) {
         String newValue = pr.toString();
         if(!newValue.equals(oldValue)) {
             oldValue = newValue;
             System.out.println(message + newValue);
         }
     }
+}
 }

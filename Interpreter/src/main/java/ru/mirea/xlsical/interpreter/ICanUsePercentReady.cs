@@ -16,15 +16,11 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package ru.mirea.xlsical.interpreter;
-
-/**
- * Интерфейс говорит, что объект умеет принимать изменения percentReady
- */
-public interface ICanUsePercentReady {
-    /**
-     * Вызывается всегда, когда используется setValue.
-     * @param percentReady Объект, который был изменён.
-     */
-    void transferValue(PercentReady percentReady);
+namespace ru.mirea.xlsical.interpreter
+{
+    /// <summary>
+    /// Вызывается всегда, когда используется setValue.
+    /// </summary>
+    /// <param name="percentReady">Объект, который был изменён.</param>
+    delegate void TransferValue(PercentReady percentReady);
 }

@@ -18,20 +18,22 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package ru.mirea.xlsical.interpreter;
+namespace ru.mirea.xlsical.interpreter
+{
+    public abstract class Package
+    {
+        /// <summary>
+        /// Создание экземпляра пакета.
+        /// </summary>
+        /// <param name="ctx">Контекст задачи.</param>
+        public Package(object context)
+        {
+            Context = context;
+        }
 
-public abstract class Package {
-
-    /**
-     * Создание экземпляра пакета
-     * @param ctx Контекст задачи.
-     */
-    public Package(Object ctx) {
-        this.ctx = ctx;
+        /// <summary>
+        /// Уникальный идентификатор сообщения.
+        /// </summary>
+        public readonly object Context;
     }
-
-    /**
-     * Уникальный индентификатор сообщения.
-     */
-    public final Object ctx;
 }
