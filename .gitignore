@@ -59,3 +59,4 @@ msbuild.wrn
 .classpath
 .project
 .settings
+settings_DetectiveDate.cfg
