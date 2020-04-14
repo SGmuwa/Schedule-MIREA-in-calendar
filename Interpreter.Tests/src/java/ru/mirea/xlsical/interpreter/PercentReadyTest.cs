@@ -16,80 +16,72 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package ru.mirea.xlsical.interpreter;
+using Xunit;
+using System;
+using System.Threading;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
-
-public class PercentReadyTest {
-
-    @Test
-    public void startSimplePercent() {
-        PercentReady pr = new PercentReady();
-        assertEquals(0.0f, pr.getReady(), 0f);
-        pr.setReady(0.5f);
-        assertEquals(0.5f, pr.getReady(), 0f);
-        try {
-            pr.setReady(2f);
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertEquals(0.5f, pr.getReady(), 0f);
+namespace ru.mirea.xlsical.interpreter
+{
+    public class PercentReadyTest
+    {
+        [Fact]
+        public void StartSimplePercent()
+        {
+            PercentReady pr = new PercentReady();
+            Assert.Equal(0.0, pr.Ready, 10);
+            pr.Ready = 0.5f;
+            Assert.Equal(0.5f, pr.Ready, 10);
+            Assert.Throws<ArgumentException>(() => pr.Ready = 2f);
+            Assert.Equal(0.5, pr.Ready, 10);
+            pr.Ready = 1.0f;
+            Assert.Equal(1.0, pr.Ready, 10);
         }
-        pr.setReady(1.0f);
-        assertEquals(1.0f, pr.getReady(), 0.0f);
-    }
 
-    @Test
-    public void startWholePercent() throws InterruptedException {
-        PercentReady whole = new PercentReady(new SampleConsoleTransferPercentReady());
-        Thread a = new Thread(() -> function1(new PercentReady(whole, 1f/11f)));
-        Thread b = new Thread(() -> function2(new PercentReady(whole, 10f/11f)));
-        a.start();
-        b.start();
-        System.out.println("wait a.");
-        a.join();
-        System.out.println("a ready, wait b.");
-        b.join();
-        System.out.println("b ready");
-    }
-
-    private void function1(PercentReady pr) {
-        pr.setReady(0.0f);
-        for(int i = 0; i < 10000; i++) {
-            pr.setReady((float)i/9999.0f);
+        [Fact]
+        public void StartWholePercent()
+        {
+            PercentReady whole = new PercentReady(subscribers: new SampleConsoleTransferPercentReady("   \r", false, true).TransferValue);
+            Thread a = new Thread(() => Function1(new PercentReady(whole, 1f / 11f)));
+            Thread b = new Thread(() => Function2(new PercentReady(whole, 10f / 11f)));
+            a.Start();
+            b.Start();
+            Console.WriteLine("wait a.");
+            a.Join();
+            Console.WriteLine("a ready, wait b.");
+            b.Join();
+            Console.WriteLine("b ready");
         }
-    }
 
-    private void function2(PercentReady pr) {
-        pr.setReady(0.0f);
-        for(int i = 0; i < 100000; i++) {
-            pr.setReady((float)i/99999.0f);
+        private void Function1(PercentReady pr)
+        {
+            pr.Ready = 0.0f;
+            for (int i = 0; i < 10000; i++)
+                pr.Ready = i / 9999.0f;
         }
-    }
 
-    @Test
-    public void testSimpleFail() {
-        try {
-            new PercentReady().setReady(2);
-            fail();
-        } catch (IllegalArgumentException e) {/*good!*/}
-        try {
-            new PercentReady(null, 2.0f);
-            fail();
-        } catch (IllegalArgumentException e) {/*good!*/}
-        try {
+        private void Function2(PercentReady pr)
+        {
+            pr.Ready = 0.0f;
+            for (int i = 0; i < 100000; i++)
+            {
+                pr.Ready = i / 99999.0f;
+            }
+        }
+
+        [Fact]
+        public void TestSimpleFail()
+        {
+            Assert.Throws<ArgumentException>(() => new PercentReady().Ready = 2);
+
+            Assert.Throws<ArgumentException>(() => new PercentReady(null, 2.0f));
+
             PercentReady big = new PercentReady();
             new PercentReady(big, 0.5f);
-            new PercentReady(big, 0.6f);
-            fail();
-        } catch (IllegalArgumentException e) {/*good!*/}
+            Assert.Throws<ArgumentException>(() => new PercentReady(big, 0.6f));
 
-        try {
-            PercentReady big = new PercentReady();
+            big = new PercentReady();
             new PercentReady(big, 0.5f);
-            big.setReady(1.0f);
-            fail();
-        } catch (IllegalAccessError e) {/*good!*/}
+            Assert.Throws<ArgumentException>(() => big.Ready = 1.0f);
+        }
     }
 }
