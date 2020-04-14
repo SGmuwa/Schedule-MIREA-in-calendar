@@ -22,16 +22,18 @@
 Суть запроса: имя искателя, тип искателя (преподаватель, студент), дата начала и конца семестра, адрес по-умолчанию.
  */
 
+using NodaTime;
+
 namespace ru.mirea.xlsical.interpreter
 {
     /// <summary>
     /// Класс, который представляет из себя искателя.
     /// В этом классе содержатся все поля, которые запрашивает пользователь с интернета.
     /// </summary>
-    /// <see cref="Seeker.NameOfSeeker"></see>
-    /// <see cref="Seeker.dateStart"></see>
-    /// <see cref="Seeker.dateFinish"></see>
-    public readonly class Seeker
+    /// <see cref="Seeker.NameOfSeeker"/>
+    /// <see cref="Seeker.DateStart"/>
+    /// <see cref="Seeker.DateFinish"/>
+    public class Seeker
     {
         /// <summary>
         /// Имя искателя.
@@ -44,49 +46,39 @@ namespace ru.mirea.xlsical.interpreter
         /// В этот день уже будет составляться расписание.
         /// Указывает на первый день 00:00:00.
         /// </summary>
-        public DateTimeOffset dateStart { get; }
+        public ZonedDateTime DateStart { get; }
 
         /// <summary>
         /// Дата конца составления ICal.
         /// В этот день будет составлено расписание в последний раз.
         /// Указывает на последний день, последнюю секунду, например, 23:59:59.
         /// </summary>
-        public DateTimeOffset dateFinish { get; }
-        
-        /**
-         * Первоначальный номер недели. По-умолчанию указывать = 1.
-         * @deprecated Не используется. Вместо этого идёт выборка данных.
-         */
-        public readonly int startWeek { get; }
+        public ZonedDateTime DateFinish { get; }
 
-        /**
-         * Создаёт экземпляр запроса.
-         * @param nameOfSeeker Имя искателя. Это либо имя преподавателя, либо название группы студента.
-         * @param dateStart Дата начала составления расписания. С какого календарного дня надо составлять расписание? Дата указывается по местному времени.
-         * @param dateFinish Дата конца составления расписания. До какого календарного дня надо составлять расписание? Дата указывается по местному времени.
-         * @param timezoneStart Часовой пояс, где будут пары. Это значение в начале семестра.
-         * @param startWeek Первоначальный номер недели. По-умолчанию указывать = 1.
-         * @deprecated Поля {@link #defaultAddress}, {@link #seekerType}, {@link #startWeek}, {@link #timezoneStart} уже не используется.
-         *             Тип {@code dateStart} и {@code dateFinish} изменены с {@link java.time.LocalDate} на {@link ZonedDateTime}.
-         */
-        public Seeker(string nameOfSeeker, DateTimeOffset dateStart, DateTimeOffset dateFinish, int startWeek)
+        /// <summary>
+        /// Создаёт экземпляр запроса.
+        /// </summary>
+        /// <param name="nameOfSeeker">Имя искателя. Это либо имя преподавателя, либо название группы студента.</param>
+        /// <param name="dateStart">Дата начала составления расписания. С какого календарного дня надо составлять расписание?</param>
+        /// <param name="dateFinish">Дата конца составления расписания. До какого календарного дня надо составлять расписание?</param>
+        /// <param name="needReset"></param>
+        public Seeker(string nameOfSeeker, ZonedDateTime dateStart, ZonedDateTime dateFinish, bool needReset = true)
         {
-            this.nameOfSeeker = nameOfSeeker;
-            this.dateStart = ZonedDateTime.of(LocalDateTime.of(dateStart, LocalTime.of(0, 0)), timezoneStart);
-            this.dateFinish = ZonedDateTime.of(LocalDateTime.of(dateFinish, LocalTime.of(0, 0)), timezoneStart).plus(1, ChronoUnit.DAYS).minus(1, ChronoUnit.SECONDS);
-            this.startWeek = startWeek;
+            this.NameOfSeeker = nameOfSeeker;
+            this.DateStart = needReset ? new ZonedDateTime(dateStart.Date.At(LocalTime.MinValue), dateStart.Zone, dateStart.Offset) : dateStart;
+            this.DateFinish = needReset ? new ZonedDateTime(dateFinish.Date.PlusDays(1).At(LocalTime.MinValue).Minus(Period.FromSeconds(1)), dateFinish.Zone, dateFinish.Offset) : dateFinish;
         }
 
-        /**
-         * Создаёт экземпляр запроса.
-         * @param nameOfSeeker Имя искателя. Это либо имя преподавателя, либо название группы студента.
-         * @param dateStart Дата начала составления расписания. С какого календарного дня надо составлять расписание? Дата указывается по местному времени.
-         * @param dateFinish Дата конца составления расписания. До какого календарного дня надо составлять расписание? Дата указывается по местному времени.
-         * @param timezoneStart Часовой пояс, где будут пары. Это значение в начале семестра.
-         */
-        public Seeker(String nameOfSeeker, LocalDate dateStart, LocalDate dateFinish, ZoneId timezoneStart)
+        /// <summary>
+        /// Создаёт экземпляр запроса.
+        /// </summary>
+        /// <param name="nameOfSeeker">Имя искателя. Это либо имя преподавателя, либо название группы студента.</param>
+        /// <param name="dateStart">Дата начала составления расписания. С какого календарного дня надо составлять расписание? Дата указывается по местному времени <code>timezoneStart</code>.</param>
+        /// <param name="dateFinish">Дата конца составления расписания. До какого календарного дня надо составлять расписание? Дата указывается по местному времени <code>timezoneStart</code>.</param>
+        /// <param name="timeZoneStart">Часовой пояс, где будут пары.</param>
+        public Seeker(string nameOfSeeker, LocalDate dateStart, LocalDate dateFinish, DateTimeZone timeZoneStart)
+        : this(nameOfSeeker, timeZoneStart.AtStartOfDay(dateStart), timeZoneStart.AtStartOfDay(dateFinish))
         {
-            this.nameOfSeeker = nameOfSeeker;
             /*
             Отправлять в конструктор ZonedDateTime не безопасно, так как тогда
             студент или преподаватель могут получить расписание не целиком за день, а
@@ -103,58 +95,22 @@ namespace ru.mirea.xlsical.interpreter
             образом возложив расчёты по определению "последнего момента времени дня" на
             алгоритмы java.time или их потомков.
              */
-            this.dateStart = ZonedDateTime.of(LocalDateTime.of(dateStart, LocalTime.of(0, 0)), timezoneStart);
-            this.dateFinish = ZonedDateTime.of(LocalDateTime.of(dateFinish, LocalTime.of(0, 0)), timezoneStart).plus(1, ChronoUnit.DAYS).minus(1, ChronoUnit.SECONDS);
-            this.startWeek = 1;
         }
 
-        public override bool Equals(Object ex)
+        public override bool Equals(object ex)
         {
             if (this == ex)
                 return true;
             if (ex is Seeker e)
             {
-                return nameOfSeeker.equals(e.nameOfSeeker) &&
-                    dateStart.equals(e.dateStart) &&
-                    dateFinish.equals(e.dateFinish);
+                return NameOfSeeker.Equals(e.NameOfSeeker) &&
+                    DateStart.Equals(e.DateStart) &&
+                    DateFinish.Equals(e.DateFinish);
             }
             return false;
         }
 
-        static Seeker()
-        {
-            int startWeek = 0;
-
-            /*
-             * Для поддержки старых устройств необходим часовой пояс "UTC+03:00" [1],
-             * так как не все устройства[2] приняли обновления от 26 октября 2014 [3].
-             * Поменять на Europe/Moscow 15 августа 2020 году.
-             * Необходимо проверить, поддерживается ли UTC+03:00?
-             *
-             * [1][3] http://www.consultant.ru/document/cons_doc_LAW_114656/b2707989c276b5a188e63bc41e7bcbcc18723de8/
-             * [2] https://dentnt.windowsfaq.ru/?p=1527
-             */
-            ZoneId zoneId = ZoneId.of("UTC+03:00");
-
-
-            ZonedDateTime start = ZonedDateTime.now(zoneId);
-            // Дольше же восьми лет не может учиться студент?
-            ZonedDateTime finish = start.plus(8, ChronoUnit.YEARS);
-
-
-
-            Instance = new Seeker(
-                    // Штука, которая расчитывает группу по-умолчанию.
-                    "ИКБО-04-" + start.minus(6L, ChronoUnit.MONTHS).getLong(ChronoField.YEAR) % 100,
-                    start.toLocalDate(),
-                    finish.toLocalDate(),
-                    zoneId
-            );
-        }
-
-        /// <summary>
-        /// Искатель по-умолчанию.
-        /// </summary>
-        public static Seeker Instance { get; }
+        public override int GetHashCode()
+        => System.HashCode.Combine(NameOfSeeker, DateStart, DateFinish);
     }
 }

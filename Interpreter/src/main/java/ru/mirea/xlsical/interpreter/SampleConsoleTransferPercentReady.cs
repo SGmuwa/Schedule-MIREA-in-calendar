@@ -16,31 +16,57 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+using System;
+
 namespace ru.mirea.xlsical.interpreter
 {
+    public class SampleConsoleTransferPercentReady
+    {
+        public SampleConsoleTransferPercentReady(string message = "", bool needNewLine = true, bool autoFlush = false)
+        {
+            this.Message = message;
+            this.NeedNewLine = needNewLine;
+            this.AutoFlush = autoFlush;
+        }
 
-public class SampleConsoleTransferPercentReady : TransferValue {
+        private string oldValue;
 
-    public SampleConsoleTransferPercentReady() {
+        private string message;
 
-    }
-    public SampleConsoleTransferPercentReady(String message) {
-        this.message = message;
-    }
+        /// <summary>
+        /// True, если нужно при печати новая строка.
+        /// </summary>
+        public bool NeedNewLine { get; set; }
 
-    private String oldValue = "";
-    private String message = "";
-    /**
-     * Вызывается всегда, когда используется setValue.
-     *
-     * @param pr Объект, который был изменён.
-     */
-    public override void transferValue(PercentReady pr) {
-        String newValue = pr.toString();
-        if(!newValue.equals(oldValue)) {
-            oldValue = newValue;
-            System.out.println(message + newValue);
+        /// <summary>
+        /// Сообщение перед выводом процента загрузки.
+        /// </summary>
+        public string Message
+        {
+            get => message;
+            set
+            {
+                oldValue = null;
+                message = value;
+            }
+        }
+
+        public bool AutoFlush { get; set; }
+
+        /// <summary>
+        /// Вызывается всегда, когда используется setValue.
+        /// </summary>
+        /// <param name="pr">Объект, который был изменён.</param>
+        public void TransferValue(PercentReady pr)
+        {
+            string newValue = pr.ToString();
+            if (!newValue.Equals(oldValue))
+            {
+                oldValue = newValue;
+                Console.Write(Message + newValue + (NeedNewLine ? Environment.NewLine : String.Empty));
+                if (AutoFlush)
+                    Console.Out.Flush();
+            }
         }
     }
-}
 }

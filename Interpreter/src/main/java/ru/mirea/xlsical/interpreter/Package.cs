@@ -20,16 +20,14 @@
 
 namespace ru.mirea.xlsical.interpreter
 {
+    [System.Serializable]
     public abstract class Package
     {
         /// <summary>
         /// Создание экземпляра пакета.
         /// </summary>
         /// <param name="ctx">Контекст задачи.</param>
-        public Package(object context)
-        {
-            Context = context;
-        }
+        public Package(object context) => this.Context = context;
 
         /// <summary>
         /// Уникальный идентификатор сообщения.

@@ -16,30 +16,28 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+using System;
+
 namespace ru.mirea.xlsical.interpreter
 {
-
-    /**
-     * Класс, который служит для управления процентом готовности задачи.
-     * Данный класс является потокобезопасным.
-     * @since 18.11.2018
-     * @version 2018-12-08
-     * @author <a href="https://github.com/SGmuwa/">[SG]Muwa</a>
-     */
+    /// <summary>
+    /// Класс, который служит для управления процентом готовности задачи.
+    /// Данный класс является потокобезопасным.
+    /// </summary>
     public class PercentReady
     {
-
         /// <summary>
         /// Создание нового экземпляра управления процентом готовности.
         /// Или создание потомка, который изменяет общий сумматор.
         /// </summary>
         /// <param name="whole">Ссылка на целую часть.</param>
         /// <param name="coefficient">Коэффициент взаимодействия на целую часть. Допустимые значения: от 0 до 1.</param>
-        /// <param name="subscriber">Функция, которую надо вызывать при каждом изменении значения.</param>
-        public PercentReady(PercentReady whole = null, float coefficient = 1.0f, ICanUsePercentReady subscriber = null)
+        /// <param name="subscribers">Функция, которую надо вызывать при каждом изменении значения.</param>
+        public PercentReady(PercentReady whole = null, float coefficient = 1.0f, params TransferValue[] subscribers)
         {
             this.whole = whole;
-            this.subscriber = subscriber;
+            foreach(TransferValue t in subscribers)
+                this.subscriber += t;
             if (0.0f <= coefficient && coefficient <= 1.0f)
             {
                 this.coefficient = coefficient;
@@ -48,19 +46,16 @@ namespace ru.mirea.xlsical.interpreter
                     lock (whole.sc)
                     {
                         if (whole.sumOfCoefficientInPieces + coefficient > 1.0000001f)
-                            throw new IllegalArgumentException("Сумма коэффициентов целой части зашкаливает! Должно быть от 0 до 1 включительно! А получается: " + whole.sumOfCoefficientInPieces + coefficient);
+                            throw new ArgumentException("Сумма коэффициентов целой части зашкаливает! Должно быть от 0 до 1 включительно! А получается: " + whole.sumOfCoefficientInPieces + coefficient);
                         else
                             whole.sumOfCoefficientInPieces += coefficient;
                     }
                 }
             }
             else
-                throw new IllegalArgumentException("Коэффициент должен быть от 0 до 1 включительно!");
+                throw new ArgumentException("Коэффициент должен быть от 0 до 1 включительно!");
         }
-
-        /**
-         * На сколько готов текущий загрузчик?
-         */
+        
         /// <summary>
         /// Описывает готовность.
         /// 0 — совсем не готов.
@@ -82,25 +77,30 @@ namespace ru.mirea.xlsical.interpreter
         /// Коэффициент влияния на родителя.
         /// </summary>
         public readonly float coefficient;
-        /**
-         * Подписчик на изменения.
-         */
-        private readonly ICanUsePercentReady subscriber;
-        /**
-         * Сумма коэффициентов в частях.
-         */
+
+        /// <summary>
+        /// Подписчики на изменения.
+        /// </summary>
+        private event TransferValue subscriber;
+
+        /// <summary>
+        /// Сумма коэффициентов в частях.
+        /// </summary>
         private float sumOfCoefficientInPieces = 0.0f;
 
-        /**
-         * Получает сумму занятых коэффициентов частями.
-         * Используйте для того, чтобы вычислить свободное пространство.
-         * @return Сумма занятых коэффициентов частями
-         */
-        public float GetFreeCoefficient()
+        /// <summary>
+        /// Получает сумму занятых коэффициентов частями.
+        /// Используйте для того, чтобы вычислить свободное пространство.
+        /// </summary>
+        /// <value>Сумма занятых коэффициентов частями.</value>
+        public float FreeCoefficient
         {
-            lock (sc)
+            get
             {
-                return sumOfCoefficientInPieces - Float.MIN_VALUE + 1.0f;
+                lock (sc)
+                {
+                    return sumOfCoefficientInPieces - float.MinValue + 1.0f;
+                }
             }
         }
 
@@ -120,11 +120,11 @@ namespace ru.mirea.xlsical.interpreter
 
             set
             {
-                IllegalArgumentException error = null;
+                ArgumentException error = null;
                 lock (sc)
                 { // Блокировка этого состояния.
                     if (sumOfCoefficientInPieces != 0.0f)
-                        throw new IllegalAccessError("Вы потеряли доступ к изменению данного поля. Его можно получить используя его части.");
+                        throw new ArgumentException("Вы потеряли доступ к изменению данного поля. Его можно получить используя его части.");
                     if (0.0f <= value && value <= 1.0f)
                     {
                         if (whole == null)
@@ -135,19 +135,19 @@ namespace ru.mirea.xlsical.interpreter
                         }
                     }
                     else
-                        error = new IllegalArgumentException("float ready can be only 0.0f ... 1.0f! Argument = " + value);
+                        error = new ArgumentException("float ready can be only 0.0f ... 1.0f! Argument = " + value);
                 }
                 if (error != null)
                     throw error;
                 if (whole == null)
                     if (this.subscriber != null)
-                        this.subscriber.transferValue(this);
+                        this.subscriber?.Invoke(this);
             }
         }
 
-        private IllegalArgumentException sendToWhole(float ready)
+        private ArgumentException sendToWhole(float ready)
         {
-            IllegalArgumentException error = null;
+            ArgumentException error = null;
             if (whole != null)
             {
                 lock (whole.sc)
@@ -165,7 +165,7 @@ namespace ru.mirea.xlsical.interpreter
                         error = whole.sendToWhole(commit);
                     }
                     else
-                        error = new IllegalArgumentException("I can't send new value: " + commit);
+                        error = new ArgumentException("I can't send new value: " + commit);
                 }
             }
             else
@@ -174,15 +174,15 @@ namespace ru.mirea.xlsical.interpreter
                 if (0.0f <= ready && ready <= 1.0f)
                     this.ready = ready;
                 else
-                    error = new IllegalArgumentException("While i go through wholes: float ready can be only 0.0f ... 1.0f! Argument = " + ready);
+                    error = new ArgumentException("While i go through wholes: float ready can be only 0.0f ... 1.0f! Argument = " + ready);
             }
             if (error == null)
                 if (subscriber != null)
-                    subscriber.transferValue(this);
+                    subscriber?.Invoke(this);
             return error;
         }
 
-        public override string toString()
-            => string.Format("%3.1f%%", ready * 100f);
+        public override string ToString()
+            => $"{ready * 100f :N0}%";
     }
 }

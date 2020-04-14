@@ -16,45 +16,40 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import java.time.LocalDate;
-import java.time.ZoneId;
+using Xunit;
+using NodaTime;
 
-import org.junit.Test;
-import ru.mirea.xlsical.interpreter.PackageToClient;
-import ru.mirea.xlsical.interpreter.PackageToServer;
-import ru.mirea.xlsical.interpreter.Seeker;
-import ru.mirea.xlsical.interpreter.SeekerType;
+namespace ru.mirea.xlsical.interpreter
+{
 
-import static org.junit.Assert.*;
+    public class TestSeeker
+    {
+        [Fact]
+        public void StartTestSeeker()
+        {
 
-public class TestSeeker {
+            System.Console.WriteLine("Test Seeker start.");
 
-    @Test
-    public void startTestSeeker() {
+            Seeker test = new Seeker(
+                    "name",
+                    new LocalDate(2000, 5, 5),
+                    new LocalDate(2000, 5, 10),
+                    DateTimeZoneProviders.Tzdb["Europe/Moscow"]
+            );
 
-        System.out.println("Test Seeker start.");
+            Assert.Equal("name", test.NameOfSeeker);
+            Assert.Equal(new LocalDate(2000, 5, 5), test.DateStart.Date);
+            Assert.Equal(new LocalDate(2000, 5, 10), test.DateFinish.Date);
+            Assert.Equal(DateTimeZoneProviders.Tzdb["Europe/Moscow"], test.DateStart.Zone);
 
-        Seeker test = new Seeker(
-                "name",
-                LocalDate.of(2000, 5, 5),
-                LocalDate.of(2000, 5, 10),
-                ZoneId.systemDefault()
-        );
+            PackageToClient cl = new PackageToClient(0, "", 0, "Всё ок");
+            Assert.Equal("", cl.CalFile);
+            Assert.Equal(0, cl.Count);
+            Assert.Equal("Всё ок", cl.Messages);
 
-        assertEquals("name", test.nameOfSeeker);
-        assertEquals(LocalDate.of(2000, 5, 5), test.dateStart.toLocalDate());
-        assertEquals(LocalDate.of(2000, 5, 10), test.dateFinish.toLocalDate());
-        assertEquals(ZoneId.systemDefault(), test.dateStart.getZone());
+            PackageToServer sv = new PackageToServer(0, test);
 
-        PackageToClient cl = new PackageToClient(0, "", 0, "Всё ок");
-        assertEquals("", cl.CalFile);
-        assertEquals(0, cl.Count);
-        assertEquals("Всё ок", cl.Messages);
-
-        PackageToServer sv = new PackageToServer(0, test);
-
-        assertEquals(test, sv.queryCriteria);
+            Assert.Equal(test, sv.queryCriteria);
+        }
     }
-
-
 }

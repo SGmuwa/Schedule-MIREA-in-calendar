@@ -22,5 +22,5 @@ namespace ru.mirea.xlsical.interpreter
     /// Вызывается всегда, когда используется setValue.
     /// </summary>
     /// <param name="percentReady">Объект, который был изменён.</param>
-    delegate void TransferValue(PercentReady percentReady);
+    public delegate void TransferValue(PercentReady percentReady);
 }

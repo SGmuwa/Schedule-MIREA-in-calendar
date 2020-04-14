@@ -22,9 +22,13 @@
 Файл указывает правило, какие данные будут переданы клиенту.
  */
 
+using System.IO;
+using System;
+using System.Runtime.Serialization.Formatters.Binary;
+
 namespace ru.mirea.xlsical.interpreter
 {
-
+    [Serializable]
     public class PackageToClient : Package
     {
         /// <summary>
@@ -52,7 +56,6 @@ namespace ru.mirea.xlsical.interpreter
         public PackageToClient(object context, string CalFile, int Count, string Messages)
         : base(context)
         {
-            super(context);
             this.CalFile = CalFile;
             this.Count = Count;
             this.Messages = Messages;
@@ -63,21 +66,12 @@ namespace ru.mirea.xlsical.interpreter
         /// </summary>
         /// <param name="input">Массив байтов, который необходимо перевести в текущий класс.</param>
         /// <returns>Представление хранилища в классе PackageToClient. Если ошибка, то null.</returns>
-        /// <exception cref="System.InvalidCastException">Данные не истинные.</exception>
+        /// <exception cref="System.InvalidCastException">Тип данных подменён.</exception>
+        /// <exception cref="System.IO.IOException">Тип данных подменён.</exception>
         public static PackageToClient fromByteArray(byte[] input)
         {
-            try
-            {
-                ByteArrayInputStream @in = new ByteArrayInputStream(input);
-                ObjectInputStream inObj = new ObjectInputStream(@in);
-                PackageToClient @out = (PackageToClient)inObj.readObject();
-                inObj.close();
-                return @out;
-            }
-            catch (IOException error)
-            {
-                return null;
-            }
+            using MemoryStream stream = new MemoryStream(input);
+            return (PackageToClient)new BinaryFormatter().Deserialize(stream);
         }
 
         public override string ToString()
