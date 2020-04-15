@@ -32,6 +32,6 @@ namespace ru.mirea.xlsical.interpreter
         /// <summary>
         /// Уникальный идентификатор сообщения.
         /// </summary>
-        public readonly object Context;
+        public object Context { get; }
     }
 }

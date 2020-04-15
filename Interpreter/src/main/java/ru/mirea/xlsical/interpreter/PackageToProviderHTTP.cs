@@ -18,18 +18,17 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/*
-Файл указывает правило, какие данные будут переданы клиенту.
- */
-
 using System.IO;
 using System;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace ru.mirea.xlsical.interpreter
 {
+    /// <summary>
+    /// Указывает правило, какие данные будут переданы клиенту.
+    /// </summary>
     [Serializable]
-    public class PackageToClient : Package
+    public class PackageToProviderHTTP : Package
     {
         /// <summary>
         /// Путь до файла *.ics.
@@ -50,16 +49,11 @@ namespace ru.mirea.xlsical.interpreter
         /// Строит данные отправляемые на клиент.
         /// </summary>
         /// <param name="context">Уникальный идентификатор сообщения или его контекст.</param>
-        /// <param name="CalFile">Путь до файла *.ics.</param>
-        /// <param name="Count">Количество созданных мероприятий.</param>
-        /// <param name="Messages">Сообщение от обработчика пользователю клиента.</param>
-        public PackageToClient(object context, string CalFile, int Count, string Messages)
-        : base(context)
-        {
-            this.CalFile = CalFile;
-            this.Count = Count;
-            this.Messages = Messages;
-        }
+        /// <param name="calFile">Путь до файла *.ics.</param>
+        /// <param name="count">Количество созданных мероприятий.</param>
+        /// <param name="messages">Сообщение от обработчика пользователю клиента.</param>
+        public PackageToProviderHTTP(object context, string calFile, int count, string messages)
+        : base(context) => (CalFile, Count, Messages) = (calFile, count, messages);
 
         /// <summary>
         /// Преобразует входящий массив байтов в текущее хранилище.
@@ -68,19 +62,13 @@ namespace ru.mirea.xlsical.interpreter
         /// <returns>Представление хранилища в классе PackageToClient. Если ошибка, то null.</returns>
         /// <exception cref="System.InvalidCastException">Тип данных подменён.</exception>
         /// <exception cref="System.IO.IOException">Тип данных подменён.</exception>
-        public static PackageToClient fromByteArray(byte[] input)
+        public static PackageToProviderHTTP fromByteArray(byte[] input)
         {
             using MemoryStream stream = new MemoryStream(input);
-            return (PackageToClient)new BinaryFormatter().Deserialize(stream);
+            return (PackageToProviderHTTP)new BinaryFormatter().Deserialize(stream);
         }
 
         public override string ToString()
-        {
-            return "PackageToClient{" +
-                    "CalFile='" + CalFile + '\'' +
-                    ", Count=" + Count +
-                    ", Messages='" + Messages + '\'' +
-                    '}';
-        }
+        => $"{nameof(PackageToProviderHTTP)}{{ CalFile='{CalFile}', Count={Count}, Messages='{Messages}'}}";
     }
 }

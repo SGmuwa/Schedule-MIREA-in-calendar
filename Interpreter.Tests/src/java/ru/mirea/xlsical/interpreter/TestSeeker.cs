@@ -42,12 +42,12 @@ namespace ru.mirea.xlsical.interpreter
             Assert.Equal(new LocalDate(2000, 5, 10), test.DateFinish.Date);
             Assert.Equal(DateTimeZoneProviders.Tzdb["Europe/Moscow"], test.DateStart.Zone);
 
-            PackageToClient cl = new PackageToClient(0, "", 0, "Всё ок");
+            PackageToProviderHTTP cl = new PackageToProviderHTTP(0, "", 0, "Всё ок");
             Assert.Equal("", cl.CalFile);
             Assert.Equal(0, cl.Count);
             Assert.Equal("Всё ок", cl.Messages);
 
-            PackageToServer sv = new PackageToServer(0, test);
+            PackageToICalMaker sv = new PackageToICalMaker(0, test);
 
             Assert.Equal(test, sv.queryCriteria);
         }

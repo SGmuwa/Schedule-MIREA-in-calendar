@@ -63,9 +63,7 @@ namespace ru.mirea.xlsical.interpreter
         {
             pr.Ready = 0.0f;
             for (int i = 0; i < 100000; i++)
-            {
                 pr.Ready = i / 99999.0f;
-            }
         }
 
         [Fact]
