@@ -4,4 +4,14 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="DocumentFormat.OpenXml" Version="2.10.1" />
+    <PackageReference Include="Ical.Net" Version="4.1.11" />
+    <PackageReference Include="NodaTime" Version="2.4.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Interpreter\Interpreter.csproj" />
+  </ItemGroup>
+
 </Project>
