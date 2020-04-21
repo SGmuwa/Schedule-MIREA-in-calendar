@@ -20,56 +20,54 @@ using System;
 
 namespace ru.mirea.xlsical.CouplesDetective
 {
-
-    /**
-     * Класс, который описывает в общем, что общего между.
-     * календарной и эксель парой.
-     * @since 16.11.2018
-     * @version 16.11.2018
-     * @author <a href="https://github.com/SGmuwa/">[SG]Muwa</a>
-     * @see CoupleInCalendar Пара для календаря
-     */
+    /// <summary>
+    /// Класс, который описывает в общем, что общего между календарной и Excel парой.
+    /// </summary>
     public class Couple
     {
-
-        /**
-         * Название пары.
-         */
+        /// <summary>
+        /// Название пары (предмета).
+        /// </summary>
         public string ItemTitle { get; }
-        /**
-         * Тип занятия (лекция, практика, лабораторная работа)
-         */
-        public string typeOfLesson { get; }
-        /**
-         * Название группы.
-         */
-        public string NameOfGroup { get; }
-        /**
-         * Имя преподавателя.
-         */
+        
+        /// <summary>
+        /// Тип занятия (лекция, практика, лабораторная работа).
+        /// </summary>
+        public string TypeOfLesson { get; }
+        
+        /// <summary>
+        /// Название (номер) группы.
+        /// </summary>
+        public string NameOfGroup { get; set; }
+
+        /// <summary>
+        /// Имя преподавателя.
+        /// </summary>
         public string NameOfTeacher { get; set; }
-        /**
-         * Номер аудитории.
-         */
+        
+        /// <summary>
+        /// Номер аудитории.
+        /// </summary>
         public string Audience { get; set; }
-        /**
-         * Адрес корпуса.
-         */
+        
+        /// <summary>
+        /// Адрес корпуса.
+        /// </summary>
         public string Address { get; }
 
-        /**
-         * Создание в памяти экземпляров параметров вне-временных параметров пары.
-         * @param itemTitle Название пары.
-         * @param typeOfLesson Тип занятия (лекция, практика, лабораторная работа)
-         * @param nameOfGroup Название группы.
-         * @param nameOfTeacher Имя преподавателя.
-         * @param audience Номер аудитории.
-         * @param address Адрес корпуса.
-         */
+        /// <summary>
+        /// Создание в памяти экземпляров параметров вне-временных параметров пары.
+        /// </summary>
+        /// <param name="itemTitle">Название пары (предмета).</param>
+        /// <param name="typeOfLesson">Тип занятия (лекция, практика, лабораторная работа).</param>
+        /// <param name="nameOfGroup">Название (номер) группы.</param>
+        /// <param name="nameOfTeacher">Имя преподавателя.</param>
+        /// <param name="audience">Номер аудитории.</param>
+        /// <param name="address">Адрес корпуса.</param>
         protected Couple(string itemTitle, string typeOfLesson, string nameOfGroup, string nameOfTeacher, string audience, string address)
         {
             this.ItemTitle = itemTitle;
-            this.typeOfLesson = typeOfLesson;
+            this.TypeOfLesson = typeOfLesson;
             this.NameOfGroup = nameOfGroup;
             this.NameOfTeacher = nameOfTeacher;
             this.Audience = audience;
@@ -83,7 +81,7 @@ namespace ru.mirea.xlsical.CouplesDetective
             if (o is Couple couple)
             {
                 return object.Equals(ItemTitle, couple.ItemTitle) &&
-                        object.Equals(typeOfLesson, couple.typeOfLesson) &&
+                        object.Equals(TypeOfLesson, couple.TypeOfLesson) &&
                         object.Equals(NameOfGroup, couple.NameOfGroup) &&
                         object.Equals(NameOfTeacher, couple.NameOfTeacher) &&
                         object.Equals(Audience, couple.Audience) &&
@@ -93,6 +91,6 @@ namespace ru.mirea.xlsical.CouplesDetective
         }
 
         public override int GetHashCode()
-            => HashCode.Combine(ItemTitle, typeOfLesson, NameOfGroup, NameOfTeacher, Audience, Address);
+        => HashCode.Combine(ItemTitle, TypeOfLesson, NameOfGroup, NameOfTeacher, Audience, Address);
     }
 }
