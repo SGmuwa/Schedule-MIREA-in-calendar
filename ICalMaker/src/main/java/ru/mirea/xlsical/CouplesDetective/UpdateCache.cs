@@ -16,19 +16,15 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package ru.mirea.xlsical.CouplesDetective;
+using ru.mirea.xlsical.interpreter;
 
-import ru.mirea.xlsical.interpreter.PercentReady;
-
-import java.io.IOException;
-
-/**
- * Интерфейс утверждает, что объект умеет обновлять.
- */
-public interface ICacheUpdater {
-    /**
-     * Вызывается, когда необходимо обработать новое обновление.
-     * @throws IOException В процессе работы с файловой системой произошла ошибка.
-     */
-    void update(PercentReady pr) throws IOException;
+namespace ru.mirea.xlsical.CouplesDetective
+{
+    /// <summary>
+    /// Класс-делегад утверждает, что метод умеет обновлять кэш.
+    /// Вызывается, когда необходимо обработать новое обновление.
+    /// </summary>
+    /// <param name="pr">Доступ к управлению передачи данных о статусе задачи.</param>
+    /// <exception cref="System.IO.IOException">В процессе работы с файловой системой произошла ошибка.</exception>
+    public delegate void UpdateCache(PercentReady pr);
 }

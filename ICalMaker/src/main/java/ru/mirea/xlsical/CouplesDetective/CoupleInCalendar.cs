@@ -18,194 +18,160 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package ru.mirea.xlsical.CouplesDetective;
+using System.Collections;
+using System.Collections.Generic;
+using NodaTime;
 
-import java.io.Serializable;
-import java.time.*;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-
-
-/**
- * Структура данных, которая представляет учебную пару в определённый день и время.
- * Сокращённо: "Календарная пара".
- * Время начала и конца пары, название группы и имя преподавателя,
- * название предмета, аудитория, адрес, тип пары.
- */
-public class CoupleInCalendar extends Couple implements Iterable<CoupleInCalendar>, Serializable {
-
-    public CoupleInCalendar(String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address, ZonedDateTime dateAndTimeOfCouple, ZonedDateTime dateAndTimeFinishOfCouple) {
-        super(itemTitle, typeOfLesson, nameOfGroup, nameOfTeacher, audience, address);
-        this.dateAndTimeOfCouple = dateAndTimeOfCouple;
-        this.dateAndTimeFinishOfCouple = dateAndTimeFinishOfCouple;
-    }
-
-    /**
-     * Конструктор используется для сериализации
-     */
-    public CoupleInCalendar(String itemTitle, String typeOfLesson, String nameOfGroup, String nameOfTeacher, String audience, String address, ZonedDateTime dateAndTimeOfCouple, ZonedDateTime dateAndTimeFinishOfCouple, CoupleInCalendar next, Duration durationToNext) {
-        super(itemTitle, typeOfLesson, nameOfGroup, nameOfTeacher, audience, address);
-        this.dateAndTimeOfCouple = dateAndTimeOfCouple;
-        this.dateAndTimeFinishOfCouple = dateAndTimeFinishOfCouple;
-        this.next = next;
-        this.durationToNext = durationToNext;
-    }
-
-    /**
-     * Дата и время пары.
-     */
-    public final ZonedDateTime dateAndTimeOfCouple;
-    /**
-     * Количество времени, сколько длится пара.
-     */
-    public final ZonedDateTime dateAndTimeFinishOfCouple;
-
-    /**
-     * Указатель на следующий похожий элемент.
-     */
-    private CoupleInCalendar next = null;
-
-    private Duration durationToNext = null;
-
-    /**
-     * Добавляет календарную пару в группу календарных пар.
-     * Требуется для группового редактирования пар.
-     * В случае, если {@link #next} не равен {@code null}, то
-     * будет вызван {@code this.next.add(next)}
-     * @param next Следующая календарная пара.
-     *             Она должна совпадать с {@link Couple#equals(Object) super.equals(Object)}
-     */
-    public void add(CoupleInCalendar next) {
-        if (next == null)
-            throw new NullPointerException("Argument \"next\" must be not null.");
-        if (!super.equals(next))
-            throw new IllegalArgumentException("Params \"this\" and \"next\" except dates must be equals!");
-        if (this.next != null) {
-            this.next.add(next);
-            return;
+namespace ru.mirea.xlsical.CouplesDetective
+{
+    /// <summary>
+    /// Структура данных, которая представляет учебную пару в определённый день и время.
+    /// Сокращённо: "Календарная пара".
+    /// Время начала и конца пары, название группы и имя преподавателя,
+    /// название предмета, аудитория, адрес, тип пары.
+    /// </summary>
+    [System.Serializable]
+    public partial class CoupleInCalendar : Couple, IEnumerable<CoupleInCalendar>
+    {
+        public CoupleInCalendar(string itemTitle, string typeOfLesson, string nameOfGroup, string nameOfTeacher, string audience, string address, ZonedDateTime dateAndTimeOfCouple, ZonedDateTime dateAndTimeFinishOfCouple)
+        : base(itemTitle, typeOfLesson, nameOfGroup, nameOfTeacher, audience, address)
+        {
+            this.DateAndTimeOfCouple = dateAndTimeOfCouple;
+            this.DateAndTimeFinishOfCouple = dateAndTimeFinishOfCouple;
         }
 
-        Duration duration = Duration.between(this.dateAndTimeOfCouple, next.dateAndTimeOfCouple);
-        if (this.durationToNext == null)
-            this.durationToNext = duration;
-        else if (!durationToNext.equals(duration))
-            throw new IllegalArgumentException("Duration must be equals previous");
-        this.next = next;
-        this.next.durationToNext = this.durationToNext;
-    }
+        /// <summary>
+        /// Конструктор используется для сериализации
+        /// </summary>
+        /// <param name="itemTitle">Название пары (предмета).</param>
+        /// <param name="typeOfLesson">Тип занятия (лекция, практика, лабораторная работа).</param>
+        /// <param name="nameOfGroup">Название (номер) группы.</param>
+        /// <param name="nameOfTeacher">Имя преподавателя.</param>
+        /// <param name="audience">Номер аудитории.</param>
+        /// <param name="address">Адрес корпуса.</param>
+        /// <param name="dateAndTimeOfCouple">Дата и время пары.</param>
+        /// <param name="dateAndTimeFinishOfCouple">Дата и время конца пары.</param>
+        /// <param name="next">Указатель на следующий похожий элемент.</param>
+        /// <param name="durationToNext"></param>
+        public CoupleInCalendar(string itemTitle, string typeOfLesson, string nameOfGroup, string nameOfTeacher, string audience, string address, ZonedDateTime dateAndTimeOfCouple, ZonedDateTime dateAndTimeFinishOfCouple, CoupleInCalendar next, Duration durationToNext)
+        : base(itemTitle, typeOfLesson, nameOfGroup, nameOfTeacher, audience, address)
+        {
+            DateAndTimeOfCouple = dateAndTimeOfCouple;
+            DateAndTimeFinishOfCouple = dateAndTimeFinishOfCouple;
+            Next = next;
+            DurationToNext = durationToNext;
+        }
+        
+        /// <summary>
+        /// Дата и время пары.
+        /// </summary>
+        public readonly ZonedDateTime DateAndTimeOfCouple;
+        
+        /// <summary>
+        /// Дата и время конца пары.
+        /// </summary>
+        public readonly ZonedDateTime DateAndTimeFinishOfCouple;
 
-    @Override
-    public String toString() {
-        return "CoupleInCalendar{" +
-                "dateAndTimeOfCouple=" + dateAndTimeOfCouple +
-                ", dateAndTimeFinishOfCouple=" + dateAndTimeFinishOfCouple +
-                ", nameOfGroup='" + nameOfGroup + '\'' +
-                ", nameOfTeacher='" + nameOfTeacher + '\'' +
-                ", itemTitle='" + itemTitle + '\'' +
-                ", audience='" + audience + '\'' +
-                ", address='" + address + '\'' +
-                ", typeOfLesson='" + typeOfLesson + '\'' +
-                '}';
-    }
+        /// <summary>
+        /// Указатель на следующий похожий элемент.
+        /// </summary>
+        private CoupleInCalendar Next = null;
 
-    /**
-     * Отвечат на вопрос, эквивалентен ли этот объект с сравниваемым объектом.
-     * Для сравнения используется:
-     * <ul type="disc">
-     *     <li>{@link #itemTitle},</li>
-     *     <li>{@link #typeOfLesson},</li>
-     *     <li>{@link #audience},</li>
-     *     <li>{@link #dateAndTimeOfCouple},</li>
-     *     <li>{@link #dateAndTimeFinishOfCouple}.</li>
-     * </ul>
-     * В сравнении не учавствуют:
-     * <ul type="disc">
-     *     <li>{@link #nameOfGroup}, так как в одной паре может учавствовать несколько групп.</li>
-     *     <li>{@link #nameOfTeacher}, так как в одной паре может учавствовать несколько преподавателей.</li>
-     *     <li>{@link #address}, так как я сомневаюсь в эквиваленте в таблицах Excel.
-     *         То есть я предполагаю, что в Excel таблицах адреса могут отличаться:
-     *         те, которые default внизу, и те, которые пишутся посреди дня.</li>
-     * </ul>
-     * @param o Объект, с которым надо сравнивать текущий объект.
-     * @return {@code True}, если два объекта совпадают. Иначе - {@code false}.
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof CoupleInCalendar)) return false;
-        CoupleInCalendar that = (CoupleInCalendar) o;
-        return
-                dateAndTimeOfCouple.equals(that.dateAndTimeOfCouple)
-                        && dateAndTimeFinishOfCouple.equals(that.dateAndTimeFinishOfCouple)
-                        && itemTitle.equals(that.itemTitle)
-                        && typeOfLesson.equals(that.typeOfLesson)
-                        && audience.equals(that.audience);
-    }
+        /// <summary>
+        /// Сколько времени должно пройти до следующей такой же пары.
+        /// </summary>
+        private Duration? DurationToNext = null;
 
-    /**
-     * Высчитывает хэш-код текущего объекта.
-     * @return Некотарая числовая маска объекта.
-     * @see #equals(Object) Какие поля учавствуют в генерации хэша?
-     */
-    @Override
-    public int hashCode() {
-        return dateAndTimeOfCouple.hashCode()
-                ^ dateAndTimeFinishOfCouple.hashCode()
-                ^ itemTitle.hashCode()
-                ^ typeOfLesson.hashCode()
-                ^ audience.hashCode();
-    }
+        /// <summary>
+        /// Добавляет календарную пару в группу календарных пар.
+        /// Требуется для группового редактирования пар.
+        /// В случае, если <see cref="Next"/> не равен <code>null</code>, то
+        /// будет вызван <code>this.next.add(next)</code>
+        /// </summary>
+        /// <param name="next">Следующая календарная пара.
+        /// Она должна совпадать с <see cref="Couple.Equals(object)"/></param>
+        public void Add(CoupleInCalendar next)
+        {
+            if (next == null)
+                throw new System.ArgumentNullException("Argument \"next\" must be not null.");
+            if (!base.Equals(next))
+                throw new System.ArgumentException("Params \"this\" and \"next\" except dates must be equals!");
+            if (this.Next != null)
+            {
+                this.Next.Add(next);
+                return;
+            }
 
-    /**
-     * Получает итератор пар, который проходит по парам, все поля которых
-     * одинаковы, кроме даты времени начала и конца.
-     *
-     * @return an Iterator.
-     */
-    @Override
-    public Iterator<CoupleInCalendar> iterator() {
-        return new CouplesIterator(this);
-    }
-
-    /**
-     * Класс, который реализует переход к следующим календарным парам.
-     */
-    private class CouplesIterator implements Iterator<CoupleInCalendar> {
-
-        /**
-         * Указатель на элемент, который надо будет вернуть.
-         */
-        private CoupleInCalendar current;
-
-        public CouplesIterator(CoupleInCalendar first) {
-            current = first;
+            Duration duration = next.DateAndTimeOfCouple - this.DateAndTimeOfCouple;
+            if (this.DurationToNext == null)
+                this.DurationToNext = duration;
+            else if (!DurationToNext.Equals(duration))
+                throw new System.ArgumentException("Duration must be equals previous");
+            this.Next = next;
+            this.Next.DurationToNext = this.DurationToNext;
         }
 
-        /**
-         * Returns {@code true} if the iteration has more elements.
-         * (In other words, returns {@code true} if {@link #current} would
-         * return an element rather than throwing an exception.)
-         *
-         * @return {@code true} if the iteration has more elements
-         */
-        @Override
-        public boolean hasNext() {
-            return current != null;
+        public override string ToString()
+        => $"CoupleInCalendar{{" +
+            $" {nameof(DateAndTimeOfCouple)}='{DateAndTimeOfCouple}'" +
+            $", {nameof(DateAndTimeFinishOfCouple)}='{DateAndTimeFinishOfCouple}'" +
+            $", {nameof(NameOfGroup)}='{NameOfGroup}'" +
+            $", {nameof(NameOfTeacher)}='{NameOfTeacher}'" +
+            $", {nameof(ItemTitle)}='{ItemTitle}'" +
+            $", {nameof(Audience)}='{Audience}'" +
+            $", {nameof(Address)}='{Address}'" +
+            $", {nameof(TypeOfLesson)}='{TypeOfLesson}'" +
+            $" }}";
+
+        /// <summary>
+        /// Отвечает на вопрос, эквивалентен ли этот объект с сравниваемым объектом.
+        /// Для сравнения используется:
+        /// <see cref="Couple.ItemTitle"/>,
+        /// <see cref="Couple.TypeOfLesson"/>,
+        /// <see cref="Couple.Audience"/>,
+        /// <see cref="DateAndTimeOfCouple"/>,
+        /// <see cref="DateAndTimeFinishOfCouple"/>.
+        /// В сравнении не участвуют:
+        /// <see cref="Couple.NameOfGroup"/>, так как в одной паре может участвовать несколько групп.
+        /// <see cref="Couple.NameOfTeacher"/>, так как в одной паре может участвовать несколько преподавателей.
+        /// <see cref="Couple.Address"/>, так как я сомневаюсь в эквиваленте в таблицах Excel. То есть я предполагаю, что в Excel таблицах адреса могут отличаться: те, которые default внизу, и те, которые пишутся посреди дня.
+        /// </summary>
+        /// <param name="o">Объект, с которым надо сравнивать текущий объект.</param>
+        /// <returns><code>true</code>, если два объекта совпадают. Иначе — <code>false</code>.</returns>
+        public override bool Equals(object o)
+        {
+            if (this == o) return true;
+            if (o is CoupleInCalendar that)
+            {
+                return
+                    DateAndTimeOfCouple.Equals(that.DateAndTimeOfCouple)
+                    && DateAndTimeFinishOfCouple.Equals(that.DateAndTimeFinishOfCouple)
+                    && ItemTitle.Equals(that.ItemTitle)
+                    && TypeOfLesson.Equals(that.TypeOfLesson)
+                    && Audience.Equals(that.Audience);
+            }
+            else return false;
         }
 
-        /**
-         * Returns the current element in the iteration.
-         *
-         * @return the current element in the iteration
-         * @throws NoSuchElementException if the iteration has no more elements
-         */
-        @Override
-        public CoupleInCalendar next() {
-            if(!hasNext())
-                throw new NoSuchElementException();
-            CoupleInCalendar out = current;
-            current = current.next;
-            return out;
-        }
+        /// <summary>
+        /// Высчитывает хэш-код текущего объекта.
+        /// </summary>
+        /// <returns>Некоторая числовая маска объекта.</returns>
+        /// <seealso cref="Equals(Object)">Какие поля участвуют в генерации хеша?</seealso>
+        public override int GetHashCode()
+        => DateAndTimeOfCouple.GetHashCode()
+            ^ DateAndTimeFinishOfCouple.GetHashCode()
+            ^ ItemTitle.GetHashCode()
+            ^ TypeOfLesson.GetHashCode()
+            ^ Audience.GetHashCode();
+
+        /// <summary>
+        /// Получает итератор пар, который проходит по парам, все поля которых
+        /// одинаковы, кроме даты времени начала и конца.
+        /// </summary>
+        /// <returns>Перечисление сходных пар.</returns>
+        public IEnumerator<CoupleInCalendar> GetEnumerator() => new CouplesEnumerator(this);
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

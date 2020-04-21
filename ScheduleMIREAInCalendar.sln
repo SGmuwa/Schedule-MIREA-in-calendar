@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interpreter", "Interpreter\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interpreter.Tests", "Interpreter.Tests\Interpreter.Tests.csproj", "{9B127EE4-2867-4422-87AB-73DCD3D10D1E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICalMaker", "ICalMaker\ICalMaker.csproj", "{E4D024F7-EA6D-4A76-8E6A-2D47867AE72C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,5 +46,17 @@ Global
 		{9B127EE4-2867-4422-87AB-73DCD3D10D1E}.Release|x64.Build.0 = Release|Any CPU
 		{9B127EE4-2867-4422-87AB-73DCD3D10D1E}.Release|x86.ActiveCfg = Release|Any CPU
 		{9B127EE4-2867-4422-87AB-73DCD3D10D1E}.Release|x86.Build.0 = Release|Any CPU
+		{E4D024F7-EA6D-4A76-8E6A-2D47867AE72C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4D024F7-EA6D-4A76-8E6A-2D47867AE72C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4D024F7-EA6D-4A76-8E6A-2D47867AE72C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E4D024F7-EA6D-4A76-8E6A-2D47867AE72C}.Debug|x64.Build.0 = Debug|Any CPU
+		{E4D024F7-EA6D-4A76-8E6A-2D47867AE72C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E4D024F7-EA6D-4A76-8E6A-2D47867AE72C}.Debug|x86.Build.0 = Debug|Any CPU
+		{E4D024F7-EA6D-4A76-8E6A-2D47867AE72C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4D024F7-EA6D-4A76-8E6A-2D47867AE72C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E4D024F7-EA6D-4A76-8E6A-2D47867AE72C}.Release|x64.ActiveCfg = Release|Any CPU
+		{E4D024F7-EA6D-4A76-8E6A-2D47867AE72C}.Release|x64.Build.0 = Release|Any CPU
+		{E4D024F7-EA6D-4A76-8E6A-2D47867AE72C}.Release|x86.ActiveCfg = Release|Any CPU
+		{E4D024F7-EA6D-4A76-8E6A-2D47867AE72C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

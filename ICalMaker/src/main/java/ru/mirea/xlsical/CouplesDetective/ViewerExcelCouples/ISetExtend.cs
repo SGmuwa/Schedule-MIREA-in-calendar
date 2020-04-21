@@ -16,17 +16,26 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-using ru.mirea.xlsical.CouplesDetective.xl;
+
+using System.Collections.Generic;
 
 namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
 {
-    public class DetectiveException : System.Exception
+    public static class ISetExtend
     {
-        public readonly ExcelFileInterface excelFile;
-
-        public DetectiveException(string message, ExcelFileInterface file)
-        : base(message) => excelFile = file;
-
-        public override string Message => $"{base.Message} file: {excelFile}";
+        /// <summary>
+        /// Добавляет элементы <paramref name="toAdd"/> в набор <paramref name="that"/>.
+        /// </summary>
+        /// <param name="that">Перечисление, куда надо добавить элементы.</param>
+        /// <param name="toAdd">Элементы, которые надо добавить в набор.</param>
+        /// <returns>Количество успешно добавленных элементов.</returns>
+        public static int AddRange<T, D>(this ISet<T> that, IEnumerable<D> toAdd) where D : T
+        {
+            int countAdd = 0;
+            foreach (D item in toAdd)
+                if (that.Add(item))
+                    countAdd++;
+            return countAdd;
+        }
     }
 }

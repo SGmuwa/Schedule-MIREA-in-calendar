@@ -17,212 +17,204 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ru.mirea.xlsical.CouplesDetective.xl;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.openxml4j.util.ZipSecureFile;
-import org.apache.poi.ss.usermodel.*;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
+namespace ru.mirea.xlsical.CouplesDetective.xl
+{
+    /// <summary>
+    /// Класс реализует интерфейс <see cref="ExcelFileInterface"/>.
+    /// Используйте <see cref="OpenFile.NewInstances(string)"/>
+    /// Он который является переходным между
+    /// <see cref="ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.Detective"/>
+    /// и <see cref="SpreadsheetDocument"/>.
+    /// </summary>
+    public class OpenFile : ExcelFileInterface
+    {
+        private int needToClose;
 
-/**
- * Класс реализует интерфейс {@link ExcelFileInterface}.
- * Он который является переходным между
- * {@link ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.Detective Detective}
- * и {@link Workbook}.
- * @since 13.05.2018
- * @version 18.11.2018
- * @author <a href="https://github.com/gosharas/">gosharas</a>, <a href="https://github.com/SGmuwa/">[SG]Muwa</a>
- * @see OpenFile#newInstances(String)
- */
-public class OpenFile implements ExcelFileInterface {
+        private SetInt closed;
 
-    static {
-        ZipSecureFile.setMinInflateRatio(0.008);
-    }
+        private readonly FileInfo fileName;
 
-    @Override
-    public String toString() {
-        return "OpenFile{" +
-                "needToClose=" + needToClose +
-                ", closed=" + closed +
-                ", fileName='" + fileName + '\'' +
-                ", isOpen=" + isOpen +
-                ", wb=" + wb +
-                ", numberSheet=" + numberSheet +
-                '}';
-    }
+        private readonly SpreadsheetDocument document;
 
-    private int needToClose;
+        private readonly int numberSheet;
 
-    private SetInt closed;
+        /// <summary>
+        /// Открывает Excel файл вместе со всеми его листами.
+        /// </summary>
+        /// <param name="fileName">Путь до файла, который необходимо открыть.</param>
+        /// <returns>Возвращает список открытых листов.</returns>
+        /// <exception cref="System.IO.IOException">Ошибка доступа к файлу.</exception>
+        /// <exception cref="System.InvalidCastException">Ошибка распознования .xls или .xlsx файла.</exception>
+        public static List<OpenFile> NewInstances(FileInfo fileName)
+        {
+            SetInt setInt = new SetInt();
+            OpenFile first = new OpenFile(fileName, 0);
+            int size = first.document.WorkbookPart.Workbook.Descendants<Sheet>().Count();
+            List<OpenFile> @out = new List<OpenFile>(size);
+            @out.Add(first);
+            first.needToClose = size;
+            first.closed = setInt;
 
-    private final String fileName;
-
-    /**
-     * Открывает Excel файл вместе со всеми его листами.
-     * @param fileName Путь до файла, который необходимо открыть.
-     * @return Возвращает список открытых листов.
-     * @throws IOException Ошибка доступа к файлу.
-     * @throws InvalidFormatException Ошибка распознования .xls или .xlsx файла.
-     */
-    public static ArrayList<OpenFile> newInstances(String fileName) throws IOException, InvalidFormatException {
-        SetInt setInt = new SetInt();
-        OpenFile first = new OpenFile(fileName, 0);
-        int size = first.wb.getNumberOfSheets();
-        ArrayList<OpenFile> out = new ArrayList<>(size);
-        out.add(first);
-        first.needToClose = size;
-        first.closed = setInt;
-
-        for(int i = 1; i < size; i++) {
-            out.add(new OpenFile(first.wb, i, size, setInt, fileName));
+            for (int i = 1; i < size; i++)
+                @out.Add(new OpenFile(first.document, i, size, setInt, fileName));
+            return @out;
         }
-        return out;
-    }
 
-    /**
-     * Получение данных в текстовом виде из указанной ячейки Excel файла.
-     * @param column Порядковый номер столбца. Отсчёт начинается с 1.
-     * @param row Порядковый номер строки. Отсчёт начинается с 1.
-     * @return Текстовые данные в ячейке. Не NULL.
-     * @throws IOException Потерян доступ к файлу.
-     */
-    @Override
-    public String getCellData(int column, int row) throws IOException {
-        Cell cell = getCell(column, row);
-        if (cell == null)
-            return "";
-        switch (cell.getCellType()) {
-            case STRING:
-                return cell.getStringCellValue();
-            case NUMERIC:
-                return Long.toString((long) cell.getNumericCellValue());
-            default:
+        /// <summary>
+        /// Получение данных в текстовом виде из указанной ячейки Excel файла.
+        /// </summary>
+        /// <param name="column">Порядковый номер столбца. Отсчёт начинается с 1.</param>
+        /// <param name="row">Порядковый номер строки. Отсчёт начинается с 1.</param>
+        /// <returns>Текстовые данные в ячейке. Не NULL.</returns>
+        /// <exception cref="System.IO.IOException">Потерян доступ к файлу.</exception>
+        public string GetCellData(int column, int row)
+        {
+            Cell cell = getCell(column, row);
+            if (cell == null)
                 return "";
+            string output = cell.InnerText;
+
+            if (cell.DataType != null)
+                switch (cell.DataType.Value)
+                {
+                    case CellValues.SharedString:
+                        var stringTable =
+                            document.WorkbookPart.GetPartsOfType<SharedStringTablePart>()
+                                .FirstOrDefault();
+
+                        if (stringTable != null)
+                            output =
+                                stringTable.SharedStringTable
+                                .ElementAt(int.Parse(output)).InnerText;
+                        break;
+                    case CellValues.Boolean:
+                        output = output == "0" ? "ЛОЖЬ" : "ИСТИНА";
+                        break;
+                }
+            return output;
         }
-    }
 
-    /**
-     * Узнаёт фоновый цвет двух ячеек и отвечает на вопрос, одинаковый ли у них фоновый цвет.
-     * @param column1 Первая сравниваемая ячейка. Порядковый номер столбца. Отсчёт начинается с 1.
-     * @param row1 Первая сравниваемая ячейка. Порядковый номер строки. Отсчёт начинается с 1.
-     * @param column2 Вторая сравниваемая ячейка. Порядковый номер столбца. Отсчёт начинается с 1.
-     * @param row2 Вторая сравниваемая ячейка. Порядковый номер строки. Отсчёт начинается с 1.
-     * @return {@code True}, если цвета совпадают. Иначе - {@code false}.
-     * @throws IOException Потерян доступ к файлу.
-     */
-    @Override
-    public boolean isBackgroundColorsEquals(int column1, int row1, int column2, int row2) throws IOException {
-        Cell cellA = getCell(column1, row1);
-        Cell cellB = getCell(column2, row2);
-        if (cellA == null || cellB == null)
-            return false;
-        // need test!
-        return cellA.getCellStyle().getFillBackgroundColorColor().equals(cellB.getCellStyle().getFillBackgroundColorColor());
-        //return cellA.getCellStyle().getFillBackgroundColor() == cellB.getCellStyle().getFillBackgroundColor(); // XSSF only work.
-    }
-
-    private boolean isOpen = true;
-
-    /**
-     * Закрывает Excel файл.
-     * @throws IOException Ошибка при закрытии файла.
-     */
-    @Override
-    public synchronized void close() throws IOException {
-        if(isOpen && closed.get() < needToClose) {
-            isOpen = false;
-            closed.add();
-            if(closed.get() == needToClose) {
-                wb.close();
-            }
+        /// <summary>
+        /// Узнаёт фоновый цвет двух ячеек и отвечает на вопрос, одинаковый ли у них фоновый цвет.
+        /// </summary>
+        /// <param name="column1">Первая сравниваемая ячейка. Порядковый номер столбца. Отсчёт начинается с 1.</param>
+        /// <param name="row1">Первая сравниваемая ячейка. Порядковый номер строки. Отсчёт начинается с 1.</param>
+        /// <param name="column2">Вторая сравниваемая ячейка. Порядковый номер столбца. Отсчёт начинается с 1.</param>
+        /// <param name="row2">Вторая сравниваемая ячейка. Порядковый номер строки. Отсчёт начинается с 1.</param>
+        /// <returns><code>true</code>, если цвета совпадают. Иначе — <code>false</code>.</returns>
+        public bool IsBackgroundColorsEquals(int column1, int row1, int column2, int row2)
+        {
+            Cell cellA = getCell(column1, row1);
+            Cell cellB = getCell(column2, row2);
+            if (cellA == null || cellB == null) return false;
+            return GetCellPatternFill(cellA).Equals(GetCellPatternFill(cellB));
         }
-    }
 
-    private final Workbook wb;
-    private final int numberSheet;
+        private PatternFill GetCellPatternFill(Cell theCell)
+        {
+            WorkbookStylesPart styles = document.WorkbookPart.WorkbookStylesPart;
+            int cellStyleIndex = theCell.StyleIndex == null ? 0 : (int)theCell.StyleIndex.Value;
+            CellFormat cellFormat = (CellFormat)styles.Stylesheet.CellFormats.ChildElements[cellStyleIndex];
+            Fill fill = (Fill)styles.Stylesheet.Fills.ChildElements[(int)cellFormat.FillId.Value];
+            return fill.PatternFill;
+        }
 
-    /**
-     * Создаёт экземпляр открытия файла.
-     * Для открытия всех листов Excel файла используйте {@link #newInstances(String)}.
-     * @param fileName Имя файла, который необходимо открыть.
-     * @param numberSheet Номер страницы книги Excel.
-     * @throws IOException Ошибка доступа к файлу.
-     * @throws InvalidFormatException Ошибка распознования файла.
-     * @see #newInstances(String)
-     */
-    private OpenFile(String fileName, int numberSheet) throws IOException, InvalidFormatException {
-        wb = WorkbookFactory.create(new FileInputStream(new File(fileName)));
-        this.numberSheet = numberSheet;
-        this.fileName = fileName;
-    }
+        private bool isOpen = true;
 
-    /**
-     * Создаёт экземпляр открытия файла.
-     * Для открытия всех листов Excel файла используйте {@link #newInstances(String)}.
-     * @param workbook Открытая книга.
-     * @param numberSheet Номер страницы книги Excel.
-     * @throws IOException Ошибка доступа к файлу.
-     * @throws InvalidFormatException Ошибка распознования файла.
-     * @see #newInstances(String)
-     */
-    private OpenFile(Workbook workbook, int numberSheet, int needToClose, SetInt closed, String fileName) throws IOException, InvalidFormatException {
-        this.needToClose = needToClose;
-        this.closed = closed;
-        this.wb = workbook;
-        this.numberSheet = numberSheet;
-        this.fileName = fileName;
-    }
+        private readonly object sync_close = new object();
 
-    /**
-     * Получение ячейки по номеру колонки и строки.
-     * @param column Порядковый номер колонки.
-     * @param row Порядковый номер строки.
-     * @return Ячейка по данному адресу.
-     */
-    private Cell getCell(int column, int row) {
-        if (column < 1 || row < 1)
-            throw new IllegalArgumentException("column and row must be more 0.");
-        Sheet myExcelSheet = wb.getSheetAt(numberSheet);
-        org.apache.poi.ss.usermodel.Row rowModel = myExcelSheet.getRow(row - 1);
-        if (rowModel == null)
-            return null;
-        Cell cell = rowModel.getCell(column - 1);
-        if (cell == null)
-            return null;
-        return cell;
-    }
-}
+        /// <summary>
+        /// Закрывает Excel файл.
+        /// </summary>
+        /// <exception cref="System.IO.IOException">Ошибка при закрытии файла.</exception>
+        public void Dispose()
+        {
+            lock (sync_close)
+                if (isOpen && closed.Value < needToClose)
+                {
+                    isOpen = false;
+                    closed.Add();
+                    if (closed.Value == needToClose)
+                        document.Dispose();
+                }
+        }
 
+        /// <summary>
+        /// Создаёт экземпляр открытия файла.
+        /// Для открытия всех листов Excel файла используйте <see cref="NewInstances(string)"/>.
+        /// </summary>
+        /// <param name="fileName">Имя файла, который необходимо открыть.</param>
+        /// <param name="numberSheet">Номер страницы книги Excel.</param>
+        /// <exception cref="System.IO.IOException">Ошибка доступа к файлу.</exception>
+        /// <exception cref="System.InvalidCastException">Ошибка распознования файла.</exception>
+        private OpenFile(FileInfo fileName, int numberSheet)
+        {
+            this.document = SpreadsheetDocument.Open(fileName.FullName, false);
+            this.numberSheet = numberSheet;
+            this.fileName = fileName;
+        }
 
-class SetInt {
-    SetInt(int value) {
-        this.value = value;
-    }
+        /// <summary>
+        /// Создаёт экземпляр открытия файла.
+        /// Для открытия всех листов Excel файла используйте <see cref="NewInstances(string)"/>.
+        /// </summary>
+        /// <param name="document">Открытый документ.</param>
+        /// <param name="numberSheet">Номер страницы книги Excel.</param>
+        /// <param name="needToClose">Количество открытых листов у Excel файла при newInstance.</param>
+        /// <param name="closed">Количество закрытых листов Excel у файла.</param>
+        /// <param name="fileName">Имя файла.</param>
+        /// <exception cref="System.IO.IOException">Ошибка доступа к файлу.</exception>
+        /// <exception cref="System.InvalidCastException">Ошибка распознования файла.</exception>
+        private OpenFile(SpreadsheetDocument document, int numberSheet, int needToClose, SetInt closed, FileInfo fileName)
+        {
+            this.document = document;
+            this.numberSheet = numberSheet;
+            this.needToClose = needToClose;
+            this.closed = closed;
+            this.fileName = fileName;
+        }
 
-    SetInt() {
-        this.value = 0;
-    }
+        /// <summary>
+        /// Получение ячейки по номеру колонки и строки.
+        /// </summary>
+        /// <param name="column">Порядковый номер колонки.</param>
+        /// <param name="row">Порядковый номер строки.</param>
+        /// <returns>Ячейка по данному адресу.</returns>
+        private Cell getCell(int column, int row)
+        {
+            if (column < 1 || row < 1)
+                throw new System.ArgumentException("column and row must be more 0.");
+            WorkbookPart wbPart = document.WorkbookPart;
+            Sheet myExcelSheet = wbPart.Workbook.Descendants<Sheet>().ElementAt(numberSheet);
+            WorksheetPart wsPart = (WorksheetPart)(wbPart.GetPartById(myExcelSheet.Id));
+            return wsPart.Worksheet.Descendants<Cell>().
+              Where(c => c.CellReference == CoordinateToAddress(column - 1, row)).FirstOrDefault();
+        }
 
-    private int value;
+        public static string CoordinateToAddress(int column, int row)
+        {
+            const string abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            string column_abcbase = System.Convert.ToString(column, abc.Length);
+            IEnumerable<byte> column_abcbaselist = from char a in column_abcbase select System.Convert.ToByte(a.ToString(), abc.Length);
+            IEnumerable<char> column_output = from byte a in column_abcbaselist select abc[a];
+            return new string(column_output.ToArray()) + row;
+        }
 
-    public int get() {
-        return value;
-    }
-
-    public void set(int value) {
-        this.value = value;
-    }
-
-    public void add(int value) {
-        this.value += value;
-    }
-
-    public void add() {
-        this.value++;
+        public override string ToString()
+        => $"{nameof(OpenFile)} {{" +
+            $" {nameof(needToClose)} = {needToClose}" +
+            $", {nameof(closed)} = {closed}" +
+            $", {nameof(fileName)} = '{fileName}'" +
+            $", {nameof(isOpen)} = {isOpen}" +
+            $", {nameof(document)} = {document}" +
+            $", {nameof(numberSheet)} = {numberSheet}" +
+            $" }}";
     }
 }

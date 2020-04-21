@@ -1,6 +1,8 @@
 /*
     Schedule MIREA in calendar.
-    Copyright (C) 2020  Mikhail Pavlovich Sidorenko (motherlode.muwa@gmail.com)
+    Copyright (C) 2020
+    Mikhail Pavlovich Sidorenko (motherlode.muwa@gmail.com)
+    George Andreevich Falileev
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,17 +18,18 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-using ru.mirea.xlsical.CouplesDetective.xl;
-
-namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
+namespace ru.mirea.xlsical.CouplesDetective.xl
 {
-    public class DetectiveException : System.Exception
+    public class SetInt
     {
-        public readonly ExcelFileInterface excelFile;
+        public SetInt(int value) => Value = value;
 
-        public DetectiveException(string message, ExcelFileInterface file)
-        : base(message) => excelFile = file;
+        public SetInt() => Value = 0;
 
-        public override string Message => $"{base.Message} file: {excelFile}";
+        public int Value { get; set; }
+
+        public void Add(int value) => Value += value;
+
+        public void Add() => Value++;
     }
 }
