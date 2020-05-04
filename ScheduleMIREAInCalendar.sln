@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interpreter.Tests", "Interp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MakerICal", "MakerICal\MakerICal.csproj", "{E4D024F7-EA6D-4A76-8E6A-2D47867AE72C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MakerICal.Tests", "MakerICal.Tests\MakerICal.Tests.csproj", "{EB758F40-B04C-4727-A1D0-B23223DAA313}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,5 +60,17 @@ Global
 		{E4D024F7-EA6D-4A76-8E6A-2D47867AE72C}.Release|x64.Build.0 = Release|Any CPU
 		{E4D024F7-EA6D-4A76-8E6A-2D47867AE72C}.Release|x86.ActiveCfg = Release|Any CPU
 		{E4D024F7-EA6D-4A76-8E6A-2D47867AE72C}.Release|x86.Build.0 = Release|Any CPU
+		{EB758F40-B04C-4727-A1D0-B23223DAA313}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB758F40-B04C-4727-A1D0-B23223DAA313}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB758F40-B04C-4727-A1D0-B23223DAA313}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EB758F40-B04C-4727-A1D0-B23223DAA313}.Debug|x64.Build.0 = Debug|Any CPU
+		{EB758F40-B04C-4727-A1D0-B23223DAA313}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EB758F40-B04C-4727-A1D0-B23223DAA313}.Debug|x86.Build.0 = Debug|Any CPU
+		{EB758F40-B04C-4727-A1D0-B23223DAA313}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB758F40-B04C-4727-A1D0-B23223DAA313}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB758F40-B04C-4727-A1D0-B23223DAA313}.Release|x64.ActiveCfg = Release|Any CPU
+		{EB758F40-B04C-4727-A1D0-B23223DAA313}.Release|x64.Build.0 = Release|Any CPU
+		{EB758F40-B04C-4727-A1D0-B23223DAA313}.Release|x86.ActiveCfg = Release|Any CPU
+		{EB758F40-B04C-4727-A1D0-B23223DAA313}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
