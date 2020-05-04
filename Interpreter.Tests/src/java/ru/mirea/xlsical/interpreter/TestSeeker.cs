@@ -42,8 +42,8 @@ namespace ru.mirea.xlsical.interpreter
             Assert.Equal(new LocalDate(2000, 5, 10), test.DateFinish.Date);
             Assert.Equal(DateTimeZoneProviders.Tzdb["Europe/Moscow"], test.DateStart.Zone);
 
-            PackageToProviderHTTP cl = new PackageToProviderHTTP(0, "", 0, "Всё ок");
-            Assert.Equal("", cl.CalFile);
+            PackageToProviderHTTP cl = new PackageToProviderHTTP(0, null, 0, "Всё ок");
+            Assert.Null(cl.CalFile);
             Assert.Equal(0, cl.Count);
             Assert.Equal("Всё ок", cl.Messages);
 
