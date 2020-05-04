@@ -85,7 +85,7 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
 
 
 
-        protected static int GetCounts6Days(ZonedDateTime current, ZonedDateTime target)
+        public static int GetCounts6Days(ZonedDateTime current, ZonedDateTime target)
         {
             int sundays = 0;
             if (ZonedDateTime.Comparer.Instant.Compare(current, target) > 0)
