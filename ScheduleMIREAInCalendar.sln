@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interpreter", "Interpreter\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interpreter.Tests", "Interpreter.Tests\Interpreter.Tests.csproj", "{9B127EE4-2867-4422-87AB-73DCD3D10D1E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICalMaker", "ICalMaker\ICalMaker.csproj", "{E4D024F7-EA6D-4A76-8E6A-2D47867AE72C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MakerICal", "MakerICal\MakerICal.csproj", "{E4D024F7-EA6D-4A76-8E6A-2D47867AE72C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

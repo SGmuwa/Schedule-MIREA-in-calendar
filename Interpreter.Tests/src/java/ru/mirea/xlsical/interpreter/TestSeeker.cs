@@ -47,7 +47,7 @@ namespace ru.mirea.xlsical.interpreter
             Assert.Equal(0, cl.Count);
             Assert.Equal("Всё ок", cl.Messages);
 
-            PackageToICalMaker sv = new PackageToICalMaker(0, test);
+            PackageToMakerICal sv = new PackageToMakerICal(0, test);
 
             Assert.Equal(test, sv.queryCriteria);
         }

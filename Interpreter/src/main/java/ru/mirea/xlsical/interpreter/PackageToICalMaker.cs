@@ -23,7 +23,7 @@ namespace ru.mirea.xlsical.interpreter
     /// <summary>
     /// Класс указывает правило, какие данные будут переданы серверу.
     /// </summary>
-    public class PackageToICalMaker : Package
+    public class PackageToMakerICal : Package
     {
         /// <summary>
         /// Критерии запроса.
@@ -41,7 +41,7 @@ namespace ru.mirea.xlsical.interpreter
         /// <param name="ctx">Уникальный идентификатор или контекст сообщения.</param>
         /// <param name="queryCriteria">Критерии запроса.</param>
         /// <param name="percentReady">Ссылка на класс, куда записывать процент готовности.</param>
-        public PackageToICalMaker(object ctx, Seeker queryCriteria, PercentReady percentReady = null)
+        public PackageToMakerICal(object ctx, Seeker queryCriteria, PercentReady percentReady = null)
         : base(ctx)
         {
             this.queryCriteria = queryCriteria;

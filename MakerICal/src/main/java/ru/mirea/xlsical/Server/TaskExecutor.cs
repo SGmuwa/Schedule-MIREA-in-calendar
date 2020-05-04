@@ -34,18 +34,18 @@ namespace ru.mirea.xlsical.Server
     /// <summary>
     /// Класс, который выступает в роле исполнителя обработчика
     /// из excel файлов в ics расписание.
-    /// Используйте <see cref="add(PackageToICalMaker)"/> для добавления задания.
+    /// Используйте <see cref="add(PackageToMakerICal)"/> для добавления задания.
     /// Используйте <see cref="take" для получения ответа.
     /// </summary>
     public class TaskExecutor
     {
-        private readonly BlockingCollection<PackageToICalMaker> qIn;
+        private readonly BlockingCollection<PackageToMakerICal> qIn;
         private readonly BlockingCollection<PackageToProviderHTTP> qOut;
         private readonly CoupleHistorian coupleHistorian;
 
         public TaskExecutor(CoupleHistorian manualHistorian = null)
         {
-            this.qIn = new BlockingCollection<PackageToICalMaker>(new ConcurrentQueue<PackageToICalMaker>());
+            this.qIn = new BlockingCollection<PackageToMakerICal>(new ConcurrentQueue<PackageToMakerICal>());
             this.qOut = new BlockingCollection<PackageToProviderHTTP>(new ConcurrentQueue<PackageToProviderHTTP>());
             this.coupleHistorian = manualHistorian == null ? new CoupleHistorian(DateTimeZoneProviders.Tzdb["UTC"].AtStrictly(LocalDateTime.FromDateTime(DateTime.UtcNow))) : manualHistorian;
         }
@@ -66,7 +66,7 @@ namespace ru.mirea.xlsical.Server
         /// Добавляет элемент в очередь задач.
         /// </summary>
         /// <param name="pack">Пакет с требованиями к решению задачи.</param>
-        public void add(PackageToICalMaker pack) => qIn.Add(pack);
+        public void add(PackageToMakerICal pack) => qIn.Add(pack);
 
         /// <summary>
         /// Запускает выполнение задач до тех пор, пока не вызовется interrupt потока.
@@ -86,7 +86,7 @@ namespace ru.mirea.xlsical.Server
         }
 
         /// <summary>
-        /// Берёт из входной очереди <see cref="add(PackageToICalMaker)"/> входной элемент,
+        /// Берёт из входной очереди <see cref="add(PackageToMakerICal)"/> входной элемент,
         /// и отправляет его в выходную очередь <see cref="take"/>.
         /// </summary>
         /// <exception cref="OperationCanceledException">Срабатывает исключение в случае прерывания ожидания из входной очереди.</exception>
@@ -99,7 +99,7 @@ namespace ru.mirea.xlsical.Server
         /// </summary>
         /// <param name="pkg">Пакет с требованиями к решению задачи.</param>
         /// <returns>Пакет от обработчика.</returns>
-        public PackageToProviderHTTP monoStep(PackageToICalMaker pkg)
+        public PackageToProviderHTTP monoStep(PackageToMakerICal pkg)
         {
             if (pkg == null)
             {
