@@ -21,6 +21,9 @@ using System.IO;
 using System.Collections.Generic;
 using ru.mirea.xlsical.interpreter;
 using System.Threading;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Net;
 
 namespace ru.mirea.xlsical.CouplesDetective
 {
@@ -71,7 +74,7 @@ namespace ru.mirea.xlsical.CouplesDetective
             else
                 pathToCache = null;
         }
-        
+
         /// <summary>
         /// Создаёт новый экземпляр синхронизатора расписания и имён преподавателей.
         /// </summary>
@@ -152,7 +155,7 @@ namespace ru.mirea.xlsical.CouplesDetective
         /// <summary>
         /// Объект, который надо обновлять после получения обновлений.
         /// </summary>
-        private UpdateCache needUpdate;
+        private event UpdateCache needUpdate;
 
         /// <summary>
         /// Функция отвечает за то, чтобы получить таблицы из сайта <a href="https://www.mirea.ru/education/schedule-main/schedule/">mirea.ru</a>.
@@ -163,18 +166,16 @@ namespace ru.mirea.xlsical.CouplesDetective
         /// </summary>
         /// <returns>Возвращает все таблицы из сайта <a href="https://www.mirea.ru/education/schedule-main/schedule/">mirea.ru</a>. Вызвать метод .close обязательно.</returns>
         public EnumeratorExcels OpenTablesFromExternal()
-        {
-            return new EnumeratorExcels(excelFiles);
-        }
+            => new EnumeratorExcels(excelFiles);
 
-        /**
-         * Функция ведёт поиск полного имени преподавателя.
-         * @param nameInExcel Краткое имя преподавателя.
-         * @return Полное имя и должность преподавателя.
-         */
-        public String findTeacher(String nameInExcel)
+        /// <summary>
+        /// Функция ведёт поиск полного имени преподавателя.
+        /// </summary>
+        /// <param name="nameInExcel">Краткое имя преподавателя.</param>
+        /// <returns>Полное имя и должность преподавателя.</returns>
+        public string findTeacher(string nameInExcel)
         {
-            // TODO: Необходимо реализовать функционал.
+#warning Необходимо реализовать функционал.
             return nameInExcel;
             //String[] fullName = Teacher.ConvertNameFromStrToArray(nameInExcel);
             //return findTeacher(fullName[0], fullName[1], fullName[2]);
@@ -184,31 +185,19 @@ namespace ru.mirea.xlsical.CouplesDetective
         //Collections.binarySearch(teachers, surname, (left, right) -> )
         //}
 
-        /**
-         * Запускает механизм автоматического обновления, скачивания данных
-         * из сайта <a href="https://www.mirea.ru/education/">mirea.ru</a>.
-         */
-        public void run()
+        /// <summary>
+        /// Запускает механизм автоматического обновления, скачивания данных
+        /// из сайта <a href="https://www.mirea.ru/education/">mirea.ru</a>.
+        /// </summary>
+        public void Run()
         {
             if (myThread != null)
             {
-                if (!myThread.isInterrupted())
-                    myThread.interrupt();
+                if (myThread.ThreadState.HasFlag(ThreadState.Running))
+                    myThread.Abort();
             }
             myThread = new Thread(this.threadBody);
-            myThread.start();
-        }
-
-        public bool isAlive()
-        {
-            return myThread != null && myThread.isAlive();
-        }
-
-        public void interrupt()
-        {
-            if (!myThread.isInterrupted())
-                myThread.interrupt();
-            myThread = null;
+            myThread.Start();
         }
 
         private void threadBody()
@@ -216,13 +205,10 @@ namespace ru.mirea.xlsical.CouplesDetective
             if (this.pathToCache != null)
                 try
                 {
-                    while (!Thread.currentThread().isInterrupted())
-                    {
-                        Thread.sleep(1000 * 60 * 60 * 8); // Проверка три раза в день.
-                        download(new PercentReady(new SampleConsoleTransferPercentReady("ExternalDataUpdater.java: download xls: ")));
-                    }
+                    Thread.Sleep(1000 * 60 * 60 * 8); // Проверка три раза в день.
+                    download(new PercentReady(subscribers: new SampleConsoleTransferPercentReady("ExternalDataUpdater.java: download xls: ").TransferValue));
                 }
-                catch (InterruptedException e)
+                catch (ThreadInterruptedException)
                 {
                     // finish.
                 }
@@ -246,117 +232,118 @@ namespace ru.mirea.xlsical.CouplesDetective
                     Console.WriteLine("Can't update: pathToCache is null.");
                     return;
                 }
-                PR_loader.setReady(0.1f);
-                Stream<String> htmlExcels = downloadHTML("https://www.mirea.ru/education/schedule-main/schedule/");
-                PR_loader.setReady(0.2f);
-                List<String> excelUrls = findAllExcelURLs(htmlExcels);
-                PR_loader.setReady(0.3f);
-                htmlExcels.close();
-                PR_loader.setReady(0.4f);
+                PR_loader.Ready = 0.1f;
+                StreamReader htmlExcels = downloadHTML("https://www.mirea.ru/education/schedule-main/schedule/");
+                PR_loader.Ready = 0.2f;
+                List<string> excelUrls = findAllExcelURLs(htmlExcels);
+                PR_loader.Ready = 0.3f;
+                htmlExcels.Dispose();
+                PR_loader.Ready = 0.4f;
                 // ---- https -> http
-                String elm;
-                for (int i = excelUrls.size() - 1; i >= 0; i--)
+                string elm;
+                for (int i = 0; i < excelUrls.Count; i++)
                 {
-                    elm = excelUrls.get(i);
-                    Console.Write(ZonedDateTime.now() + " ExternalDataUpdater.java: " + elm + " ;\t");
-                    elm = elm.replaceFirst("https:/", "http:/");
-                    excelUrls.set(i, elm);
+                    elm = excelUrls[i];
+                    Console.Write(DateTime.UtcNow + " ExternalDataUpdater.java: " + elm + " ;\t");
+                    elm = elm.Replace("https:/", "http:/");
+                    excelUrls[i] = elm;
                 }
-                PR_loader.setReady(0.5f);
+                PR_loader.Ready = 0.5f;
                 Console.WriteLine();
                 // ----
                 try
                 {
-                    PR_loader.setReady(0.6f);
+                    PR_loader.Ready = 0.6f;
                     excelFiles = downloadFilesToPath(excelUrls, this.pathToCache, PR_downloader);
-                    PR_loader.setReady(0.7f);
+                    PR_loader.Ready = 0.7f;
 
-                    Stream<String> htmlNames = downloadHTML("https://www.mirea.ru/sveden/employees/");
-                    PR_loader.setReady(0.8f);
+                    StreamReader htmlNames = downloadHTML("https://www.mirea.ru/sveden/employees/");
+                    PR_loader.Ready = 0.8f;
                     teachers = getTeachers(htmlNames);
-                    PR_loader.setReady(0.9f);
+                    PR_loader.Ready = 0.9f;
                 }
                 catch (Exception e)
                 {
-                    e.printStackTrace();
-                    Console.WriteLine(e.getLocalizedMessage());
+                    Console.WriteLine(e.Message + " " + e.StackTrace);
                 }
                 if (needUpdate != null)
                 {
                     try
                     {
-                        needUpdate.update(PR_install);
+                        needUpdate?.Invoke(PR_install);
                     }
                     catch (IOException e)
                     {
-                        Console.WriteLine(ZonedDateTime.now() + " ExternalDataUpdater.java: " + e.getLocalizedMessage());
+                        Console.WriteLine(DateTime.UtcNow + " ExternalDataUpdater.java: " + e.Message);
                     }
-                    PR_install.setReady(1f);
+                    PR_install.Ready = 1f;
                 }
-                PR_loader.setReady(1f);
+                PR_loader.Ready = 1f;
             }
         }
+
+        private static readonly Regex pFio = new Regex("<td itemprop=\"fio\">");
+        private static readonly Regex pPost = new Regex("<td itemprop=\"post\">");
+        private static readonly Regex pEnd = new Regex("</td>");
 
         /// <summary>
         /// Получает преподавателей из HTML потока.
         /// </summary>
         /// <param name="htmlNames">HTML код, где таблица преподавателей.</param>
         /// <returns>Список преподавателей.</returns>
-        private List<Teacher> getTeachers(Stream<String> htmlNames)
+        private List<Teacher> getTeachers(StreamReader htmlNames)
         {
             if (htmlNames == null)
                 return null;
-            StringBuilder html = new StringBuilder();
-            Pattern pFio = Pattern.compile("<td itemprop=\"fio\">");
-            Pattern pPost = Pattern.compile("<td itemprop=\"post\">");
-            Pattern pEnd = Pattern.compile("</td>");
+            StringBuilder htmlBuild = new StringBuilder();
             bool needEnd = false;
-            Iterator<String> iteratorHtmlNames = htmlNames.iterator();
-            while (iteratorHtmlNames.hasNext())
+            Match mFio;
+            Match mPost;
+            for (string str = htmlNames.ReadLine(); str != null; str = htmlNames.ReadLine())
             {
-                String str = iteratorHtmlNames.next();
-                Matcher mFio = pFio.matcher(str);
-                Matcher mPost = pPost.matcher(str);
-                Matcher mEnd = pEnd.matcher(str);
+                mFio = pFio.Match(str);
+                mPost = pPost.Match(str);
+                Match mEnd = pEnd.Match(str);
                 bool isAdd = false; // Необходимо, чтобы дважды не добавить одну и ту же строку.
-                if (mFio.find() || mPost.find() || needEnd)
+                if (mFio.Success || mPost.Success || needEnd)
                 {
-                    html.append(' ');
-                    html.append(str);
+                    htmlBuild.Append(' ');
+                    htmlBuild.Append(str);
                     isAdd = true;
                     needEnd = true;
                 }
-                if (mEnd.find())
+                if (mEnd.Success)
                 {
-                    if (!isAdd) html.append(str);
+                    if (!isAdd) htmlBuild.Append(str);
                     needEnd = false;
                 }
             }
-            Matcher mFio = pFio.matcher(html);
-            List<String> namesOfTeachers = new List<>();
-            while (mFio.find())
+            string html = htmlBuild.ToString();
+            mFio = pFio.Match(html);
+            List<string> namesOfTeachers = new List<string>();
+            while (mFio.Success)
             {
-                int indexStart = mFio.end() + 1;
-                int indexFinish = html.indexOf("</td", indexStart) - 1;
-                namesOfTeachers.add(html.substring(indexStart, indexFinish));
+                int indexStart = mFio.Index + mFio.Length + 1;
+                int indexFinish = html.IndexOf("</td", indexStart) - 1;
+                namesOfTeachers.Add(html.Substring(indexStart, indexFinish - indexStart));
             }
-            Matcher mPost = pPost.matcher(html);
-            List<String> posts = new List<>();
-            while (mPost.find())
+            mPost = pPost.Match(html);
+            List<string> posts = new List<string>();
+            while (mPost.Success)
             {
-                int indexStart = mPost.end() + 1;
-                int indexFinish = html.indexOf("</td", indexStart) - 1;
-                posts.add(html.substring(indexStart, indexFinish));
+                int indexStart = mPost.Index + mPost.Length + 1;
+                int indexFinish = html.IndexOf("</td", indexStart) - 1;
+                posts.Add(html.Substring(indexStart, indexFinish));
             }
-            if (namesOfTeachers.size() != posts.size())
-                throw new Exception("size of Teachers " + namesOfTeachers.size() + " not equals size Posts " + posts.size() + " .");
+            if (namesOfTeachers.Count != posts.Count)
+                throw new Exception("size of Teachers " + namesOfTeachers.Count + " not equals size Posts " + posts.Count + " .");
 
-            List<Teacher> teachers = new List<>(posts.size());
-            Iterator<String> iPost = posts.iterator();
-            Iterator<String> iName = namesOfTeachers.iterator();
-            while (iPost.hasNext() && iName.hasNext())
+            List<Teacher> teachers = new List<Teacher>(posts.Count);
+            IEnumerator<string> iPost = posts.GetEnumerator();
+            IEnumerator<string> iName = namesOfTeachers.GetEnumerator();
+            while (iPost.MoveNext() && iName.MoveNext())
             {
-                teachers.add(new Teacher(iName.next(), iPost.next()));
+                teachers.Add(new Teacher(iName.Current, iPost.Current));
             }
             return teachers;
         }
@@ -368,36 +355,36 @@ namespace ru.mirea.xlsical.CouplesDetective
         /// <param name="pathToCache">Путь до местоположения временных файлов, место загрузки.</param>
         /// <param name="pr">Доступ к управлению процентом готовности.</param>
         /// <returns>Список скаченных файлов.</returns>
-        private List<FileInfo> downloadFilesToPath(Collection<String> excelUrls, DirectoryInfo pathToCache, PercentReady pr = new PercentReady())
+        private List<FileInfo> downloadFilesToPath(ICollection<string> excelUrls, DirectoryInfo pathToCache, PercentReady pr = null)
         {
+            if (pr == null)
+                pr = new PercentReady();
             PercentReady PR_writerUrls = new PercentReady(pr, 0.2f);
             PercentReady PR_downloader = new PercentReady(pr, 0.8f);
 
 
-            int size = excelUrls.size();
-            List<File> excelFilesPaths = new List<>(size);
-            Iterator<String> it = excelUrls.iterator();
+            int size = excelUrls.Count;
+            List<FileInfo> excelFilesPaths = new List<FileInfo>(size);
+            IEnumerator<String> it = excelUrls.GetEnumerator();
             for (int i = 0; i < size; i++)
             {
-                String url = it.next();
-                excelFilesPaths.add(new File(pathToCache, LocalDateTime.now().toString().replace(':', '-').replace('.', '_') + "_" + random.nextLong() + "_" + url.substring(url.lastIndexOf("/") + 1)));
-                Console.Write(ZonedDateTime.now() + " ExternalDataUpdater.java: " + excelFilesPaths.get(i).toString() + ";\t");
-                PR_writerUrls.setReady(i / (float)size);
+                String url = it.Current;
+                excelFilesPaths.Add(new FileInfo(Path.Combine(pathToCache.FullName, DateTime.UtcNow.ToString().Replace(':', '-').Replace('.', '_') + "_" + random.NextLong() + "_" + url.Substring(url.LastIndexOf("/") + 1))));
+                Console.Write(DateTime.UtcNow + " ExternalDataUpdater.java: " + excelFilesPaths[i].ToString() + ";\t");
+                PR_writerUrls.Ready = i / (float)size;
             }
             Console.WriteLine();
-            it = excelUrls.iterator();
-            for (int i = 0; i < excelFilesPaths.size(); i++)
+            it = excelUrls.GetEnumerator();
+            for (int i = 0; i < excelFilesPaths.Count && it.MoveNext(); i++)
             {
-                if (!excelFilesPaths.get(i).createNewFile())
-                    throw new IOException("can't create new excel file. File = " + excelFilesPaths.get(i).toString());
                 try
                 {
-                    downloadFile(new URL(it.next()), excelFilesPaths.get(i));
+                    downloadFile(new Uri(it.Current), excelFilesPaths[i].Create());
                 }
                 catch (IOException e)
                 {
-                    Console.WriteLine("ExternalDataUpdater.java: I can't save file " + excelFilesPaths.get(i));
-                    excelFilesPaths.remove(i);
+                    Console.WriteLine("ExternalDataUpdater.java: I can't save file " + excelFilesPaths[i] + e.Message);
+                    excelFilesPaths.RemoveAt(i);
                     i--;
                 }
                 PR_downloader.Ready = i / ((float)size);
@@ -407,26 +394,27 @@ namespace ru.mirea.xlsical.CouplesDetective
             return excelFilesPaths;
         }
 
-        /**
-         * Находит все ссылки на файлы excel из потока текста.
-         * @param htmlExcels Поток текста html.
-         * @return Лист на ссылки excel файлов.
-         */
-        private List<String> findAllExcelURLs(Stream<String> htmlExcels)
-        {
-            // href ?= ?"http.+?\.[xX][lL][sS][xX]?"
-            List<String> excelsUrls = new List<>();
-            Pattern p = Pattern.compile("href ?= ?\"http.+?\\.[xX][lL][sS][xX]?\"");
-            htmlExcels.forEach((str)=> {
-                Matcher m = p.matcher(str);
-                if (m.find())
-                {
-                    String resultFind = m.group();
-                    resultFind = resultFind.substring(resultFind.indexOf("http"), resultFind.lastIndexOf("\""));
-                    excelsUrls.add(resultFind);
-                }
+        private static readonly Regex httpXlsRegex = new Regex(@"href ?= ?""http.+?\.[xX][lL][sS][xX]?""");
 
-            });
+        /// <summary>
+        /// Находит все ссылки на файлы excel из потока текста.
+        /// </summary>
+        /// <param name="htmlExcels">Поток текста html.</param>
+        /// <returns>Лист на ссылки excel файлов.</returns>
+        private static List<string> findAllExcelURLs(StreamReader htmlExcels)
+        {
+            List<string> excelsUrls = new List<string>();
+            string str;
+            while ((str = htmlExcels.ReadLine()) != null)
+            {
+                MatchCollection matches = httpXlsRegex.Matches(str);
+                foreach(Match m in matches)
+                {
+                    int start = m.Value.IndexOf("http");
+                    int length = m.Value.LastIndexOf('"') - start;
+                    excelsUrls.Add(m.Value.Substring(start, length));
+                }
+            }
             return excelsUrls;
         }
 
@@ -435,49 +423,20 @@ namespace ru.mirea.xlsical.CouplesDetective
         /// </summary>
         /// <param name="s">URL ссылка, с которой происходит скачивание.</param>
         /// <returns>Текстовый поток от URL GET запроса.</returns>
-        private Stream<String> downloadHTML(String s)
+        private StreamReader downloadHTML(string s)
         {
-            URL url;
-            InputStream @is = null;
-            BufferedReader br;
-            String line;
-
-            try
-            {
-                url = new URL(s);
-                URLConnection connection = url.openConnection();
-                String redirect = connection.getHeaderField("Location");
-                if (redirect != null)
-                {
-                    url = new URL(redirect);
-                }
-            @is = url.openStream();  // throws an IOException
-                br = new BufferedReader(new InputStreamReader(@is));
-                return br.lines();
-            }
-            catch (IOException ioe)
-            {
-                ioe.printStackTrace();
-            }
-            return null;
+            WebClient client = new WebClient();
+            StreamWithEvent stream = new StreamWithEvent(client.OpenRead(s));
+            stream.Disposed += (c, _) => ((WebClient)c).Dispose();
+            return new StreamReader(stream);
         }
 
-        private void downloadFile(URL url, File fileToWrite)
+        private void downloadFile(Uri url, FileStream fileToWrite)
         {
-            URLConnection connection = url.openConnection();
-            String redirect = connection.getHeaderField("Location");
-            if (redirect != null)
-            { // https://stackoverflow.com/questions/18431440/301-moved-permanently
-                url = new URL(redirect);
-            }
-
-            ReadableByteChannel readableByteChannel = Channels.newChannel(url.openStream());
-
-            FileOutputStream fileOutputStream = new FileOutputStream(fileToWrite);
-            fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
-
-            readableByteChannel.close();
-            fileOutputStream.close();
+            using WebClient client = new WebClient();
+            using Stream stream = client.OpenRead(url);
+            stream.CopyTo(fileToWrite);
+            fileToWrite.Dispose();
         }
 
         public void setNeedUpdate(UpdateCache needUpdate)

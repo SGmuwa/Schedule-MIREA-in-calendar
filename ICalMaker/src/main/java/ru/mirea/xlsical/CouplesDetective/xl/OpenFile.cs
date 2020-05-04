@@ -52,12 +52,12 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
         /// <returns>Возвращает список открытых листов.</returns>
         /// <exception cref="System.IO.IOException">Ошибка доступа к файлу.</exception>
         /// <exception cref="System.InvalidCastException">Ошибка распознования .xls или .xlsx файла.</exception>
-        public static List<OpenFile> NewInstances(FileInfo fileName)
+        public static List<ExcelFileInterface> NewInstances(FileInfo fileName)
         {
             SetInt setInt = new SetInt();
             OpenFile first = new OpenFile(fileName, 0);
             int size = first.document.WorkbookPart.Workbook.Descendants<Sheet>().Count();
-            List<OpenFile> @out = new List<OpenFile>(size);
+            List<ExcelFileInterface> @out = new List<ExcelFileInterface>(size);
             @out.Add(first);
             first.needToClose = size;
             first.closed = setInt;

@@ -15,64 +15,58 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples;
 
-import ru.mirea.xlsical.CouplesDetective.CoupleInCalendar;
-import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
-import ru.mirea.xlsical.interpreter.Seeker;
+using System.Collections.Generic;
+using NodaTime;
+using ru.mirea.xlsical.CouplesDetective.xl;
 
-import java.io.IOException;
-import java.time.ZonedDateTime;
-import java.util.List;
+namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
+{
+    /// <summary>
+    /// Данный класс отвечает за просмотр пар из Excel расписания.
+    /// Данный класс может видеть только экзаменационное расписание.
+    /// </summary>
+    public class DetectiveExams : Detective
+    {
+        protected DetectiveExams(ExcelFileInterface file, DetectiveDate dateSettings)
+        : base(file, dateSettings) { }
 
-/**
- * Данный класс отвечает за просмотр пар из Excel расписания.
- * Данный класс может видеть только экзаменационное расписание.
- */
-public class DetectiveExams extends Detective {
-    protected DetectiveExams(ExcelFileInterface file, DetectiveDate dateSettings) {
-        super(file, dateSettings);
+        /// <summary>
+        /// Функция ищет занятия для seeker в файле File.
+        /// </summary>
+        /// <param name="start">Дата и время начала составления расписания.</param>
+        /// <param name="finish">Дата и время конца составления расписания.</param>
+        /// <returns>Перечисление занятий для seeker.</returns>
+        /// <exception cref="DetectiveException">Появилась проблема, связанная с обработкой Excel файла.</exception>
+        /// <exception cref="System.IO.IOException">Во время работы с Excel file - файл стал недоступен.</exception>
+        public override IEnumerable<CoupleInCalendar> StartAnInvestigation(ZonedDateTime start, ZonedDateTime finish)
+        {
+#warning throw new System.NotImplementedException();
+            throw new System.NotImplementedException();
+        }
+
+        /// <summary>
+        /// Функция расчитывает рекомендуемое время начала построения текущего расписания.
+        /// </summary>
+        /// <param name="now">Момент времени, который считается настоящим.</param>
+        /// <returns>Время начала занятий.</returns>
+        /// <seealso cref="GetFinishTime(ZonedDateTime)"/>
+        public override ZonedDateTime GetStartTime(ZonedDateTime now)
+        {
+#warning throw new System.NotImplementedException();
+            throw new System.NotImplementedException();
+        }
+
+        /// <summary>
+        /// Функция расчитывает рекомендуемое время конца построения текущего расписания.
+        /// </summary>
+        /// <param name="now">Момент времени, который считается настоящим.</param>
+        /// <returns>Время конца занятий.</returns>
+        /// <seealso cref="GetStartTime(ZonedDateTime)"/>
+        public override ZonedDateTime GetFinishTime(ZonedDateTime now)
+        {
+#warning throw new System.NotImplementedException();
+            throw new System.NotImplementedException();
+        }
     }
-
-    /**
-     * Функция ищет занятия для seeker в файле File.
-     * // TODO: Данная функция ещё не разработана.
-     *
-     * @param start  Дата и время начала составления расписания.
-     * @param finish Дата и время конца составления раписания.
-     * @throws DetectiveException Появилась проблема, связанная с обработкой Excel файла.
-     * @throws IOException        Во время работы с Excel file - файл стал недоступен.
-     * @deprecated Не разработана ещё функция.
-     */
-    @Override
-    public List<CoupleInCalendar> startAnInvestigation(ZonedDateTime start, ZonedDateTime finish) throws DetectiveException, IOException {
-        throw new UnsupportedOperationException("Not implemented");
-    }
-
-    /**
-     * Функция расчитывает рекомендуемое время начала построения текущего расписания.
-     *
-     * @param now Момент времени, который считается настоящим.
-     * @return Время начала занятий.
-     * @see #getFinishTime(ZonedDateTime)
-     */
-    @Override
-    public ZonedDateTime getStartTime(ZonedDateTime now) {
-        // TODO
-        throw new UnsupportedOperationException("Not implemented");
-    }
-
-    /**
-     * Функция расчитывает рекомендуемое время конца построения текущего расписания.
-     *
-     * @param now Момент времени, который считается настоящим.
-     * @return Время конца занятий.
-     * @see #getStartTime(ZonedDateTime)
-     */
-    @Override
-    public ZonedDateTime getFinishTime(ZonedDateTime now) {
-        // TODO
-        throw new UnsupportedOperationException("Not implemented");
-    }
-
 }

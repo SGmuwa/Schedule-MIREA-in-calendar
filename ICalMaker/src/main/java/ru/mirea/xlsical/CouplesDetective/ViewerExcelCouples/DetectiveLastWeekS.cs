@@ -15,150 +15,127 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples;
+using System.Collections.Generic;
+using NodaTime;
+using ru.mirea.xlsical.CouplesDetective.xl;
 
-import ru.mirea.xlsical.CouplesDetective.CoupleInCalendar;
-import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
+namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
+{
+    /// <summary>
+    /// Данный класс отвечает за просмотр пар из Excel расписания.
+    /// Данный класс может видеть только расписание зачётной недели.
+    /// </summary>
+    public class DetectiveLastWeekS : IDetective
+    {
 
-import java.io.IOException;
-import java.time.*;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
+        private DetectiveSemester detectiveSemester;
 
-/**
- * Данный класс отвечает за просмотр пар из Excel расписания.
- * Данный класс может видеть только расписание зачётной недели.
- */
-public class DetectiveLastWeekS implements IDetective {
+        public DetectiveLastWeekS(ExcelFileInterface file, DetectiveDate dateSettings)
+            => detectiveSemester = new DetectiveSemester(file, dateSettings);
 
-    private DetectiveSemester detectiveSemester;
+        /// <summary>
+        /// Функция ищет занятия для seeker в файле File.
+        /// </summary>
+        /// <param name="start">Дата и время начала составления расписания.</param>
+        /// <param name="finish">Дата и время конца составления расписания.</param>
+        /// <returns>Список занятий.</returns>
+        /// <exception cref="DetectiveException">Появилась проблема, связанная с обработкой Excel файла.</exception>
+        /// <exception cref="System.IO.IOException">Во время работы с Excel file - файл стал недоступен.</exception>
+        public IEnumerable<CoupleInCalendar> StartAnInvestigation(ZonedDateTime start, ZonedDateTime finish)
+            => detectiveSemester.StartAnInvestigation(start, finish);
 
-    public DetectiveLastWeekS(ExcelFileInterface file, DetectiveDate dateSettings) {
-        detectiveSemester = new DetectiveSemester(file, dateSettings);
-    }
+        /// <summary>
+        /// Функция расчитывает рекомендуемое время начала построения текущего расписания.
+        /// </summary>
+        /// <param name="now">Момент времени, который считается настоящим.</param>
+        /// <returns>Возвращает первую секунду, с которой можно принимать зачёт. Это гарантированно 00:00:00.</returns>
+        /// <seealso cref="GetFinishTime(ZonedDateTime)"/>
+        public ZonedDateTime GetStartTime(ZonedDateTime now)
+            => GetStartTime(detectiveSemester.dateSettings, now);
 
-    /**
-     * Функция ищет занятия для seeker в файле File.
-     *
-     * @param start  Дата и время начала составления расписания.
-     * @param finish Дата и время конца составления раписания.
-     * @throws DetectiveException Появилась проблема, связанная с обработкой Excel файла.
-     * @throws IOException        Во время работы с Excel file - файл стал недоступен.
-     */
-    @Override
-    public List<CoupleInCalendar> startAnInvestigation(ZonedDateTime start, ZonedDateTime finish) throws DetectiveException, IOException {
-        return detectiveSemester.startAnInvestigation(start, finish);
-    }
-
-    /**
-     * Функция расчитывает рекомендуемое время начала построения текущего расписания.
-     * @param now Момент времени, который считается настоящим.
-     * @return Возвращает первую секунду, с которой можно принимать зачёт. Это гаратированно 00:00:00.
-     * @see #getFinishTime(ZonedDateTime)
-     */
-    @Override
-    public ZonedDateTime getStartTime(ZonedDateTime now) {
-        return static_getStartTime(detectiveSemester.dateSettings, now);
-    }
-
-    /**
-     * Данный метот является реализацией для {@link #getStartTime(ZonedDateTime)}.
-     * Используется для того, чтобы Детектив симестра узнал, до какой даты ему строить расписание.
-     *
-     * Функция расчитывает рекомендуемое время начала построения текущего расписания.
-     * @param dateSettings Параметры дат, которые внесены ректором.
-     * @param now Момент времени, который считается настоящим.
-     * @return Возвращает первую секунду, с которой можно принимать зачёт. Это гарантированно 00:00:00.
-     * @see #getFinishTime(ZonedDateTime)
-     */
-    protected static ZonedDateTime static_getStartTime(DetectiveDate dateSettings, ZonedDateTime now) {
-        ZonedDateTime current = static_getFinishTime(dateSettings, now).minus(7, ChronoUnit.DAYS);
-        current = Detective.addBusinessDaysToDate(current, 1);
-        return ZonedDateTime.of(
-                current.toLocalDate(),
-                LocalTime.MIN,
-                current.getZone()
-        );
-    }
-
-    /**
-     * Функция расчитывает рекомендуемое время конца построения текущего расписания.
-     *
-     * @param now Момент времени, который считается настоящим.
-     * @return Последняя доступная секунда для принятия зачёта.
-     * @see #getStartTime(ZonedDateTime)
-     */
-    @Override
-    public ZonedDateTime getFinishTime(ZonedDateTime now) {
-        return static_getFinishTime(detectiveSemester.dateSettings, now);
-    }
-
-    protected static ZonedDateTime static_getFinishTime(DetectiveDate dateSettings, ZonedDateTime now) {
-        DetectiveDate.TwoZonedDateTime search;
-        if (Month.JANUARY.getValue() <= now.getMonth().getValue()
-                && now.getMonth().getValue() <= Month.JUNE.getValue()
-        ) { // У нас загружано расписание для весны. Ищем конец.
-            search = dateSettings.searchBeforeAfter(
-                    ZonedDateTime.of(
-                            LocalDate.of(now.getYear(), Month.MAY, 15),
-                            LocalTime.NOON,
-                            now.getZone()
-                    ),
-                    Duration.of(35, ChronoUnit.DAYS)
-            );
-        }
-        else { // У нас загружано расписание для осени. Ищем конец.
-            search = dateSettings.searchBeforeAfter(
-                    ZonedDateTime.of(
-                            LocalDate.of(now.getYear(), Month.DECEMBER, 10),
-                            LocalTime.NOON,
-                            now.getZone()
-                    ),
-                    Duration.of(35, ChronoUnit.DAYS)
+        /// <summary>
+        /// Данный метод является реализацией для <see cref="GetStartTime(ZonedDateTime)"/>.
+        /// Используется для того, чтобы Детектив семестра узнал, до какой даты ему строить расписание.
+        /// <para>Функция расчитывает рекомендуемое время начала построения текущего расписания.</para>
+        /// </summary>
+        /// <param name="dateSettings">Параметры дат, которые внесены ректором.</param>
+        /// <param name="now">Момент времени, который считается настоящим.</param>
+        /// <returns>Возвращает первую секунду, с которой можно принимать зачёт. Это гарантированно 00:00:00.</returns>
+        /// <seealso cref="GetFinishTime(ZonedDateTime)"/>
+        public static ZonedDateTime GetStartTime(DetectiveDate dateSettings, ZonedDateTime now)
+        {
+            ZonedDateTime current = GetFinishTime(dateSettings, now).PlusDays(-7);
+            current = Detective.AddBusinessDaysToDate(current, 1);
+            return new ZonedDateTime(
+                    current.LocalDateTime.Date.At(LocalTime.MinValue),
+                    current.Zone,
+                    current.Offset
             );
         }
 
-        return search.getRight() == null ? guessFinishTime(now) : search.getRight();
-    }
+        /// <summary>
+        /// Функция расчитывает рекомендуемое время конца построения текущего расписания.
+        /// </summary>
+        /// <param name="now">Момент времени, который считается настоящим.</param>
+        /// <returns>Последняя доступная секунда для принятия зачёта.</returns>
+        /// <seealso cref="GetStartTime(ZonedDateTime)"/>
+        public ZonedDateTime GetFinishTime(ZonedDateTime now)
+            => GetFinishTime(detectiveSemester.dateSettings, now);
 
+        public static ZonedDateTime GetFinishTime(DetectiveDate dateSettings, ZonedDateTime now)
+        {
+            (ZonedDateTime? start, ZonedDateTime? finish) search;
+            if (IsoMonth.January <= (IsoMonth)now.Month
+                    && (IsoMonth)now.Month <= IsoMonth.June
+            )
+            { // У нас загружено расписание для весны. Ищем конец.
+                search = dateSettings.searchBeforeAfter(
+                    now.Zone.AtLeniently(new LocalDateTime(now.Year, (int)IsoMonth.May, 15, 12, 00)),
+                    Duration.FromDays(35)
+                );
+            }
+            else
+            { // У нас загружено расписание для осени. Ищем конец.
+                search = dateSettings.searchBeforeAfter(
+                    now.Zone.AtLeniently(new LocalDateTime(now.Year, (int)IsoMonth.December, 10, 12, 00)),
+                    Duration.FromDays(35)
+                );
+            }
+            return search.finish.HasValue ? search.finish.Value : guessFinishTime(now);
+        }
 
-    /**
-     * Угадывает, в какой день будет закончена зачётная неделя
-     * @param now Любая дата семестра, к которому прилегает зачёт.
-     * @return День и время, в который зачёт проводить можно.
-     */
-    protected static ZonedDateTime guessFinishTime(ZonedDateTime now) {
-        ZonedDateTime current;
-        if (Month.JANUARY.getValue() <= now.getMonth().getValue()
-                && now.getMonth().getValue() <= Month.JUNE.getValue()
-        ) { // У нас загружано расписание для весны. Ищем конец.
-            current = ZonedDateTime.of(
-                    // Мы узнаём последний день мая защищённым способом =). Хотя я в курсе, что это 31 мая.
-                    LocalDate.of(now.getYear(), Month.JUNE, 1),
-                    LocalTime.MIN,
-                    now.getZone()
-            );
+        /// <summary>
+        /// Угадывает, в какой день будет закончена зачётная неделя
+        /// </summary>
+        /// <param name="now">Любая дата семестра, к которому прилегает зачёт.</param>
+        /// <returns>День и время, в который зачёт проводить можно.</returns>
+        protected static ZonedDateTime guessFinishTime(ZonedDateTime now)
+        {
+            ZonedDateTime current;
+            if (IsoMonth.January <= (IsoMonth)now.Month
+                    && (IsoMonth)now.Month <= IsoMonth.June
+            )
+            { // У нас загружено расписание для весны. Ищем конец.
+                // Мы узнаём последний день мая защищённым способом =). Хотя я в курсе, что это 31 мая.
+                current = now.Zone.AtStrictly(new LocalDateTime(now.Year, (int)IsoMonth.June, 1, 00, 00));
+            }
+            else
+            { // У нас загружено расписание для осени. Ищем конец.
+                // Производственный шестидневный календарь предполагает, что 30 декабря - последний рабочий день.
+                // Выставим 31 декабря и отними секунду.
+                current = now.Zone.AtStrictly(new LocalDateTime(now.Year, (int)IsoMonth.December, 31, 00, 00));
+            }
+            // Переходим на последнюю секунду доступного дня:
+            current = current.PlusSeconds(-1);
+            // Если мы попали на воскресенье, то сдвинемся на день назад:
+            if (current.DayOfWeek == IsoDayOfWeek.Sunday)
+                current = current.PlusDays(-1);
+            return current;
         }
-        else { // У нас загружано расписание для осени. Ищем конец.
-            current = ZonedDateTime.of(
-                    // Производственный шестидненвый календарь предполагает, что 30 декабря - последний рабочий день.
-                    // Выставим 31 декабря и отнимим секунду.
-                    LocalDate.of(now.getYear(), Month.DECEMBER, 31),
-                    LocalTime.MIN,
-                    now.getZone()
-            );
-        }
-        // Переходим на последнию секунду доступного дня:
-        current = current.minus(1, ChronoUnit.SECONDS);
-        // Если мы попали на воскресенье, то сдвинемся на день назад:
-        if(current.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
-            current = current.minus(1, ChronoUnit.DAYS);
-        }
-        return current;
-    }
 
-    @Override
-    public void close() throws IOException {
-        detectiveSemester.close();
+        public void Dispose()
+        {
+            detectiveSemester.Dispose();
+        }
     }
 }

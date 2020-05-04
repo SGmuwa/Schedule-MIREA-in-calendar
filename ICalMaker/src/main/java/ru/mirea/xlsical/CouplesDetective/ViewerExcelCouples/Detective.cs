@@ -39,7 +39,7 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
         /// Благодаря этому Детектив знает, когда начало или конец
         /// семестра поставил ректор университета.
         /// </summary>
-        protected readonly DetectiveDate dateSettings;
+        public readonly DetectiveDate dateSettings;
 
         /// <summary>
         /// Создаёт экземпляр просмоторщика excel таблицы.
@@ -91,14 +91,14 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
             if (ZonedDateTime.Comparer.Instant.Compare(current, target) > 0)
                 throw new System.ArgumentException();
             Duration duration = target - current;
-            long days = duration.Days + 1;
-            long weeks = days / 7;
-            current = current.Plus(Duration.FromDays(weeks * 7));
+            int days = duration.Days + 1;
+            int weeks = days / 7;
+            current = current.PlusDays(weeks * 7);
             while (ZonedDateTime.Comparer.Instant.Compare(current, target) <= 0)
             {
                 if (current.DayOfWeek == IsoDayOfWeek.Sunday)
                     sundays++;
-                current = current.Plus(Duration.FromDays(1));
+                current = current.PlusDays(1);
             }
             return (int)(-sundays + (days - weeks));
         }
@@ -110,7 +110,7 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
         /// <param name="current">Исходная дата, к которой надо прибавить будние дни.</param>
         /// <param name="bDays">Количество дней, которые надо подсчитать.</param>
         /// <returns>Возвращает сумму даты <code>current</code> и <code>bDays</code>.</returns>
-        protected static ZonedDateTime AddBusinessDaysToDate(ZonedDateTime current, long bDays)
+        public static ZonedDateTime AddBusinessDaysToDate(ZonedDateTime current, long bDays)
         {
             if (current == null)
                 throw new System.ArgumentNullException(nameof(current));
@@ -120,18 +120,18 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
                 throw new System.ArgumentException("bDays must be more or equals 0");
 
             if (current.DayOfWeek == IsoDayOfWeek.Sunday)
-                current = current.Plus(Duration.FromDays(1));
+                current = current.PlusDays(1);
             checked
             {
                 int weeks = (int)(bDays / 6);
-                current = current.Plus(Duration.FromDays(weeks * 7));
+                current = current.PlusDays(weeks * 7);
                 bDays -= weeks * 6;
             }
             for (long i = 0; i < bDays; i++)
             {
-                current = current.Plus(Duration.FromDays(1));
+                current = current.PlusDays(1);
                 if (current.DayOfWeek == IsoDayOfWeek.Sunday)
-                    current = current.Plus(Duration.FromDays(1));
+                    current = current.PlusDays(1);
             }
             return current;
         }

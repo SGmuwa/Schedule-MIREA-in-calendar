@@ -47,16 +47,15 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
         /// <returns></returns>
         /// <exception cref="DetectiveException">Появилась проблема, связанная с обработкой Excel файла.</exception>
         /// <exception cref="System.IO.IOException">Во время работы с Excel file — файл стал недоступен.</exception>
-        public LinkedList<CoupleInCalendar> startAnInvestigation(ZonedDateTime start, ZonedDateTime finish, int startWeek)
+        public IEnumerable<CoupleInCalendar> startAnInvestigation(ZonedDateTime start, ZonedDateTime finish, int startWeek)
         {
             LinkedList<CoupleInExcel> couplesInExcel = startViewer();
             LinkedList<CoupleInCalendar> @out = new LinkedList<CoupleInCalendar>();
             foreach (CoupleInExcel line in couplesInExcel)
             {
                 @out.AddLastRange(SetterCouplesInCalendar.getCouplesByPeriod(
-                    start.toLocalDate(),
-                    finish.toLocalDate(),
-                    start.getZone(),
+                    start,
+                    finish,
                     startWeek,
                     line.start,
                     line.finish,
@@ -79,126 +78,105 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
          * @param start  Дата и время начала составления расписания.
          *               Стоит отметить, что если указать день начала с воскресенья,
          *               то в понедельник будет номер недели равный двум.
-         * @param finish Дата и время конца составления раписания.
+         * @param finish Дата и время конца составления расписания.
          * @throws DetectiveException Появилась проблема, связанная с обработкой Excel файла.
          * @throws IOException        Во время работы с Excel file - файл стал недоступен.
          * @see #startAnInvestigation(ZonedDateTime, ZonedDateTime, int) 
          */
-        public override LinkedList<CoupleInCalendar> startAnInvestigation(ZonedDateTime start, ZonedDateTime finish)
+        public override IEnumerable<CoupleInCalendar> StartAnInvestigation(ZonedDateTime start, ZonedDateTime finish)
         {
             return startAnInvestigation(start, finish, 1);
         }
 
-        /**
-         * Функция расчитывает рекомендуемое время начала построения текущего расписания.
-         *
-         * @param now Момент времени, который считается настоящим.
-         * @return Время начала занятий.
-         * @see #getFinishTime(ZonedDateTime)
-         */
-        public override ZonedDateTime getStartTime(ZonedDateTime now)
+        /// <summary>
+        /// Функция расчитывает рекомендуемое время начала построения текущего расписания.
+        /// </summary>
+        /// <param name="now">Момент времени, который считается настоящим.</param>
+        /// <returns>Время начала занятий.</returns>
+        /// <seealso cref="GetFinishTime(ZonedDateTime)"/>
+        public override ZonedDateTime GetStartTime(ZonedDateTime now)
         {
-            DetectiveDate.TwoZonedDateTime search;
-            if (Month.JANUARY.getValue() <= now.getMonth().getValue()
-                    && now.getMonth().getValue() <= Month.JUNE.getValue()
+            (ZonedDateTime? start, ZonedDateTime? finish) search;
+            if (IsoMonth.January <= (IsoMonth)now.Month
+                    && (IsoMonth)now.Month <= IsoMonth.June
             )
-            { // У нас загружано расписание для весны. Ищем начало.
+            { // У нас загружено расписание для весны. Ищем начало.
                 search = dateSettings.searchBeforeAfter(
-                        ZonedDateTime.of(
-                                LocalDate.of(now.getYear(), Month.FEBRUARY, 25),
-                                LocalTime.NOON,
-                                now.getZone()
-                        ),
-                        Duration.of(35, ChronoUnit.DAYS)
+                    now.Zone.AtLeniently(new LocalDateTime(now.Year, (int)IsoMonth.February, 25, 12, 00)),
+                    Duration.FromDays(35)
                 );
             }
             else
-            { // У нас загружано расписание для осени. Ищем начало.
+            { // У нас загружено расписание для осени. Ищем начало.
                 search = dateSettings.searchBeforeAfter(
-                        ZonedDateTime.of(
-                                LocalDate.of(now.getYear(), Month.SEPTEMBER, 25),
-                                LocalTime.NOON,
-                                now.getZone()
-                        ),
-                        Duration.of(35, ChronoUnit.DAYS)
+                    now.Zone.AtLeniently(new LocalDateTime(now.Year, (int)IsoMonth.September, 25, 12, 00)),
+                    Duration.FromDays(35)
                 );
             }
-            if (search.getLeft() == null)
-                return guessStartTime(now); // Не нашёл? Давай гадать!
-
-            return search.getLeft();
+            return search.start.HasValue ? search.start.Value : guessStartTime(now);
         }
 
-        /**
-         * Метод отвечает за то, чтобы догадаться, в какой день начнётся семестр.
-         * @param now Любая дата требуемого семестра.
-         * @return Предполагаемая дата начала семестра.
-         */
+        /// <summary>
+        /// Метод отвечает за то, чтобы догадаться, в какой день начнётся семестр.
+        /// </summary>
+        /// <param name="now">Любая дата требуемого семестра.</param>
+        /// <returns>Предполагаемая дата начала семестра.</returns>
         protected static ZonedDateTime guessStartTime(ZonedDateTime now)
         {
-            if (Month.JANUARY.getValue() <= now.getMonth().getValue()
-                    && now.getMonth().getValue() <= Month.JUNE.getValue()
+            if (IsoMonth.January <= (IsoMonth)now.Month
+                    && (IsoMonth)now.Month <= IsoMonth.June
             )
-            { // У нас загружано расписание для весны
+            { // У нас загружено расписание для весны
               // Установить на начало января
-                ZonedDateTime current = ZonedDateTime.of(
-                        LocalDate.of(now.getYear(), 1, 1),
-                        LocalTime.of(0, 0, 0),
-                        now.getZone()
-                );
+                ZonedDateTime current = now.Zone.AtStartOfDay(new LocalDate(now.Year, (int)IsoMonth.January, 1));
                 // Прибавить 32 будни+суббота дней
                 current = AddBusinessDaysToDate(current, 32);
-                switch (current.getDayOfWeek())
+                switch (current.DayOfWeek)
                 {
                     //case MONDAY:
                     //    break;
-                    case TUESDAY:
-                        current = current.minus(1, ChronoUnit.DAYS);
+                    case IsoDayOfWeek.Tuesday:
+                        current = current.PlusDays(-1);
                         break;
-                    case WEDNESDAY:
-                        current = current.minus(2, ChronoUnit.DAYS);
+                    case IsoDayOfWeek.Wednesday:
+                        current = current.PlusDays(-2);
                         break;
                     //case THURSDAY:
                     //    break;
                     //case FRIDAY:
                     //    break;
-                    case SATURDAY:
-                        current = current.plus(2, ChronoUnit.DAYS);
+                    case IsoDayOfWeek.Saturday:
+                        current = current.PlusDays(2);
                         break;
-                    case SUNDAY:
-                        current = current.plus(1, ChronoUnit.DAYS);
+                    case IsoDayOfWeek.Sunday:
+                        current = current.PlusDays(1);
                         break;
                 }
                 return current;
             }
             else
-            { // У нас загружано расписание для осени.
-                ZonedDateTime current = ZonedDateTime.of(
-                        LocalDate.of(now.getYear(), 9, 1),
-                        LocalTime.of(0, 0, 0),
-                        now.getZone()
-                );
-                switch (current.getDayOfWeek())
+            { // У нас загружено расписание для осени.
+                ZonedDateTime current = now.Zone.AtStartOfDay(new LocalDate(now.Year, (int)IsoMonth.September, 1));
+                switch (current.DayOfWeek)
                 {
-                    case SATURDAY:
-                        current = current.plus(2, ChronoUnit.DAYS);
+                    case IsoDayOfWeek.Saturday:
+                        current = current.PlusDays(2);
                         break;
-                    case SUNDAY:
-                        current = current.plus(1, ChronoUnit.DAYS);
+                    case IsoDayOfWeek.Sunday:
+                        current = current.PlusDays(1);
                         break;
                 }
                 return current;
             }
         }
 
-        /**
-         * Функция расчитывает рекомендуемое время конца построения текущего расписания.
-         *
-         * @param now Момент времени, который считается настоящим.
-         * @return Время
-         * @see #getStartTime(ZonedDateTime)
-         */
-        public override ZonedDateTime getFinishTime(ZonedDateTime now)
+        /// <summary>
+        /// Функция расчитывает рекомендуемое время конца построения текущего расписания.
+        /// </summary>
+        /// <param name="now">Момент времени, который считается настоящим.</param>
+        /// <returns>Время</returns>
+        /// <seealso cref="GetStartTime(ZonedDateTime)"/>
+        public override ZonedDateTime GetFinishTime(ZonedDateTime now)
         {
             /*
              * Обращаемся к зачётным неделям.
@@ -207,9 +185,9 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
              * Мы отнимаем секунду и получаем последнюю секунду, когда могут проводится
              * семестровые занятия.
              */
-            ZonedDateTime current = DetectiveLastWeekS.static_getStartTime(this.dateSettings, now).minus(1, ChronoUnit.SECONDS);
-            if (current.getDayOfWeek().Equals(DayOfWeek.SUNDAY))
-                current = current.minus(1, ChronoUnit.DAYS);
+            ZonedDateTime current = DetectiveLastWeekS.GetStartTime(this.dateSettings, now).PlusMinutes(-1);
+            if (current.DayOfWeek == IsoDayOfWeek.Sunday)
+                current = current.PlusDays(-1);
             return current;
         }
 
@@ -659,9 +637,9 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
                 foreach (int numberOfWeek /*Номер недели*/ in weeks)
                 {
                     // Передвигаемся на неделю.
-                    current = start.Plus(Duration.FromDays((numberOfWeek - startWeek) * 7));
+                    current = start.PlusDays((numberOfWeek - startWeek) * 7);
                     int needAddDayOfWeek = (int)dayOfWeek - (int)current.DayOfWeek;
-                    current = current.Plus(Duration.FromDays(needAddDayOfWeek));
+                    current = current.PlusDays(needAddDayOfWeek);
                     if (
                             ZonedDateTime.Comparer.Instant.Compare(current, start) < 0 ||  // Использование LocalTime.MAX не безопасно: в дне может и не быть максимального локального времени. Использовано вместо этого прибавление одного дня и время 00:00.
                                     ZonedDateTime.Comparer.Instant.Compare(current, finish) >= 0)

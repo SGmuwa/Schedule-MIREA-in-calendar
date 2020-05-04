@@ -33,7 +33,7 @@ namespace ru.mirea.xlsical.interpreter
         /// <summary>
         /// Путь до файла *.ics.
         /// </summary>
-        public readonly string CalFile;
+        public readonly FileInfo CalFile;
 
         /// <summary>
         /// Количество созданных мероприятий.
@@ -52,7 +52,7 @@ namespace ru.mirea.xlsical.interpreter
         /// <param name="calFile">Путь до файла *.ics.</param>
         /// <param name="count">Количество созданных мероприятий.</param>
         /// <param name="messages">Сообщение от обработчика пользователю клиента.</param>
-        public PackageToProviderHTTP(object context, string calFile, int count, string messages)
+        public PackageToProviderHTTP(object context, FileInfo calFile, int count, string messages)
         : base(context) => (CalFile, Count, Messages) = (calFile, count, messages);
 
         /// <summary>
@@ -69,6 +69,6 @@ namespace ru.mirea.xlsical.interpreter
         }
 
         public override string ToString()
-        => $"{nameof(PackageToProviderHTTP)}{{ CalFile='{CalFile}', Count={Count}, Messages='{Messages}'}}";
+            => $"{nameof(PackageToProviderHTTP)}{{ CalFile='{CalFile}', Count={Count}, Messages='{Messages}'}}";
     }
 }

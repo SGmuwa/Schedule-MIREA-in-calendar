@@ -37,7 +37,7 @@ namespace ru.mirea.xlsical.CouplesDetective
         private DetectiveDate settingDates;
         public readonly FileInfo pathToCache;
 
-        public CoupleHistorian(ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, ZonedDateTime now, PercentReady pr, FileInfo pathToCache)
+        public CoupleHistorian(ZonedDateTime now, ExternalDataUpdater edUpdater, DetectiveDate detectiveDate, PercentReady pr, FileInfo pathToCache)
         {
             PercentReady PR_loadCache = new PercentReady(pr, 0.1f);
             PercentReady PR_updateCache = new PercentReady(pr, 0.9f);
@@ -64,7 +64,7 @@ namespace ru.mirea.xlsical.CouplesDetective
             updateCache(PR_updateCache);
         }
 
-        protected CoupleHistorian(ZonedDateTime now, PercentReady pr = null, FileInfo pathToCache = null)
+        public CoupleHistorian(ZonedDateTime now, PercentReady pr = null, FileInfo pathToCache = null)
         {
             if (pathToCache == null)
                 pathToCache = new FileInfo("ArrayListOfCouplesInCalendar.dat");
@@ -163,7 +163,7 @@ namespace ru.mirea.xlsical.CouplesDetective
                 cycles[0].Ready = 1.0f;
             }
             // Всё, что позже этой метки - можно менять. Всё, что раньше - нельзя.
-            ZonedDateTime deadLine = now.Minus(Duration.FromDays(4));
+            ZonedDateTime deadLine = now.PlusDays(-4);
             // Добавим то, что было раньше.
             {
                 float size = cache.Count;

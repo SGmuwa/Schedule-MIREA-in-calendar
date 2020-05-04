@@ -18,190 +18,172 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package ru.mirea.xlsical.Server;
+using System;
+using NodaTime;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading;
+using ru.mirea.xlsical.CouplesDetective;
+using ru.mirea.xlsical.CouplesDetective.xl;
+using ru.mirea.xlsical.interpreter;
+using ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import ru.mirea.xlsical.CouplesDetective.CoupleHistorian;
-import ru.mirea.xlsical.CouplesDetective.CoupleInCalendar;
-import ru.mirea.xlsical.CouplesDetective.ExportCouplesToICal;
-import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.*;
-import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
-import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
-import ru.mirea.xlsical.interpreter.PackageToClient;
-import ru.mirea.xlsical.interpreter.PackageToServer;
-import ru.mirea.xlsical.interpreter.PercentReady;
+namespace ru.mirea.xlsical.Server
+{
+    /// <summary>
+    /// Класс, который выступает в роле исполнителя обработчика
+    /// из excel файлов в ics расписание.
+    /// Используйте <see cref="add(PackageToICalMaker)"/> для добавления задания.
+    /// Используйте <see cref="take" для получения ответа.
+    /// </summary>
+    public class TaskExecutor
+    {
+        private readonly BlockingCollection<PackageToICalMaker> qIn;
+        private readonly BlockingCollection<PackageToProviderHTTP> qOut;
+        private readonly CoupleHistorian coupleHistorian;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
+        public TaskExecutor(CoupleHistorian manualHistorian = null)
+        {
+            this.qIn = new BlockingCollection<PackageToICalMaker>(new ConcurrentQueue<PackageToICalMaker>());
+            this.qOut = new BlockingCollection<PackageToProviderHTTP>(new ConcurrentQueue<PackageToProviderHTTP>());
+            this.coupleHistorian = manualHistorian == null ? new CoupleHistorian(DateTimeZoneProviders.Tzdb["UTC"].AtStrictly(LocalDateTime.FromDateTime(DateTime.UtcNow))) : manualHistorian;
+        }
 
-/**
- * Класс, который выступает в роле исполнителя обработчика
- * из excel файлов в ics расписание.
- * Используйте {@code add} для добавления задания.
- * Используйте {@code take} для получения ответа.
- *
- * @see #add(PackageToServer)
- * @see #take()
- */
-public class TaskExecutor implements Runnable {
+        public TaskExecutor(PercentReady pr)
+        : this(new CoupleHistorian(DateTimeZoneProviders.Tzdb["UTC"].AtStrictly(LocalDateTime.FromDateTime(DateTime.UtcNow)), pr))
+        { }
 
-    private final BlockingQueue<PackageToServer> qIn;
-    private final BlockingQueue<PackageToClient> qOut;
-    private final CoupleHistorian coupleHistorian;
+        /// <summary>
+        /// Получает готовый элемент из очереди и удаляет его из очереди.
+        /// Если выходная очередь пуста, то ждёт появления элемента.
+        /// В случае, если ожидание прервать, то сработает исключение.
+        /// </summary>
+        /// <returns>Пакет от обработчика.</returns>
+        public PackageToProviderHTTP take() => qOut.Take();
 
-    public TaskExecutor(CoupleHistorian manualHistorian) {
-        this.qIn = new LinkedBlockingQueue<>();
-        this.qOut = new LinkedBlockingQueue<>();
-        this.coupleHistorian = manualHistorian;
-    }
+        /// <summary>
+        /// Добавляет элемент в очередь задач.
+        /// </summary>
+        /// <param name="pack">Пакет с требованиями к решению задачи.</param>
+        public void add(PackageToICalMaker pack) => qIn.Add(pack);
 
-    public TaskExecutor() throws IOException {
-        this(new CoupleHistorian());
-    }
+        /// <summary>
+        /// Запускает выполнение задач до тех пор, пока не вызовется interrupt потока.
+        /// По факту - циклический вызов <see cref="step"/>.
+        /// </summary>
+        public void run()
+        {
+            while (!Thread.CurrentThread.ThreadState.HasFlag(ThreadState.AbortRequested))
+                try
+                {
+                    step();
+                }
+                catch (System.Threading.ThreadAbortException)
+                {
+                    return;
+                }
+        }
 
-    public TaskExecutor(PercentReady pr) throws IOException {
-        this(new CoupleHistorian(pr));
-    }
+        /// <summary>
+        /// Берёт из входной очереди <see cref="add(PackageToICalMaker)"/> входной элемент,
+        /// и отправляет его в выходную очередь <see cref="take"/>.
+        /// </summary>
+        /// <exception cref="OperationCanceledException">Срабатывает исключение в случае прерывания ожидания из входной очереди.</exception>
+        public void step() => qOut.Add(monoStep(qIn.Take()));
 
-    /**
-     * Получает готовый элемент из очереди и удаляет его из очереди.
-     * Если выходная очередь пуста, то ждёт появления элемента.
-     * В случае, если ожидание прервать, то сработает исключение {@link java.lang.InterruptedException}.
-     * @return Пакет от обработчика.
-     */
-    public PackageToClient take() throws InterruptedException {
-        return qOut.take();
-    }
-
-    /**
-     * Добавляет элемент в очередь задач.
-     * @param pack Пакет с требованиями к решению задачи.
-     */
-    public void add(PackageToServer pack) {
-        qIn.add(pack);
-    }
-
-    /**
-     * Запускает выполнение задач до тех пор, пока не вызовется {@code interrupt} потока.
-     * По факту - циклический вызов {@link #step()}.
-     */
-    @Override
-    public void run() {
-        while(!Thread.currentThread().isInterrupted())
-            try {
-                step();
-            } catch (InterruptedException e){
-                return;
+        /// <summary>
+        /// Выполняет обработку пакета без использования очередей.
+        /// Не рекомендуется использовать данный метод, так как он
+        /// заставляет ждать выполнения работы входной поток.
+        /// </summary>
+        /// <param name="pkg">Пакет с требованиями к решению задачи.</param>
+        /// <returns>Пакет от обработчика.</returns>
+        public PackageToProviderHTTP monoStep(PackageToICalMaker pkg)
+        {
+            if (pkg == null)
+            {
+                return new PackageToProviderHTTP(null, null, 0, "Ошибка: была предпринята попытка обработать пустой пакет.");
             }
-    }
-
-    /**
-     * Берёт из входной очереди (see how to {@link #add(PackageToServer) add} to input queue) входной элемент,
-     * и отправляет его в выходную очередь (see how to {@link #take() take} from queue).
-     * @throws InterruptedException Срабатывает исключение в случае прерывания ожидания из входной очереди.
-     */
-    public void step() throws InterruptedException {
-        qOut.add(monoStep(qIn.take()));
-    }
-
-    /**
-     * Выполняет обработку пакета без использования очередей. <p/>
-     * <u>Не рекомендуется использовать</u> данный метод,
-     * так как он заставляет ждать выполнения работы входной поток.
-     * Если входящих пакетов из интернета будет приходить быстрее,
-     * чем обрабатываться, то нет гарантий на сохранность входных пакетов.
-     * @param pkg Пакет с требованиями к решению задачи.
-     * @return Пакет от обработчика.
-     */
-    public PackageToClient monoStep(PackageToServer pkg) {
-        if(pkg == null) {
-            return new PackageToClient(null, null, 0, "Ошибка: была предпринята попытка обработать пустой пакет.");
+            if (pkg.queryCriteria == null)
+            {
+                pkg.percentReady.Ready = 1.0f;
+                return new PackageToProviderHTTP(pkg.Context, null, 0, "Ошибка: отсутствуют критерии поиска.");
+            }
+            List<CoupleInCalendar> couples = coupleHistorian.getCouples(pkg.queryCriteria, new PercentReady(pkg.percentReady, 0.6f));
+            FileInfo iCalFile = ExportCouplesToICal.start(couples, new PercentReady(pkg.percentReady, 0.4f));
+            Console.WriteLine(iCalFile);
+            if (iCalFile != null)
+                return new PackageToProviderHTTP(
+                    pkg.Context,
+                    iCalFile,
+                    couples.Count,
+                    "ok.");
+            else
+                return new PackageToProviderHTTP(
+                    pkg.Context,
+                    null,
+                    couples.Count,
+                    "empty.");
         }
-        if(pkg.queryCriteria == null) {
-            pkg.percentReady.setReady(1.0f);
-            return new PackageToClient(pkg.ctx, null, 0, "Ошибка: отстствуют критерии поиска.");
-        }
-        List<CoupleInCalendar> couples = coupleHistorian.getCouples(pkg.queryCriteria, new PercentReady(pkg.percentReady, 0.6f));
-        String iCalFile = ExportCouplesToICal.start(couples, new PercentReady(pkg.percentReady, 0.4f));
-        System.out.println(iCalFile);
-        if(iCalFile != null)
-            return new PackageToClient(
-                pkg.ctx,
-                iCalFile,
-                couples.size(),
-                "ok.");
-        else
-            return new PackageToClient(
-                pkg.ctx,
-                null,
-                couples.size(),
-                "empty.");
-    }
 
-    /**
-     * Открывает все excel файлы, которые были переданы из массива путей до файлов.
-     * @param filesStr Массив строк, который символизируют путь до файлов Excel.
-     * @return Массив-список открытых Excel файлов.
-     */
-    private static ArrayList<ExcelFileInterface> openExcelFiles(String[] filesStr) {
-        ArrayList<ExcelFileInterface> output = new ArrayList<>(filesStr.length);
-        for(int index = filesStr.length - 1; index >= 0; index--) {
-            output.addAll(openExcelFiles(filesStr[index]));
+        /// <summary>
+        /// Открывает все excel файлы, которые были переданы из массива путей до файлов.
+        /// </summary>
+        /// <param name="filesStr">Массив строк, который символизируют путь до файлов Excel.</param>
+        /// <returns>Массив-список открытых Excel файлов.</returns>
+        private static List<ExcelFileInterface> openExcelFiles(string[] filesStr)
+        {
+            List<ExcelFileInterface> output = new List<ExcelFileInterface>(filesStr.Length);
+            for (int index = filesStr.Length - 1; index >= 0; index--)
+                output.AddRange(openExcelFiles(filesStr[index]));
+            return output;
         }
-        return output;
-    }
 
-    /**
-     * Открывает все Excel файлы, которые были переданы в колекции путей до файлов.
-     * @param filesStr Коллекция строк, который символизируют путь до файлов Excel.
-     * @return Массив-список открытых Excel файлов.
-     */
-    private static ArrayList<ExcelFileInterface> openExcelFiles(Collection<? extends String> filesStr) {
-        int size = filesStr.size();
-        ArrayList<ExcelFileInterface> output = new ArrayList<>(size);
-        for(String str : filesStr) {
-            output.addAll(openExcelFiles(str));
+        /// <summary>
+        /// Открывает все Excel файлы, которые были переданы в колекции путей до файлов.
+        /// </summary>
+        /// <param name="filesStr">Коллекция строк, который символизируют путь до файлов Excel.</param>
+        /// <returns>Массив-список открытых Excel файлов.</returns>
+        private static List<ExcelFileInterface> openExcelFiles(ICollection<string> filesStr)
+        {
+            int size = filesStr.Count;
+            List<ExcelFileInterface> output = new List<ExcelFileInterface>(size);
+            foreach (string str in filesStr)
+                output.AddRange(openExcelFiles(str));
+            return output;
         }
-        return output;
-    }
 
-    /**
-     * Открывает все Excel файлы, которые были переданы из получателя путей до файлов.
-     * @param filesStr Перечеслитель строк, который символизируют путь до файлов Excel.
-     * @return Связный-список открытых Excel файлов.
-     */
-    private static LinkedList<ExcelFileInterface> openExcelFiles(Iterable<? extends String> filesStr) {
-        LinkedList<ExcelFileInterface> output = new LinkedList<>();
-        for(String str : filesStr) {
-            output.addAll(openExcelFiles(str));
+        /// <summary>
+        /// Открывает все Excel файлы, которые были переданы из получателя путей до файлов.
+        /// </summary>
+        /// <param name="filesStr">Перечеслитель строк, который символизируют путь до файлов Excel.</param>
+        /// <returns>Связный-список открытых Excel файлов.</returns>
+        private static LinkedList<ExcelFileInterface> openExcelFiles(IEnumerable<string> filesStr)
+        {
+            LinkedList<ExcelFileInterface> output = new LinkedList<ExcelFileInterface>();
+            foreach (String str in filesStr)
+                output.AddLastRange(openExcelFiles(str));
+            return output;
         }
-        return output;
-    }
 
-    /**
-     * Открывает Excel файл, который был передан по fileStr.
-     * @param fileStr Путь до файла Excel.
-     * @return Список открытых Excel файлов.
-     */
-    private static ArrayList<? extends ExcelFileInterface> openExcelFiles(String fileStr) {
-        File a = new File(fileStr);
-        if(!a.canRead()) {
-            System.out.println("TaskExecutor::openExcelFiles(String fileStr) - can't reed file " + fileStr);
-            return new ArrayList<>();
-        }
-        try {
-            return OpenFile.newInstances(a.getAbsolutePath());
-        } catch (IOException | InvalidFormatException error) {
-            error.printStackTrace();
-            return new ArrayList<>();
+        /// <summary>
+        /// Открывает Excel файл, который был передан по fileStr.
+        /// </summary>
+        /// <param name="fileStr">Путь до файла Excel.</param>
+        /// <returns>Список открытых Excel файлов.</returns>
+        private static List<ExcelFileInterface> openExcelFiles(string fileStr)
+        {
+            FileInfo a = new FileInfo(fileStr);
+            try
+            {
+                return OpenFile.NewInstances(a);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message + e.StackTrace);
+                return new List<ExcelFileInterface>();
+            }
         }
     }
 }
