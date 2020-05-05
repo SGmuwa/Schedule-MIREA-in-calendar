@@ -47,11 +47,11 @@ namespace ru.mirea.xlsical.Server
         {
             this.qIn = new BlockingCollection<PackageToMakerICal>(new ConcurrentQueue<PackageToMakerICal>());
             this.qOut = new BlockingCollection<PackageToProviderHTTP>(new ConcurrentQueue<PackageToProviderHTTP>());
-            this.coupleHistorian = manualHistorian == null ? new CoupleHistorian(DateTimeZoneProviders.Tzdb["UTC"].AtStrictly(LocalDateTime.FromDateTime(DateTime.UtcNow))) : manualHistorian;
+            this.coupleHistorian = manualHistorian == null ? new CoupleHistorian(DateTimeZone.Utc.AtStrictly(LocalDateTime.FromDateTime(DateTime.UtcNow))) : manualHistorian;
         }
 
         public TaskExecutor(PercentReady pr)
-        : this(new CoupleHistorian(DateTimeZoneProviders.Tzdb["UTC"].AtStrictly(LocalDateTime.FromDateTime(DateTime.UtcNow)), pr))
+        : this(new CoupleHistorian(DateTimeZone.Utc.AtStrictly(LocalDateTime.FromDateTime(DateTime.UtcNow)), pr))
         { }
 
         /// <summary>

@@ -33,28 +33,28 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
         public void calculateDays()
         {
             Assert.Equal(2, GetCounts6Days(
-                DateTimeZoneProviders.Tzdb["UTC"].AtStartOfDay(new LocalDate(2018, 12, 3)),
-                DateTimeZoneProviders.Tzdb["UTC"].AtStartOfDay(new LocalDate(2018, 12, 4))));
+                DateTimeZone.Utc.AtStartOfDay(new LocalDate(2018, 12, 3)),
+                DateTimeZone.Utc.AtStartOfDay(new LocalDate(2018, 12, 4))));
 
             Assert.Equal(1, GetCounts6Days(
-                DateTimeZoneProviders.Tzdb["UTC"].AtStartOfDay(new LocalDate(2018, 12, 1)),
-                DateTimeZoneProviders.Tzdb["UTC"].AtStartOfDay(new LocalDate(2018, 12, 2))));
+                DateTimeZone.Utc.AtStartOfDay(new LocalDate(2018, 12, 1)),
+                DateTimeZone.Utc.AtStartOfDay(new LocalDate(2018, 12, 2))));
 
             Assert.Equal(1, GetCounts6Days(
-                DateTimeZoneProviders.Tzdb["UTC"].AtStartOfDay(new LocalDate(2018, 12, 2)),
-                DateTimeZoneProviders.Tzdb["UTC"].AtStartOfDay(new LocalDate(2018, 12, 3))));
+                DateTimeZone.Utc.AtStartOfDay(new LocalDate(2018, 12, 2)),
+                DateTimeZone.Utc.AtStartOfDay(new LocalDate(2018, 12, 3))));
 
             Assert.Equal(6, GetCounts6Days(
-                DateTimeZoneProviders.Tzdb["UTC"].AtStartOfDay(new LocalDate(2000, 1, 1)),
-                DateTimeZoneProviders.Tzdb["UTC"].AtStartOfDay(new LocalDate(2000, 1, 7))));
+                DateTimeZone.Utc.AtStartOfDay(new LocalDate(2000, 1, 1)),
+                DateTimeZone.Utc.AtStartOfDay(new LocalDate(2000, 1, 7))));
 
             Assert.Equal(
-                DateTimeZoneProviders.Tzdb["UTC"].AtStartOfDay(new LocalDate(2018, 12, 4)),
-                AddBusinessDaysToDate(DateTimeZoneProviders.Tzdb["UTC"].AtStartOfDay(new LocalDate(2018, 12, 2)), 1));
+                DateTimeZone.Utc.AtStartOfDay(new LocalDate(2018, 12, 4)),
+                AddBusinessDaysToDate(DateTimeZone.Utc.AtStartOfDay(new LocalDate(2018, 12, 2)), 1));
 
             {
-                ZonedDateTime a = DateTimeZoneProviders.Tzdb["UTC"].AtStartOfDay(new LocalDate(2019, 1, 1));
-                ZonedDateTime b = DateTimeZoneProviders.Tzdb["UTC"].AtStartOfDay(new LocalDate(2019, 2, 10));
+                ZonedDateTime a = DateTimeZone.Utc.AtStartOfDay(new LocalDate(2019, 1, 1));
+                ZonedDateTime b = DateTimeZone.Utc.AtStartOfDay(new LocalDate(2019, 2, 10));
                 Assert.Equal(GetCounts6Days(a, b), GetCounts6Days(a, AddBusinessDaysToDate(a, GetCounts6Days(a, b) - 1)));
             }
         }
