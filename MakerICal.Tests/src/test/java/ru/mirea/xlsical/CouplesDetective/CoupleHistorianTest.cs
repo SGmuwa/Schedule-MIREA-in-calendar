@@ -16,62 +16,35 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package ru.mirea.xlsical.CouplesDetective;
+using Xunit;
+using System.Collections.Generic;
 
-import org.junit.Test;
-import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveDate;
-import ru.mirea.xlsical.interpreter.PercentReady;
-
-import java.io.File;
-import java.io.IOException;
-import java.time.ZonedDateTime;
-import java.util.LinkedList;
-
-import static org.junit.Assert.assertEquals;
-
-public class CoupleHistorianTest
-        extends CoupleHistorian { // Для использования protected
-
-
-    public CoupleHistorianTest() throws IOException {
-        super(new ExternalDataUpdater(false), new DetectiveDate(), ZonedDateTime.now(), new PercentReady());
-    }
-
-    /*
-    @Test
-    public void testRemove40from90() throws IOException {
-        LinkedList<CoupleInCalendar> a = CoupleHistorian.static_loadCache(new File("tests/big/small.dat"));
-        LinkedList<CoupleInCalendar> b = CoupleHistorian.static_loadCache(new File("tests/big/GlobalTaskExecutor.java21740.dat"));
-        System.out.println(b.size());
-        b.removeIf((coup) -> coup.nameOfGroup.charAt(0) != '1');
-        System.out.println(b.size());
-        for (CoupleInCalendar coup :
-                b) {
-            System.out.println(coup);
+namespace ru.mirea.xlsical.CouplesDetective
+{
+    public class CoupleHistorianTest
+    {
+        [Fact]
+        public void testBigCache()
+        {
+            CoupleHistorian a1 = GlobalTaskExecutor.coupleHistorian;
+            CoupleHistorian a2 = GlobalTaskExecutor.coupleHistorian;
+            LinkedList<CoupleInCalendar> c11 = a1.Cache;
+            long f1 = GlobalTaskExecutor.fileForCacheCoupleHistorian.Length;
+            a1.SaveCache();
+            a1.LoadCache();
+            long f2 = GlobalTaskExecutor.fileForCacheCoupleHistorian.Length;
+            LinkedList<CoupleInCalendar> c12 = a1.Cache;
+            LinkedList<CoupleInCalendar> c21 = a2.Cache;
+            a2.SaveCache();
+            a2.LoadCache();
+            long f3 = GlobalTaskExecutor.fileForCacheCoupleHistorian.Length;
+            LinkedList<CoupleInCalendar> c22 = a2.Cache;
+            Assert.Equal(c11, c12);
+            Assert.Equal(c12, c21);
+            Assert.Equal(c21, c22);
+            Assert.Equal(c11, c22);
+            Assert.Equal(f1, f2);
+            Assert.Equal(f1, f3);
         }
-    }*/
-
-    @Test
-    public void testBigCache() throws IOException {
-        CoupleHistorian a1 = GlobalTaskExecutor.coupleHistorian;
-        CoupleHistorian a2 = GlobalTaskExecutor.coupleHistorian;
-        LinkedList<CoupleInCalendar> c11 = a1.getCache();
-        long f1 = GlobalTaskExecutor.fileForCacheCoupleHistorian.length();
-        a1.saveCache();
-        a1.loadCache();
-        long f2 = GlobalTaskExecutor.fileForCacheCoupleHistorian.length();
-        LinkedList<CoupleInCalendar> c12 = a1.getCache();
-        LinkedList<CoupleInCalendar> c21 = a2.getCache();
-        a2.saveCache();
-        a2.loadCache();
-        long f3 = GlobalTaskExecutor.fileForCacheCoupleHistorian.length();
-        LinkedList<CoupleInCalendar> c22 = a2.getCache();
-        assertEquals(c11, c12);
-        assertEquals(c12, c21);
-        assertEquals(c21, c22);
-        assertEquals(c11, c22);
-        assertEquals(f1, f2);
-        assertEquals(f1, f3);
     }
-
 }

@@ -33,7 +33,6 @@ namespace ru.mirea.xlsical.CouplesDetective
     public class CoupleHistorian
     {
         private readonly ExternalDataUpdater edUpdater;
-        private LinkedList<CoupleInCalendar> cache;
         private DetectiveDate settingDates;
         public readonly FileInfo pathToCache;
 
@@ -52,11 +51,11 @@ namespace ru.mirea.xlsical.CouplesDetective
             {
                 try
                 {
-                    loadCache();
+                    LoadCache();
                 }
                 catch (IOException)
                 {
-                    cache = null;
+                    Cache = null;
                 }
             }
             PR_loadCache.Ready = 1f;
@@ -89,21 +88,18 @@ namespace ru.mirea.xlsical.CouplesDetective
             if (this.pathToCache != null && this.pathToCache.Exists)
                 try
                 {
-                    loadCache();
+                    LoadCache();
                 }
                 catch (IOException)
                 {
-                    cache = null;
+                    Cache = null;
                 }
             PR_constructor.Ready = 0.75f;
             // Всегда нужно обновить кэш после простоя.
             updateCache(new PercentReady(pr, 1f - 0.0025f));
         }
 
-        protected LinkedList<CoupleInCalendar> getCache()
-        {
-            return cache;
-        }
+        public LinkedList<CoupleInCalendar> Cache { get; private set; }
 
         private ZonedDateTime now;
 
@@ -129,8 +125,8 @@ namespace ru.mirea.xlsical.CouplesDetective
             PercentReady sort = new PercentReady(pr, 2f / 16f);
             LinkedList<CoupleInCalendar> outCache = new LinkedList<CoupleInCalendar>(); // Итоговый кэш
             LinkedList<CoupleInCalendar> newCache = new LinkedList<CoupleInCalendar>(); // То, что получили из МИРЭА
-            if (this.cache == null)
-                this.cache = new LinkedList<CoupleInCalendar>();
+            if (this.Cache == null)
+                this.Cache = new LinkedList<CoupleInCalendar>();
             ZonedDateTime now = this.now == null ? new ZonedDateTime(LocalDateTime.FromDateTime(System.DateTime.UtcNow), DateTimeZone.Utc, Offset.Zero) : this.now;
 
             {
@@ -166,9 +162,9 @@ namespace ru.mirea.xlsical.CouplesDetective
             ZonedDateTime deadLine = now.PlusDays(-4);
             // Добавим то, что было раньше.
             {
-                float size = cache.Count;
+                float size = Cache.Count;
                 int i = 0;
-                foreach (CoupleInCalendar couple in cache)
+                foreach (CoupleInCalendar couple in Cache)
                 {
                     if (ZonedDateTime.Comparer.Instant.Compare(couple.DateAndTimeOfCouple, deadLine) < 0)
                     { // Добавим то, что было до обновления.
@@ -196,23 +192,23 @@ namespace ru.mirea.xlsical.CouplesDetective
             }
             sortByDateTime(outCache, sort);
             mergeCouples(outCache);
-            cache = outCache;
+            Cache = outCache;
             if (pathToCache != null)
-                saveCache();
+                SaveCache();
         }
 
-        protected void loadCache()
+        public void LoadCache()
         {
             LinkedList<CoupleInCalendar> outCache = static_loadCache(pathToCache);
             sortByDateTime(outCache, new PercentReady());
             mergeCouples(outCache);
-            cache = outCache;
+            Cache = outCache;
         }
 
         protected static LinkedList<CoupleInCalendar> static_loadCache(FileInfo pathToCache)
-        => SaverLoaderClass.ReadFromBinaryFile<LinkedList<CoupleInCalendar>>(pathToCache);
+            => SaverLoaderClass.ReadFromBinaryFile<LinkedList<CoupleInCalendar>>(pathToCache);
 
-        protected void saveCache() => SaverLoaderClass.WriteToBinaryFile(pathToCache, cache);
+        public void SaveCache() => SaverLoaderClass.WriteToBinaryFile(pathToCache, Cache);
 
         /// <summary>
         /// Получение календарного расписания по заданным критериям.
@@ -224,7 +220,7 @@ namespace ru.mirea.xlsical.CouplesDetective
         public List<CoupleInCalendar> getCouples(Seeker queryCriteria, PercentReady percentReady)
         {
             percentReady.Ready = 0.0f;
-            List<CoupleInCalendar> @out = new List<CoupleInCalendar>(cache.Count);
+            List<CoupleInCalendar> @out = new List<CoupleInCalendar>(Cache.Count);
             Regex p;
             try
             {
@@ -235,8 +231,8 @@ namespace ru.mirea.xlsical.CouplesDetective
                 p = null;
             }
             int ready = 0;
-            int size = cache.Count;
-            foreach (CoupleInCalendar couple in cache)
+            int size = Cache.Count;
+            foreach (CoupleInCalendar couple in Cache)
             {
                 /*
 
