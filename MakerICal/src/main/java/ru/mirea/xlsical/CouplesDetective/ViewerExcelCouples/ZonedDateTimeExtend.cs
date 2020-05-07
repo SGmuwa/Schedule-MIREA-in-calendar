@@ -26,7 +26,7 @@ namespace NodaTime
         /// Returns the result of adding a increment of days to this zoned date and time.
         /// </summary>
         /// <param name="that">Zoned date and time.</param>
-        /// <param name="days">The number of hours to add</param>
+        /// <param name="days">The number of days to add.</param>
         /// <returns>A new NodaTime.ZonedDateTime representing the result of the addition.</returns>
         /// <exception cref="NodaTime.SkippedTimeException">Exception thrown to indicate that the specified
         /// local time doesn't exist in a particular time zone due to daylight saving time changes.</exception>
@@ -35,5 +35,19 @@ namespace NodaTime
         [PureAttribute]
         public static ZonedDateTime PlusDays(this ZonedDateTime that, int days)
             => that.Zone.AtStrictly(that.LocalDateTime.Date.PlusDays(days).At(that.LocalDateTime.TimeOfDay));
+
+        /// <summary>
+        /// Returns the result of adding a increment of ISO weeks to this zoned date and time.
+        /// </summary>
+        /// <param name="that">Zoned date and time.</param>
+        /// <param name="IsoWeeks">The number of ISO weeks to add.</param>
+        /// <returns>A new NodaTime.ZonedDateTime representing the result of the addition.</returns>
+        /// <exception cref="NodaTime.SkippedTimeException">Exception thrown to indicate that the specified
+        /// local time doesn't exist in a particular time zone due to daylight saving time changes.</exception>
+        /// <exception cref="NodaTime.AmbiguousTimeException">Exception thrown to indicate that the specified
+        /// local date/time occurs twice in a particular time zone due to daylight saving time changes.</exception>
+        [PureAttribute]
+        public static ZonedDateTime PlusWeeks(this ZonedDateTime that, int IsoWeeks)
+            => that.PlusDays(7 * IsoWeeks);
     }
 }
