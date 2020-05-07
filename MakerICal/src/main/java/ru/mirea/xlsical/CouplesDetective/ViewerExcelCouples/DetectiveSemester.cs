@@ -638,8 +638,10 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
                 {
                     // Передвигаемся на неделю.
                     current = start.PlusDays((numberOfWeek - startWeek) * 7);
+                    current = current.minusNanos(current.getNano()).minusSeconds(current.getSecond()).minusMinutes(current.getMinute()).minusHours(current.getHour());
                     int needAddDayOfWeek = (int)dayOfWeek - (int)current.DayOfWeek;
                     current = current.PlusDays(needAddDayOfWeek);
+                    current = current.plusNanos(timeStartOfCouple.getNano()).plusSeconds(timeStartOfCouple.getSecond()).plusMinutes(timeStartOfCouple.getMinute()).plusHours(timeStartOfCouple.getHour());
                     if (
                             ZonedDateTime.Comparer.Instant.Compare(current, start) < 0 ||  // Использование LocalTime.MAX не безопасно: в дне может и не быть максимального локального времени. Использовано вместо этого прибавление одного дня и время 00:00.
                                     ZonedDateTime.Comparer.Instant.Compare(current, finish) >= 0)
