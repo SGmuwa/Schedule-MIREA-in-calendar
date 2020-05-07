@@ -604,6 +604,7 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
             /// <param name="startWeek">С какого номера недели начать построение расписания?</param>
             /// <param name="timeStartOfCouple">Время начала пары.</param>
             /// <param name="timeFinishOfCouple">Время окончания пары.</param>
+            /// <param name="timezoneCouple">Часовой пояс пар</param>
             /// <param name="dayOfWeek">Рассматриваемый день недели. Использование: Напрмер, Calendar.MUNDAY.</param>
             /// <param name="isOdd"><c>true</c>, если это для нечётной недели. <c>false</c>, если эта строка для чётной недели.</param>
             /// <param name="itemTitle">Первая строка данных названия предмета. Сюда может входить и номера недель.</param>
@@ -615,12 +616,14 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
             /// <returns>Возвращает, в какие дни будут пары.</returns>
             public static List<CoupleInCalendar> getCouplesByPeriod(
                 ZonedDateTime start, ZonedDateTime finish, int startWeek,
-                LocalTime timeStartOfCouple, LocalTime timeFinishOfCouple, IsoDayOfWeek dayOfWeek,
-                bool isOdd, string itemTitle, string typeOfLesson,
-                string nameOfGroup, string nameOfTeacher, string audience,
-                string address)
+                LocalTime timeStartOfCouple, LocalTime timeFinishOfCouple, DateTimeZone timezoneCouple,
+                IsoDayOfWeek dayOfWeek, bool isOdd, string itemTitle,
+                string typeOfLesson, string nameOfGroup, string nameOfTeacher,
+                string audience, string address)
             {
                 List<CoupleInCalendar> @out;
+                start = start.WithZone(timezoneCouple);
+                finish = finish.WithZone(timezoneCouple);
                 ZonedDateTime current = start;
                 Duration durationBetweenStartAndFinish = (timeFinishOfCouple - timeStartOfCouple).ToDuration();
 
@@ -638,17 +641,15 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
                 {
                     // Передвигаемся на неделю.
                     current = start.PlusDays((numberOfWeek - startWeek) * 7);
-                    current = current.minusNanos(current.getNano()).minusSeconds(current.getSecond()).minusMinutes(current.getMinute()).minusHours(current.getHour());
+                    current = current.Zone.AtStartOfDay(current.Date);
                     int needAddDayOfWeek = (int)dayOfWeek - (int)current.DayOfWeek;
                     current = current.PlusDays(needAddDayOfWeek);
-                    current = current.plusNanos(timeStartOfCouple.getNano()).plusSeconds(timeStartOfCouple.getSecond()).plusMinutes(timeStartOfCouple.getMinute()).plusHours(timeStartOfCouple.getHour());
+                    current = current.Zone.AtStrictly(current.Date.At(timeStartOfCouple));
                     if (
-                            ZonedDateTime.Comparer.Instant.Compare(current, start) < 0 ||  // Использование LocalTime.MAX не безопасно: в дне может и не быть максимального локального времени. Использовано вместо этого прибавление одного дня и время 00:00.
-                                    ZonedDateTime.Comparer.Instant.Compare(current, finish) >= 0)
-                    {
-                        continue;
-                    }
-                    @out.Add(new CoupleInCalendar(
+                        ZonedDateTime.Comparer.Instant.Compare(current, start) >= 0
+                        && ZonedDateTime.Comparer.Instant.Compare(current, finish) < 0
+                    )
+                        @out.Add(new CoupleInCalendar(
                             itemTitle,
                             typeOfLesson,
                             nameOfGroup,
@@ -657,7 +658,7 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
                             address,
                             current,
                             current.Plus(durationBetweenStartAndFinish)
-                    ));
+                        ));
                 }
                 return @out;
             }
