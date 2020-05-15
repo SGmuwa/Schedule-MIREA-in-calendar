@@ -222,7 +222,7 @@ public class ExternalDataUpdater {
             return;
         }
         PR_loader.setReady(0.1f);
-        Stream<String> htmlExcels = downloadHTML("https://www.mirea.ru/education/schedule-main/schedule/");
+        Stream<String> htmlExcels = downloadHTML("https://www.mirea.ru/schedule/");
         PR_loader.setReady(0.2f);
         ArrayList<String> excelUrls = findAllExcelURLs(htmlExcels);
         PR_loader.setReady(0.3f);
