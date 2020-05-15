@@ -233,7 +233,7 @@ namespace ru.mirea.xlsical.CouplesDetective
                     return;
                 }
                 PR_loader.Ready = 0.1f;
-                StreamReader htmlExcels = downloadHTML("https://www.mirea.ru/education/schedule-main/schedule/");
+                StreamReader htmlExcels = downloadHTML("https://www.mirea.ru/schedule/");
                 PR_loader.Ready = 0.2f;
                 List<string> excelUrls = findAllExcelURLs(htmlExcels);
                 PR_loader.Ready = 0.3f;
