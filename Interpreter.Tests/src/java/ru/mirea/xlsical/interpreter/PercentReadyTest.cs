@@ -22,6 +22,9 @@ using System.Threading;
 
 namespace ru.mirea.xlsical.interpreter
 {
+    /// <summary>
+    /// Тестирование подсчётов готовности результатов.
+    /// </summary>
     public class PercentReadyTest
     {
         [Fact]

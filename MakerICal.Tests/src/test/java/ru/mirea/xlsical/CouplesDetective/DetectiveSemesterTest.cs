@@ -41,6 +41,9 @@ import java.util.*;
 import java.awt.*;
 import java.util.List;
 
+/// <summary>
+/// Тестирование правильности распознавания информации из Excel файлов.
+/// </summary>
 public class DetectiveSemesterTest {
     @Test
     public void GetMinutesFromTimeStringTest() throws DetectiveException {

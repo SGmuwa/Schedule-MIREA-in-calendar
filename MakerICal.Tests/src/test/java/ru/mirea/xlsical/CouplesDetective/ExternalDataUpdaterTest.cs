@@ -26,6 +26,9 @@ import java.util.Iterator;
 
 import static org.junit.Assert.*;
 
+/// <summary>
+/// Тестирование правильности получения Excel файлов из сайта университета.
+/// </summary>
 public class ExternalDataUpdaterTest {
 
     @Test

@@ -23,6 +23,9 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+/// <summary>
+/// Тестирование правильности экспорта данных в формат iCal.
+/// </summary>
 public class ExportCouplesToICalTest {
 
     @Test

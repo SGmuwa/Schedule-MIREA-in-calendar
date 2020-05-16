@@ -37,6 +37,9 @@ import java.util.ArrayList;
 
 import static org.junit.Assert.*;
 
+/// <summary>
+/// Тестирование базовых инструментов работы с Excel файлами.
+/// </summary>
 public class OpenFileTest {
 
     @Test

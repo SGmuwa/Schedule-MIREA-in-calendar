@@ -21,7 +21,9 @@ using NodaTime;
 
 namespace ru.mirea.xlsical.interpreter
 {
-
+    /// <summary>
+    /// Тестирование цельности данных пользователя.
+    /// </summary>
     public class TestSeeker
     {
         [Fact]

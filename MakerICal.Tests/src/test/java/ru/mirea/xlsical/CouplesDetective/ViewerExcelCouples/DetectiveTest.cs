@@ -22,7 +22,9 @@ using static ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.Detective;
 
 namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
 {
-
+    /// <summary>
+    /// Тестирование поиска начала и конца семестра.
+    /// </summary>
     public class DetectiveTest
     {
         /// <summary>

@@ -21,6 +21,9 @@ using System.Collections.Generic;
 
 namespace ru.mirea.xlsical.CouplesDetective
 {
+    /// <summary>
+    /// Тестирование модуля хранения календарных пар.
+    /// </summary>
     public class CoupleHistorianTest
     {
         [Fact]

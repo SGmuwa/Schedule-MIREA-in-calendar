@@ -37,6 +37,10 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
+/// <summary>
+/// Тестирование конвейера задач.
+/// На вход конвейера поступают запросы, а на выходе — iCal файлы.
+/// </summary>
 public class TaskExecutorTest {
 
     @Test

@@ -25,6 +25,9 @@ using Xunit;
 
 namespace ru.mirea.xlsical.CouplesDetective
 {
+    /// <summary>
+    /// Тестирование арифметических операций над учебными парами, тестирование подсчёта.
+    /// </summary>
     public class CoupleInCalendarTest
     {
         /// <summary>
