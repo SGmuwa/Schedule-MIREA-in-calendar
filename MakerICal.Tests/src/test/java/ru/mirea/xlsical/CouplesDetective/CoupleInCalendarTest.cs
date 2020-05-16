@@ -243,7 +243,7 @@ namespace ru.mirea.xlsical.CouplesDetective
             DateTimeZone timezone = DateTimeZoneProviders.Tzdb["GMT+00:00"]; // GMT+0:00
 
             ZonedDateTime start = new LocalDate(2018, (int)IsoMonth.January, 1).AtStartOfDayInZone(timezone);
-            ZonedDateTime finish = new LocalDate(2018, (int)IsoMonth.APRIL, YearMonth.of(2018, (int)IsoMonth.APRIL).lengthOfMonth()); // Последний день апреля 2018 года.
+            ZonedDateTime finish = new LocalDate(2018, (int)IsoMonth.April, YearMonth.of(2018, (int)IsoMonth.APRIL).lengthOfMonth()); // Последний день апреля 2018 года.
 
             LocalTime time1 = new LocalTime(10, 40, 0);
             LocalTime time2 = new LocalTime(12, 10, 0);
