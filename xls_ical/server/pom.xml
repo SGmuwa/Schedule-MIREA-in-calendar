@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>server</artifactId>
+    <version>1.0</version>
+    <packaging>jar</packaging>
+
+    <parent>
+        <artifactId>xlsical</artifactId>
+        <groupId>ru.mirea.xlsical</groupId>
+        <version>1.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <dependencies>
+        <!-- Для работы Excel
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>3.12</version>
+        </dependency> -->
+        <!-- Для работы Excel -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>4.0.1</version>
+        </dependency>
+        <!-- Для работы тестов -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Ранее использовалось для netty подключений -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.1.25.Final</version>
+        </dependency>
+        <!-- Код из interpreter помещён в отдельный пакет для создания иных пакетов для взаимодействия с текущим TaskExecutor -->
+        <dependency>
+            <groupId>ru.mirea.xlsical</groupId>
+            <artifactId>interpreter</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.7.28</version>
+        </dependency>
+        <!-- Используется для экспорта в ical -->
+        <dependency>
+            <groupId>org.mnode.ical4j</groupId>
+            <artifactId>ical4j</artifactId>
+            <version>3.0.9</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.9</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <!-- Используется для создания единого jar файла -->
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+</project>

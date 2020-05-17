@@ -14,4 +14,30 @@ hs_err_pid*
 .idea/*
 target/*
 
-*.xls
+*.idea*
+
+*.iml
+
+*/target/*
+
+*.lst
+
+.DS_Store
+xls_ical/interpreter/target/maven-archiver/pom.properties
+xls_ical/interpreter/target/surefire-reports/TEST-TestPackage.xml
+xls_ical/interpreter/target/surefire-reports/TEST-TestSeeker.xml
+xls_ical/interpreter/target/surefire-reports/TestPackage.txt
+xls_ical/interpreter/target/surefire-reports/TestSeeker.txt
+*.ics
+*~*.xls*
+
+*target*
+
+**/cache/excel/*
+xls_ical/server/ArrayListOfCouplesInCalendar.dat
+# Пусть будет показано развитие файла. xls_ical/ArrayListOfCouplesInCalendar.dat
+xls_ical/settings_DetectiveDate.cfg
+xls_ical/server/settings_DetectiveDate.cfg
+# Включить надо чтобы были предыдущие версии xls_ical/backend_1/ArrayListOfCouplesInCalendar.dat
+xls_ical/backend_1/settings_DetectiveDate.cfg
+*.dat

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ru.mirea.xlsical</groupId>
+    <artifactId>xlsical</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0</version>
+    <modules>
+        <module>server</module>
+		<module>interpreter</module>
+        <module>console-interface</module>
+        <module>backend_1</module>
+    </modules>
+
+
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
+    
+</project>
