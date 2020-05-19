@@ -54,6 +54,10 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
         /// <exception cref="System.InvalidCastException">Ошибка распознования .xls или .xlsx файла.</exception>
         public static List<ExcelFileInterface> NewInstances(FileInfo fileName)
         {
+            if (fileName == null)
+                throw new System.ArgumentNullException(nameof(fileName));
+            if (!fileName.Exists)
+                throw new System.IO.FileNotFoundException(fileName.FullName);
             SetInt setInt = new SetInt();
             OpenFile first = new OpenFile(fileName, 0);
             int size = first.document.WorkbookPart.Workbook.Descendants<Sheet>().Count();
@@ -66,6 +70,17 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
                 @out.Add(new OpenFile(first.document, i, size, setInt, fileName));
             return @out;
         }
+
+        /// <summary>
+        /// Открывает Excel файл вместе со всеми его листами.
+        /// </summary>
+        /// <param name="fileName">Путь до файла, который необходимо открыть.</param>
+        /// <returns>Возвращает список открытых листов.</returns>
+        /// <exception cref="System.IO.IOException">Ошибка доступа к файлу.</exception>
+        /// <exception cref="System.InvalidCastException">Ошибка распознования .xls или .xlsx файла.</exception>
+        /// <seealso cref="NewInstances(FileInfo)"/>
+        public static List<ExcelFileInterface> NewInstances(string fileName)
+            => NewInstances(new FileInfo(fileName ?? throw new System.ArgumentNullException(nameof(fileName))));
 
         /// <summary>
         /// Получение данных в текстовом виде из указанной ячейки Excel файла.
