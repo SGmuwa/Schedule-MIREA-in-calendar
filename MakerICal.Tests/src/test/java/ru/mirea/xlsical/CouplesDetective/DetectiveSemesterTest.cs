@@ -18,135 +18,130 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package ru.mirea.xlsical.CouplesDetective;
+using System.Collections.Generic;
+using System.Drawing;
+using NodaTime;
+using ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples;
+using ru.mirea.xlsical.CouplesDetective.xl;
+using ru.mirea.xlsical.interpreter;
+using Xunit;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import ru.mirea.xlsical.CouplesDetective.CoupleInCalendar;
-import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveDate;
-import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveSemester;
-import org.junit.Test;
-import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.DetectiveException;
-import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
-import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
-import ru.mirea.xlsical.interpreter.Seeker;
-import ru.mirea.xlsical.interpreter.SeekerType;
+namespace ru.mirea.xlsical.CouplesDetective
+{
+    /// <summary>
+    /// Тестирование правильности распознавания информации из Excel файлов.
+    /// </summary>
+    public class DetectiveSemesterTest
+    {
+        [Fact]
+        public void GetMinutesFromTimeStringTest()
+        {
+            DetectiveSemester ds = new DetectiveSemester(null, new DetectiveDate());
+            Assert.Equal(728, ds.GetMinutesFromTimeString("12:08"));
+            Assert.Equal(13, ds.GetMinutesFromTimeString("00-13"));
+            Assert.Equal(78, ds.GetMinutesFromTimeString("01-18"));
+            Assert.Equal(860, ds.GetMinutesFromTimeString("14:20"));
+            Assert.Equal(1230, ds.GetMinutesFromTimeString("20-30"));
+            Assert.Equal(0, ds.GetMinutesFromTimeString("00:00"));
+        }
 
-import static org.junit.Assert.*;
+        [Fact]
+        public void IsStringNumberTest()
+        {
+            Assert.True(DetectiveSemester.IsStringNumber("8"));
+            Assert.False(DetectiveSemester.IsStringNumber(""));
+            Assert.True(DetectiveSemester.IsStringNumber("85"));
+            Assert.True(DetectiveSemester.IsStringNumber("0"));
+            Assert.True(DetectiveSemester.IsStringNumber("-3"));
+            Assert.False(DetectiveSemester.IsStringNumber("f"));
+            Assert.False(DetectiveSemester.IsStringNumber("."));
+        }
 
-import java.io.IOException;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.*;
-import java.awt.*;
-import java.util.List;
+        [Fact]
+        public void IsEqualsInListTest()
+        {
+            string a = "a";
+            string b = "b";
+            List<string> list = new List<string>();
+            list.Add(a);
+            Assert.True(DetectiveSemester.IsEqualsInList(list, a));
+            Assert.False(DetectiveSemester.IsEqualsInList(list, b));
+        }
 
-/// <summary>
-/// Тестирование правильности распознавания информации из Excel файлов.
-/// </summary>
-public class DetectiveSemesterTest {
-    @Test
-    public void GetMinutesFromTimeStringTest() throws DetectiveException {
-        DetectiveSemester ds = new DetectiveSemester(null, new DetectiveDate());
-        assertEquals(728, ds.GetMinutesFromTimeString("12:08"));
-        assertEquals(13, ds.GetMinutesFromTimeString("00-13"));
-        assertEquals(78, ds.GetMinutesFromTimeString("01-18"));
-        assertEquals(860, ds.GetMinutesFromTimeString("14:20"));
-        assertEquals(1230, ds.GetMinutesFromTimeString("20-30"));
-        assertEquals(0, ds.GetMinutesFromTimeString("00:00"));
+        [Fact]
+        public void StartAnInvestigationTest()
+        {
+            ICollection<ExcelFileInterface> files = null;
+
+            files = OpenFile.NewInstances("tests/IIT-3k-18_19-osen.xlsx");
+
+            Assert.NotNull(files);
+            Assert.Equal(1, files.Count);
+            foreach (ExcelFileInterface file in files)
+                file.Dispose();
+        }
+
+
+        [Fact]
+        public void GetCouplesFromDayTest()
+        {
+            IList<Point> list = new List<Point>();
+            IList<ExcelFileInterface> files;
+            ICollection<DetectiveSemester.CoupleInExcel> col;
+            int[] times = { 540, 630, 640, 730, 780, 870, 880, 970, 980, 1070, 1080, 1170 };
+
+            files = OpenFile.NewInstances("tests/test-01.xlsx");
+            Assert.Equal(1, files.Count);
+            Seeker seeker = new Seeker("ИКБО-04-16", new LocalDate(2018, 9, 1), new LocalDate(2018, 10, 1), DateTimeZoneProviders.Tzdb["UTC+3"]);
+            using (ExcelFileInterface file = files[0])
+            {
+                col = new DetectiveSemester(file, new DetectiveDate()).GetCouplesFromDay(
+                    6,
+                    3,
+                    "ИКБО-04-16",
+                    IsoDayOfWeek.Monday,
+                    list,
+                    times,
+                    "пр-т Вернадского, 78"
+                );
+            }
+#warning Отсутсвуют Asserts
+            System.Console.WriteLine(string.Join('\n', col));
+        }
+
+        [Fact]
+        public void OpenFirstXls()
+        {
+
+            IList<ExcelFileInterface> files = null;
+            files = OpenFile.NewInstances("tests/IIT-3k-18_19-osen.xlsx");
+            Assert.NotNull(files);
+            Assert.Equal(1, files.Count);
+            ExcelFileInterface file = files[0];
+
+            System.Console.WriteLine(file.GetCellData(1, 1));
+            System.Console.WriteLine(file.GetCellData(2, 1));
+            System.Console.WriteLine(file.GetCellData(1, 2));
+            System.Console.WriteLine(file.GetCellData(2, 2));
+
+#warning Должен поддерживаться using для закрытия.
+            file.Dispose();
+        }
+#warning Отключен тест.
+        /*
+            [Fact]
+            public void GetTimesTest() {
+                Point point = new Point(5,3);
+                List<ExcelFileInterface> files;
+                int [] mas = {0,0};
+
+                files = OpenFile.NewInstances("tests/IIT-3k-18_19-osen.xlsx");
+                assertNotNull(files);
+                Assert.Equal(1, files.Count);
+                ExcelFileInterface file = files[0];
+
+                mas = GetTimes(point, file);
+
+            }*/
     }
-
-    @Test
-    public void IsStringNumberTest(){
-        assertTrue(DetectiveSemester.IsStringNumber("8"));
-        assertFalse(DetectiveSemester.IsStringNumber(""));
-        assertTrue(DetectiveSemester.IsStringNumber("85"));
-        assertTrue(DetectiveSemester.IsStringNumber("0"));
-        assertTrue(DetectiveSemester.IsStringNumber("-3"));
-        assertFalse(DetectiveSemester.IsStringNumber("f"));
-        assertFalse(DetectiveSemester.IsStringNumber("."));
-    }
-
-    @Test
-    public void IsEqualsInListTest(){
-        String a = "a";
-        String b = "b";
-        ArrayList <String> list = new ArrayList <String>();
-        list.add(a);
-        assertTrue(DetectiveSemester.IsEqualsInList(list, a));
-        assertFalse(DetectiveSemester.IsEqualsInList(list, b));
-    }
-
-    @Test
-    public void startAnInvestigationTest() throws IOException, InvalidFormatException {
-        Collection<? extends ExcelFileInterface> files = null;
-
-        files = OpenFile.newInstances("tests/IIT-3k-18_19-osen.xlsx");
-
-        assertNotNull(files);
-        assertEquals(1, files.size());
-        for(ExcelFileInterface file : files)
-            file.close();
-    }
-
-
-    @Test
-    public void GetCouplesFromDayTest() throws IOException, InvalidFormatException {
-        List<Point> list = new ArrayList<>();
-        Collection<? extends ExcelFileInterface> files;
-        Collection<? extends DetectiveSemester.CoupleInExcel> col;
-        int[] times = {540,630,640,730,780,870,880,970,980,1070,1080,1170};
-
-        files = OpenFile.newInstances("tests/test-01.xlsx");
-        assertEquals(1, files.size());
-        ExcelFileInterface file = files.iterator().next();
-        Seeker seeker = new Seeker("ИКБО-04-16", LocalDate.of(2018,9,1), LocalDate.of(2018, 10,1), ZoneId.of("UTC+3"));
-
-        col = new DetectiveSemester(files.iterator().next(), new DetectiveDate()).GetCouplesFromDay(
-                6,
-                3,
-                "ИКБО-04-16",
-                DayOfWeek.of(1),
-                list,
-                times,
-                "пр-т Вернадского, 78"
-        );
-
-        for(Object couple : col)
-            System.out.println(couple.toString());
-
-        file.close();
-    }
-
-    @Test
-    public void openFirstXls() throws IOException, InvalidFormatException {
-
-        List<? extends ExcelFileInterface> files = null;
-        files = OpenFile.newInstances("tests/IIT-3k-18_19-osen.xlsx");
-        assertNotNull(files);
-        assertEquals(1, files.size());
-        ExcelFileInterface file = files.get(0);
-
-        System.out.println(file.getCellData(1, 1));
-        System.out.println(file.getCellData(2, 1));
-        System.out.println(file.getCellData(1, 2));
-        System.out.println(file.getCellData(2, 2));
-
-        file.close();
-    }
-/*
-    @Test
-    public void GetTimesTest() throws IOException, InvalidFormatException, DetectiveException {
-        Point point = new Point(5,3);
-        ArrayList<? extends ExcelFileInterface> files;
-        int [] mas = {0,0};
-
-        files = OpenFile.newInstances("tests/IIT-3k-18_19-osen.xlsx");
-        assertNotNull(files);
-        assertEquals(1, files.size());
-        ExcelFileInterface file = files.get(0);
-
-        mas = GetTimes(point, file);
-
-    }*/
 }

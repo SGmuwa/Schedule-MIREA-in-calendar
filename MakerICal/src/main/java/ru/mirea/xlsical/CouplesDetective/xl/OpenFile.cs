@@ -45,6 +45,7 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
 
         private readonly int numberSheet;
 
+#warning Должен возвращаться лист, поддерживающий using.
         /// <summary>
         /// Открывает Excel файл вместе со всеми его листами.
         /// </summary>

@@ -453,7 +453,7 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
         /// <returns>Множество занятий у группы в конкретный день.</returns>
         public LinkedList<CoupleInExcel> GetCouplesFromDay(
             int column, int row, string nameOfGroup,
-            IsoDayOfWeek dayOfWeek, List<Point> ignoresCoupleTitle, int[] times,
+            IsoDayOfWeek dayOfWeek, IList<Point> ignoresCoupleTitle, int[] times,
             string address)
         {
             LinkedList<CoupleInExcel> coupleOfDay = new LinkedList<CoupleInExcel>();
