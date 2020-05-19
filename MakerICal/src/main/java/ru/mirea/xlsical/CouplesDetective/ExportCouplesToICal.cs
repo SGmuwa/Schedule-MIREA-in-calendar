@@ -24,8 +24,8 @@ using System.IO;
 using System.Text;
 using Ical.Net;
 using Ical.Net.CalendarComponents;
-using Ical.Net.DataTypes;
 using Ical.Net.Serialization;
+using NodaTime;
 using ru.mirea.xlsical.interpreter;
 
 namespace ru.mirea.xlsical.CouplesDetective
@@ -66,8 +66,8 @@ namespace ru.mirea.xlsical.CouplesDetective
                     Description = c.Audience + "\n" + c.NameOfGroup + "\n" + c.NameOfTeacher,
                     Location = c.Address,
                     Uid = $"{DateTime.UtcNow.ToFileTimeUtc()}_{ran.NextLong()}@ru.mirea.xlsical",
-                    Start = new CalDateTime(c.DateAndTimeOfCouple.LocalDateTime.ToDateTimeUnspecified(), c.DateAndTimeOfCouple.Zone.Id),
-                    End = new CalDateTime(c.DateAndTimeFinishOfCouple.LocalDateTime.ToDateTimeUnspecified(), c.DateAndTimeFinishOfCouple.Zone.Id)
+                    Start = c.DateAndTimeOfCouple.ToCalDateTime(),
+                    End = c.DateAndTimeFinishOfCouple.ToCalDateTime()
                 };
                 cal.Events.Add(ev);
                 ready++;

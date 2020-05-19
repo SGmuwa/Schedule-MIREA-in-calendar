@@ -17,6 +17,7 @@
 */
 
 using System.Diagnostics.Contracts;
+using Ical.Net.DataTypes;
 
 namespace NodaTime
 {
@@ -32,7 +33,7 @@ namespace NodaTime
         /// local time doesn't exist in a particular time zone due to daylight saving time changes.</exception>
         /// <exception cref="NodaTime.AmbiguousTimeException">Exception thrown to indicate that the specified
         /// local date/time occurs twice in a particular time zone due to daylight saving time changes.</exception>
-        [PureAttribute]
+        [Pure]
         public static ZonedDateTime PlusDays(this ZonedDateTime that, int days)
             => that.Zone.AtStrictly(that.LocalDateTime.Date.PlusDays(days).At(that.LocalDateTime.TimeOfDay));
 
@@ -46,8 +47,17 @@ namespace NodaTime
         /// local time doesn't exist in a particular time zone due to daylight saving time changes.</exception>
         /// <exception cref="NodaTime.AmbiguousTimeException">Exception thrown to indicate that the specified
         /// local date/time occurs twice in a particular time zone due to daylight saving time changes.</exception>
-        [PureAttribute]
+        [Pure]
         public static ZonedDateTime PlusWeeks(this ZonedDateTime that, int IsoWeeks)
             => that.PlusDays(7 * IsoWeeks);
+
+        /// <summary>
+        /// Convert <see cref="ZonedDateTime"/> to <see cref="CalDateTime"/>.
+        /// </summary>
+        /// <param name="that">Instance of time via <see cref="ZonedDateTime"/>.</param>
+        /// <returns>Instance of time via <see cref="CalDateTime"/>.</returns>
+        [Pure]
+        public static CalDateTime ToCalDateTime(this ZonedDateTime that)
+            => new CalDateTime(that.LocalDateTime.ToDateTimeUnspecified(), that.Zone.Id);
     }
 }
