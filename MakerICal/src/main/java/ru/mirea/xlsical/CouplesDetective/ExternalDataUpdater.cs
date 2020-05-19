@@ -188,16 +188,27 @@ namespace ru.mirea.xlsical.CouplesDetective
         /// <summary>
         /// Запускает механизм автоматического обновления, скачивания данных
         /// из сайта <a href="https://www.mirea.ru/education/">mirea.ru</a>.
+        /// Если уже запущен, то будет вызван <see cref="Stop"/>, а затем
+        /// запустится механизм.
         /// </summary>
         public void Run()
         {
-            if (myThread != null)
-            {
-                if (myThread.ThreadState.HasFlag(ThreadState.Running))
-                    myThread.Abort();
-            }
+            Stop();
             myThread = new Thread(this.threadBody);
             myThread.Start();
+        }
+
+        /// <summary>
+        /// Останавливает механизм автоматического обновления.
+        /// Если механизм уже остановлен, то метод ничего не делает.
+        /// </summary>
+        public void Stop()
+        {
+            if (myThread != null)
+            {
+                myThread.Interrupt();
+                myThread = null;
+            }
         }
 
         private void threadBody()
@@ -408,7 +419,7 @@ namespace ru.mirea.xlsical.CouplesDetective
             while ((str = htmlExcels.ReadLine()) != null)
             {
                 MatchCollection matches = httpXlsRegex.Matches(str);
-                foreach(Match m in matches)
+                foreach (Match m in matches)
                 {
                     int start = m.Value.IndexOf("http");
                     int length = m.Value.LastIndexOf('"') - start;
