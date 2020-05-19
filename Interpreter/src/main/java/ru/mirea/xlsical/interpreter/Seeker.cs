@@ -16,12 +16,6 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/*
-[SG]Muwa Михаил Павлович Сидоренко. 2018.
-Файл представляет из себя хранилище запроса.
-Суть запроса: имя искателя, тип искателя (преподаватель, студент), дата начала и конца семестра, адрес по-умолчанию.
- */
-
 using NodaTime;
 
 namespace ru.mirea.xlsical.interpreter
@@ -58,43 +52,54 @@ namespace ru.mirea.xlsical.interpreter
         /// <summary>
         /// Создаёт экземпляр запроса.
         /// </summary>
-        /// <param name="nameOfSeeker">Имя искателя. Это либо имя преподавателя, либо название группы студента.</param>
-        /// <param name="dateStart">Дата начала составления расписания. С какого календарного дня надо составлять расписание?</param>
-        /// <param name="dateFinish">Дата конца составления расписания. До какого календарного дня надо составлять расписание?</param>
-        /// <param name="needReset"></param>
-        public Seeker(string nameOfSeeker, ZonedDateTime dateStart, ZonedDateTime dateFinish, bool needReset = true)
-        {
-            this.NameOfSeeker = nameOfSeeker;
-            this.DateStart = needReset ? new ZonedDateTime(dateStart.Date.At(LocalTime.MinValue), dateStart.Zone, dateStart.Offset) : dateStart;
-            this.DateFinish = needReset ? new ZonedDateTime(dateFinish.Date.PlusDays(1).At(LocalTime.MinValue).Minus(Period.FromSeconds(1)), dateFinish.Zone, dateFinish.Offset) : dateFinish;
-        }
+        /// <param name="nameOfSeeker">
+        /// Имя искателя. Это либо имя преподавателя, либо название группы студента.
+        /// </param>
+        /// <param name="dateStart">
+        /// Дата начала составления расписания.
+        /// С какого момента времени включительно включительно надо составлять расписание?
+        /// </param>
+        /// <param name="dateFinish">
+        /// Дата конца составления расписания.
+        /// До какого момента времени включительно надо составлять расписание?
+        /// </param>
+        public Seeker(string nameOfSeeker, ZonedDateTime dateStart, ZonedDateTime dateFinish)
+            => (NameOfSeeker, DateStart, DateFinish) = (nameOfSeeker, dateStart, dateFinish);
 
         /// <summary>
         /// Создаёт экземпляр запроса.
         /// </summary>
-        /// <param name="nameOfSeeker">Имя искателя. Это либо имя преподавателя, либо название группы студента.</param>
-        /// <param name="dateStart">Дата начала составления расписания. С какого календарного дня надо составлять расписание? Дата указывается по местному времени <code>timezoneStart</code>.</param>
-        /// <param name="dateFinish">Дата конца составления расписания. До какого календарного дня надо составлять расписание? Дата указывается по местному времени <code>timezoneStart</code>.</param>
-        /// <param name="timeZoneStart">Часовой пояс, где будут пары.</param>
-        public Seeker(string nameOfSeeker, LocalDate dateStart, LocalDate dateFinish, DateTimeZone timeZoneStart)
-        : this(nameOfSeeker, timeZoneStart.AtStartOfDay(dateStart), timeZoneStart.AtStartOfDay(dateFinish))
+        /// <param name="nameOfSeeker">
+        /// Имя искателя. Это либо имя преподавателя, либо название группы студента.
+        /// </param>
+        /// <param name="dateStart">
+        /// Дата начала составления расписания.
+        /// С какого дня включительно включительно надо составлять расписание?
+        /// </param>
+        /// <param name="dateFinish">
+        /// Дата конца составления расписания.
+        /// До какого дня включительно надо составлять расписание?
+        /// </param>
+        /// <param name="timeZone">
+        /// Часовой пояс искателя.
+        /// </param>
+        /// <remarks>
+        /// Допустим, искатель живёт в часовом поясне МСК+24.
+        /// Искатель задаётся вопросом, какие у него пары с понедельника по пятницу?
+        /// У него в календаре отображаются занятия с понедельника по пятницу.
+        /// Он смотрит, что в понедельник у него пар нет. Со вторника по пятницу есть.
+        /// Но на сервере хранятся пары с понедельника по пятницу. Но из-за смещения
+        /// часового пояса, у него все пары сдвинуты на день, и это нормально, так как искатель живёт
+        /// по своему часовому поясу.
+        /// У него, оказывается, есть пары ещё и в субботу в его часовом поясе. Чтобы их получить, ему надо
+        /// запросить пары на субботу включительно.
+        /// В то время, пока студент думает, что у него суббота, университет думает, что в стенах университета пятница.
+        /// </remarks>
+        public Seeker(string nameOfSeeker, LocalDate dateStart, LocalDate dateFinish, DateTimeZone timeZone)
         {
-            /*
-            Отправлять в конструктор ZonedDateTime не безопасно, так как тогда
-            студент или преподаватель могут получить расписание не целиком за день, а
-            только части дня. Лучше сокрыть данный функционал, чтобы пользователи
-            получали данные в промежуток включая целиком учебные дни.
-            Необходимо преобразовать LocalDate и ZoneId в указатели времени,
-            чтобы не было проблем с точностью.
-            С датой начала нет проблем: указываем на самую первую минуту дня.
-            С датой конца проблема: не гарантировано, что в дне строго 60*60*24 секунд.
-            Также по описанию данного класса, последний день надо включить.
-            Просто прибавить один день и указать до 00:00:00 нельзя, так как при преобразовании
-            в LocalDate будет покрываться следующий день.
-            Поэтому надо прибавить к dateFinish один день и отнять одну секунду, таким
-            образом возложив расчёты по определению "последнего момента времени дня" на
-            алгоритмы java.time или их потомков.
-             */
+            NameOfSeeker = nameOfSeeker;
+            DateStart = timeZone.AtStartOfDay(dateStart);
+            DateFinish = timeZone.AtStartOfDay(dateFinish.PlusDays(1)).PlusSeconds(-1);
         }
 
         public override bool Equals(object ex)
