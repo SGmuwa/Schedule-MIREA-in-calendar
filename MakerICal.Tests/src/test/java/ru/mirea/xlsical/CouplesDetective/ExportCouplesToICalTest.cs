@@ -15,44 +15,37 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ru.mirea.xlsical.CouplesDetective;
 
-import net.fortuna.ical4j.model.*;
-import net.fortuna.ical4j.model.component.VEvent;
-import org.junit.Test;
+using Xunit;
+using Ical.Net;
+using Ical.Net.CalendarComponents;
+using NodaTime;
 
-import static org.junit.Assert.*;
+namespace ru.mirea.xlsical.CouplesDetective
+{
+    /// <summary>
+    /// Тестирование правильности экспорта данных в формат iCal.
+    /// </summary>
+    public class ExportCouplesToICalTest
+    {
+        [Fact]
+        public void Tutorial()
+        {
+            ZonedDateTime start = DateTimeZoneProviders.Tzdb["Australia/Melbourne"].AtStartOfDay(new LocalDate(2005, (int)IsoMonth.November, 15));
+            CalendarEvent ev = new CalendarEvent
+            {
+                Start = start.ToCalDateTime(),
+                Summary = "Melbourne Cup"
+            };
+            Calendar cal = new Calendar();
+            cal.AddChild(ev);
 
-/// <summary>
-/// Тестирование правильности экспорта данных в формат iCal.
-/// </summary>
-public class ExportCouplesToICalTest {
+            Assert.Equal(1, cal.Events.Count);
 
-    @Test
-    public void Tutorial(){
-        // http://ical4j.sourceforge.net/introduction.html
-        TimeZoneRegistry registry = TimeZoneRegistryFactory.getInstance().createRegistry();
-        TimeZone timezone = registry.getTimeZone("Australia/Melbourne");
+            ev = cal.Events[0];
 
-        java.util.Calendar cal = java.util.Calendar.getInstance(timezone);
-        cal.set(java.util.Calendar.YEAR, 2005);
-        cal.set(java.util.Calendar.MONTH, java.util.Calendar.NOVEMBER);
-        cal.set(java.util.Calendar.DAY_OF_MONTH, 1);
-        cal.set(java.util.Calendar.HOUR_OF_DAY, 15);
-        cal.clear(java.util.Calendar.MINUTE);
-        cal.clear(java.util.Calendar.SECOND);
-
-        DateTime dt = new DateTime(cal.getTime());
-        dt.setTimeZone(timezone);
-        VEvent melbourneCup = new VEvent(dt, "Melbourne Cup");
-
-        String[] result = melbourneCup.toString().split("\r\n");
-
-        assertNotNull(result);
-        assertEquals(5, result.length);
-        assertEquals("BEGIN:VEVENT", result[0]);
-        assertEquals("DTSTART;TZID=Australia/Melbourne:20051101T150000", result[2]);
-        assertEquals("SUMMARY:Melbourne Cup", result[3]);
-        assertEquals("END:VEVENT", result[4]);
+            Assert.Equal(start.ToCalDateTime(), ev.Start);
+            Assert.Equal("Melbourne Cup", ev.Summary);
+        }
     }
 }
