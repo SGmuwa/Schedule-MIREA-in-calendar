@@ -326,22 +326,21 @@ namespace ru.mirea.xlsical.CouplesDetective
             }
         }
 
-        /**
-         * Тестирование одной пары на четыре месяца по чётным неделям.
-         */
+        /// <summary>
+        /// Тестирование одной пары на четыре месяца по чётным неделям.
+        /// </summary>
         [Fact]
-        public void startTestOneCoupleDuring4MonthInEvenWeek()
+        public void StartTestOneCoupleDuring4MonthInEvenWeek()
         {
+            DateTimeZone timezone = DateTimeZoneProviders.Tzdb["GMT+00:00"]; // GMT+0:00
 
-            LocalDate start = new LocalDate(2018, (int)IsoMonth.January, 1);
-            LocalDate finish = new LocalDate(2018, (int)IsoMonth.APRIL, YearMonth.of(2018, (int)IsoMonth.APRIL).lengthOfMonth()); // Последний день апреля 2018 года.
+            ZonedDateTime start = new LocalDate(2018, (int)IsoMonth.January, 1).AtStartOfDayInZone(timezone);
+            ZonedDateTime finish = new LocalDate(2018, (int)IsoMonth.April, start.Calendar.GetDaysInMonth(2018, (int)IsoMonth.April)).AtStartOfDayInZone(timezone); // Последний день апреля 2018 года.
 
             LocalTime time1 = new LocalTime(10, 40, 0);
             LocalTime time2 = new LocalTime(12, 10, 0);
 
-            IsoDayOfWeek day = IsoDayOfWeek.THURSDAY; // Четверг
-
-            DateTimeZone timezone = DateTimeZone.of("GMT+00:00"); // GMT+0:00
+            IsoDayOfWeek day = IsoDayOfWeek.Thursday; // Четверг
 
             string nGr = "АБВГ-01-ГА";
             string nam = ",vrihjegijrw093i2-FFOKEOKOкуцпцшокш342хгйе9з3кшйз3сь4мш9рХШАООХЕ3пп4хзр54.епз35щлр344щее.3уе4.н3ен.е45..5н54.542FPQWQ#@(-)@(#)$oqfk"; // http://xpoint.ru/forums/internet/standards/thread/29138.xhtml
@@ -350,47 +349,51 @@ namespace ru.mirea.xlsical.CouplesDetective
             string add = "ВОдичка";
             string aud = "А-(-1) = А+1";
 
-            List<CoupleInCalendar> @out = DetectiveSemester.SetterCouplesInCalendar.getCouplesByPeriod(start, finish, timezone, 1, time1, time2, day, false, nam, typ, nGr, tic, aud, add);
+            List<CoupleInCalendar> @out = DetectiveSemester.SetterCouplesInCalendar.getCouplesByPeriod(start, finish, 1, time1, time2, timezone, day, false, nam, typ, nGr, tic, aud, add);
 
             /* Количество */
             Assert.Equal(8, @out.Count);
 
             Assert.NotNull(@out);
 
+            ZonedDateTime firstGood = new LocalDate(2018, (int)IsoMonth.January, 11).At(new LocalTime(10, 40, 0)).InZoneStrictly(timezone);
+
             /* Время начала пары 1*/
-            Assert.Equal(ZonedDateTime.of(LocalDateTime.of(new LocalDate(2018, (int)IsoMonth.January, 11).plus(0, ChronoUnit.WEEKS), new LocalTime(10, 40, 0)), timezone), @out[0].DateAndTimeOfCouple);
+            Assert.Equal(firstGood, @out[0].DateAndTimeOfCouple);
             /* Время начала пары 2*/
-            Assert.Equal(ZonedDateTime.of(LocalDateTime.of(new LocalDate(2018, (int)IsoMonth.January, 11).plus(2, ChronoUnit.WEEKS), new LocalTime(10, 40, 0)), timezone), @out[1].DateAndTimeOfCouple);
+            Assert.Equal(firstGood.PlusWeeks(2), @out[1].DateAndTimeOfCouple);
             /* Время начала пары 3*/
-            Assert.Equal(ZonedDateTime.of(LocalDateTime.of(new LocalDate(2018, (int)IsoMonth.January, 11).plus(2 * 2, ChronoUnit.WEEKS), new LocalTime(10, 40, 0)), timezone), @out[2].DateAndTimeOfCouple);
+            Assert.Equal(firstGood.PlusWeeks(2 * 2), @out[2].DateAndTimeOfCouple);
             /* Время начала пары 4*/
-            Assert.Equal(ZonedDateTime.of(LocalDateTime.of(new LocalDate(2018, (int)IsoMonth.January, 11).plus(2 * 3, ChronoUnit.WEEKS), new LocalTime(10, 40, 0)), timezone), @out[3].DateAndTimeOfCouple);
+            Assert.Equal(firstGood.PlusWeeks(2 * 3), @out[3].DateAndTimeOfCouple);
             /* Время начала пары 5*/
-            Assert.Equal(ZonedDateTime.of(LocalDateTime.of(new LocalDate(2018, (int)IsoMonth.January, 11).plus(2 * 4, ChronoUnit.WEEKS), new LocalTime(10, 40, 0)), timezone), @out[4].DateAndTimeOfCouple);
+            Assert.Equal(firstGood.PlusWeeks(2 * 4), @out[4].DateAndTimeOfCouple);
             /* Время начала пары 6*/
-            Assert.Equal(ZonedDateTime.of(LocalDateTime.of(new LocalDate(2018, (int)IsoMonth.January, 11).plus(2 * 5, ChronoUnit.WEEKS), new LocalTime(10, 40, 0)), timezone), @out[5].DateAndTimeOfCouple);
+            Assert.Equal(firstGood.PlusWeeks(2 * 5), @out[5].DateAndTimeOfCouple);
             /* Время начала пары 7*/
-            Assert.Equal(ZonedDateTime.of(LocalDateTime.of(new LocalDate(2018, (int)IsoMonth.January, 11).plus(2 * 6, ChronoUnit.WEEKS), new LocalTime(10, 40, 0)), timezone), @out[6].DateAndTimeOfCouple);
+            Assert.Equal(firstGood.PlusWeeks(2 * 6), @out[6].DateAndTimeOfCouple);
             /* Время начала пары 8*/
-            Assert.Equal(ZonedDateTime.of(LocalDateTime.of(new LocalDate(2018, (int)IsoMonth.January, 11).plus(2 * 7, ChronoUnit.WEEKS), new LocalTime(10, 40, 0)), timezone), @out[7].DateAndTimeOfCouple);
+            Assert.Equal(firstGood.PlusWeeks(2 * 7), @out[7].DateAndTimeOfCouple);
+
+            firstGood = new LocalDate(2018, (int)IsoMonth.January, 11).At(time2).InZoneStrictly(timezone);
 
             /* Время конца пары 1 */
-            Assert.Equal(ZonedDateTime.of(LocalDateTime.of(new LocalDate(2018, (int)IsoMonth.January, 11).plus(0, ChronoUnit.WEEKS), time2), timezone), @out[0].DateAndTimeFinishOfCouple);
+            Assert.Equal(firstGood, @out[0].DateAndTimeFinishOfCouple);
             /* Время конца пары 2 */
-            Assert.Equal(ZonedDateTime.of(LocalDateTime.of(new LocalDate(2018, (int)IsoMonth.January, 11).plus(2, ChronoUnit.WEEKS), time2), timezone), @out[1].DateAndTimeFinishOfCouple);
+            Assert.Equal(firstGood.PlusWeeks(2), @out[1].DateAndTimeFinishOfCouple);
             /* Время конца пары 3 */
-            Assert.Equal(ZonedDateTime.of(LocalDateTime.of(new LocalDate(2018, (int)IsoMonth.January, 11).plus(2 * 2, ChronoUnit.WEEKS), time2), timezone), @out[2].DateAndTimeFinishOfCouple);
+            Assert.Equal(firstGood.PlusWeeks(2 * 2), @out[2].DateAndTimeFinishOfCouple);
             /* Время конца пары 4 */
-            Assert.Equal(ZonedDateTime.of(LocalDateTime.of(new LocalDate(2018, (int)IsoMonth.January, 11).plus(2 * 3, ChronoUnit.WEEKS), time2), timezone), @out[3].DateAndTimeFinishOfCouple);
+            Assert.Equal(firstGood.PlusWeeks(2 * 3), @out[3].DateAndTimeFinishOfCouple);
             /* Время конца пары 5 */
-            Assert.Equal(ZonedDateTime.of(LocalDateTime.of(new LocalDate(2018, (int)IsoMonth.January, 11).plus(2 * 4, ChronoUnit.WEEKS), time2), timezone), @out[4].DateAndTimeFinishOfCouple);
+            Assert.Equal(firstGood.PlusWeeks(2 * 4), @out[4].DateAndTimeFinishOfCouple);
             /* Время конца пары 6 */
-            Assert.Equal(ZonedDateTime.of(LocalDateTime.of(new LocalDate(2018, (int)IsoMonth.January, 11).plus(2 * 5, ChronoUnit.WEEKS), time2), timezone), @out[5].DateAndTimeFinishOfCouple);
+            Assert.Equal(firstGood.PlusWeeks(2 * 5), @out[5].DateAndTimeFinishOfCouple);
             /* Время конца пары 7 */
-            Assert.Equal(ZonedDateTime.of(LocalDateTime.of(new LocalDate(2018, (int)IsoMonth.January, 11).plus(2 * 6, ChronoUnit.WEEKS), time2), timezone), @out[6].DateAndTimeFinishOfCouple);
+            Assert.Equal(firstGood.PlusWeeks(2 * 6), @out[6].DateAndTimeFinishOfCouple);
             /* Время конца пары 8 */
-            Assert.Equal(ZonedDateTime.of(LocalDateTime.of(new LocalDate(2018, (int)IsoMonth.January, 11).plus(2 * 7, ChronoUnit.WEEKS), time2), timezone), @out[7].DateAndTimeFinishOfCouple);
-            for (CoupleInCalendar o : @out)
+            Assert.Equal(firstGood.PlusWeeks(2 * 7), @out[7].DateAndTimeFinishOfCouple);
+            foreach (CoupleInCalendar o in @out)
             {
                 /* Название группы */
                 Assert.Equal(nGr, o.NameOfGroup);
@@ -491,7 +494,7 @@ namespace ru.mirea.xlsical.CouplesDetective
         public void startTestOneCoupleDuring4MonthInSomeWeek()
         {
 
-            LocalDate start = new LocalDate(2018, (int)IsoMonth.January, 1);
+            ZonedDateTime start = new LocalDate(2018, (int)IsoMonth.January, 1).AtStartOfDayInZone(timezone);
             LocalDate finish = new LocalDate(2018, (int)IsoMonth.APRIL, YearMonth.of(2018, (int)IsoMonth.APRIL).lengthOfMonth()); // Последний день апреля 2018 года.
 
             LocalTime time1 = new LocalTime(10, 40, 0);
@@ -560,7 +563,7 @@ namespace ru.mirea.xlsical.CouplesDetective
         public void startTestOneCoupleDuring4MonthInSomeExceptionWeek()
         {
 
-            LocalDate start = new LocalDate(2018, (int)IsoMonth.January, 1);
+            ZonedDateTime start = new LocalDate(2018, (int)IsoMonth.January, 1).AtStartOfDayInZone(timezone);
             LocalDate finish = new LocalDate(2018, (int)IsoMonth.APRIL, YearMonth.of(2018, (int)IsoMonth.APRIL).lengthOfMonth()); // Последний день апреля 2018 года.
 
             LocalTime time1 = new LocalTime(10, 40, 0);
@@ -639,7 +642,7 @@ namespace ru.mirea.xlsical.CouplesDetective
         [Fact]
         public void startTestStartWith5Week()
         {
-            LocalDate start = new LocalDate(2018, (int)IsoMonth.January, 1);
+            ZonedDateTime start = new LocalDate(2018, (int)IsoMonth.January, 1).AtStartOfDayInZone(timezone);
             LocalDate finish = new LocalDate(2018, (int)IsoMonth.FEBRUARY, YearMonth.of(2018, (int)IsoMonth.FEBRUARY).lengthOfMonth()); // Последний день января 2018 года.
 
             LocalTime timeStartCouple = new LocalTime(10, 40, 0);
