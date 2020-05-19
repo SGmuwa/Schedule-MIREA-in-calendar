@@ -47,7 +47,7 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
         /// <returns></returns>
         /// <exception cref="DetectiveException">Появилась проблема, связанная с обработкой Excel файла.</exception>
         /// <exception cref="System.IO.IOException">Во время работы с Excel file — файл стал недоступен.</exception>
-        public IEnumerable<CoupleInCalendar> startAnInvestigation(ZonedDateTime start, ZonedDateTime finish, int startWeek)
+        public IEnumerable<CoupleInCalendar> StartAnInvestigation(ZonedDateTime start, ZonedDateTime finish, int startWeek)
         {
             LinkedList<CoupleInExcel> couplesInExcel = startViewer();
             LinkedList<CoupleInCalendar> @out = new LinkedList<CoupleInCalendar>();
@@ -59,6 +59,8 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
                     startWeek,
                     line.start,
                     line.finish,
+                    #warning Волшебная константа!
+                    DateTimeZoneProviders.Tzdb["Europe/Moscow"],
                     line.dayOfWeek,
                     line.isOdd,
                     line.ItemTitle,
@@ -84,9 +86,7 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
          * @see #startAnInvestigation(ZonedDateTime, ZonedDateTime, int) 
          */
         public override IEnumerable<CoupleInCalendar> StartAnInvestigation(ZonedDateTime start, ZonedDateTime finish)
-        {
-            return startAnInvestigation(start, finish, 1);
-        }
+            => StartAnInvestigation(start, finish, 1);
 
         /// <summary>
         /// Функция расчитывает рекомендуемое время начала построения текущего расписания.
