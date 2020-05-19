@@ -19,6 +19,7 @@
 */
 
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using NodaTime;
 using ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples;
 using Xunit;
@@ -410,81 +411,37 @@ namespace ru.mirea.xlsical.CouplesDetective
             }
         }
 
-        /**
-         * Данный тест проверяет, правильно ли программа отвечает на вопрос,
-         * есть ли в записи предмета информации об исключениях датах.
-         * А именно на каких неделях есть пары, или на каких недлях пар нет.
-         */
+        /// <summary>
+        /// Данный тест проверяет, правильно ли программа отвечает на вопрос,
+        /// есть ли в записи предмета информации об исключениях датах.
+        /// А именно на каких неделях есть пары, или на каких неделях пар нет.
+        /// </summary>
         [Fact]
-        public void startTestRex()
+        public void StartTestRex()
         {
+            Assert.True(Regex.IsMatch("volume", "^[a-z0-9_-]{3,15}$"));
+            Assert.False(Regex.IsMatch("_@BEST", "^[a-z0-9_-]{3,15}$"));
+            Assert.True(Regex.IsMatch("1 w. 1", @"^.+w\.?.+$"));
+            Assert.True(Regex.IsMatch("1 н. 1", @"^.+н\.?.+$"));
+            Assert.True(Regex.IsMatch("1 н. 1", @".+н\.?.+"));
+            Assert.False(Regex.IsMatch("1 н. 1", @"н\.?"));
+            Assert.True(Regex.IsMatch("1 н. 1", @"(^.+\s[нН]\.?.+$)"));
+            Assert.False(Regex.IsMatch("1 н. 1\n", @"(^.+\s[нН]\.?.+$)|()"));
 
-            /*
-            Beginner
-             */
+            Assert.Equal(new int[] { 1 }, DetectiveSemester.SetterCouplesInCalendar.GetAllOnlyWeeks("1 н. 1"));
+            Assert.Equal(new int[] { 5 }, DetectiveSemester.SetterCouplesInCalendar.GetAllOnlyWeeks("кр 5 н Логика"));
+            Assert.Equal(new int[] { 5 }, DetectiveSemester.SetterCouplesInCalendar.GetAllOnlyWeeks("кр. 5 н. Логика"));
+            Assert.Equal(new int[] { }, DetectiveSemester.SetterCouplesInCalendar.GetAllOnlyWeeks("Внешний и внутренний PR"));
+            Assert.Equal(new int[] { }, DetectiveSemester.SetterCouplesInCalendar.GetAllOnlyWeeks("Дискретная математика"));
+            Assert.Equal(new int[] { 11, 13, 15, 17 }, DetectiveSemester.SetterCouplesInCalendar.GetAllOnlyWeeks("11,13,15,17 н. Правоведение"));
+            Assert.Equal(new int[] { 11, 13, 15, 17 }, DetectiveSemester.SetterCouplesInCalendar.GetAllOnlyWeeks("11,13,15,17 н Правоведение"));
+            Assert.Equal(new int[] { }, DetectiveSemester.SetterCouplesInCalendar.GetAllOnlyWeeks("История Неолита"));
 
-            assertTrue(
-                    Pattern.compile("^[a-z0-9_-]{3,15}$") // Сюда пишется регулярное выражение
-                            .matcher("vovan") // Здесь пишем проверяемый текст, который надо сравнить с регулярным выражением.
-                            .matches() // Отправляем команду "сравнить". True, если текст совпадает с регулярным выражением.
-            );
-
-            assertFalse(
-                    Pattern.compile("^[a-z0-9_-]{3,15}$")
-                            .matcher("_@BEST").matches()
-            );
-
-            // --------
-
-            assertTrue(
-                    Pattern.compile("^.+w\\.?.+$")
-                            .matcher("1 w. 1").matches()
-            );
-
-            assertTrue(
-                    Pattern.compile("^.+н\\.?.+$")
-                            .matcher("1 н. 1").matches()
-            );
-
-            assertTrue(
-                    Pattern.compile(".+н\\.?.+")
-                            .matcher("1 н. 1").matches()
-            );
-
-            assertFalse(
-                    Pattern.compile("н\\.?")
-                            .matcher("1 н. 1").matches()
-            );
-
-            assertTrue(
-                    Pattern.compile("(^.+\\s[нН]\\.?.+$)")
-                            .matcher("1 н. 1").matches()
-            );
-
-            assertFalse(
-                    Pattern.compile("(^.+\\s[нН]\\.?.+$)|()")
-                            .matcher("1 н. 1\n").matches()
-            );
-
-            // -------- ^J
-
-
-            assertArrayEquals(new Integer[] { 1 }, DetectiveSemester.SetterCouplesInCalendar.getAllOnlyWeeks("1 н. 1").toArray(new Integer[0]));
-            assertArrayEquals(new Integer[] { 5 }, DetectiveSemester.SetterCouplesInCalendar.getAllOnlyWeeks("кр 5 н Логика").toArray(new Integer[0]));
-            assertArrayEquals(new Integer[] { 5 }, DetectiveSemester.SetterCouplesInCalendar.getAllOnlyWeeks("кр. 5 н. Логика").toArray(new Integer[0]));
-            assertArrayEquals(new Integer[] { }, DetectiveSemester.SetterCouplesInCalendar.getAllOnlyWeeks("Внешний и внутренний PR").toArray(new Integer[0]));
-            assertArrayEquals(new Integer[] { }, DetectiveSemester.SetterCouplesInCalendar.getAllOnlyWeeks("Дискретная математика").toArray(new Integer[0]));
-            assertArrayEquals(new Integer[] { 11, 13, 15, 17 }, DetectiveSemester.SetterCouplesInCalendar.getAllOnlyWeeks("11,13,15,17 н. Правоведение").toArray(new Integer[0]));
-            assertArrayEquals(new Integer[] { 11, 13, 15, 17 }, DetectiveSemester.SetterCouplesInCalendar.getAllOnlyWeeks("11,13,15,17 н Правоведение").toArray(new Integer[0]));
-            assertArrayEquals(new Integer[] { }, DetectiveSemester.SetterCouplesInCalendar.getAllOnlyWeeks("История Неполита").toArray(new Integer[0]));
-
-            assertArrayEquals(new Integer[] { 5 }, DetectiveSemester.SetterCouplesInCalendar.getAllExceptionWeeks("кр 5 н Логика").toArray(new Integer[0]));
-            assertArrayEquals(new Integer[] { 5 }, DetectiveSemester.SetterCouplesInCalendar.getAllExceptionWeeks("кр. 5 н. Логика").toArray(new Integer[0]));
-            assertArrayEquals(new Integer[] { }, DetectiveSemester.SetterCouplesInCalendar.getAllExceptionWeeks("Внешний и внутренний PR").toArray(new Integer[0]));
-            assertArrayEquals(new Integer[] { }, DetectiveSemester.SetterCouplesInCalendar.getAllExceptionWeeks("Дискретная математика").toArray(new Integer[0]));
-            assertArrayEquals(new Integer[] { }, DetectiveSemester.SetterCouplesInCalendar.getAllExceptionWeeks("11,13,15,17 н. Правоведение").toArray(new Integer[0]));
-
-
+            Assert.Equal(new int[] { 5 }, DetectiveSemester.SetterCouplesInCalendar.GetAllExceptionWeeks("кр 5 н Логика"));
+            Assert.Equal(new int[] { 5 }, DetectiveSemester.SetterCouplesInCalendar.GetAllExceptionWeeks("кр. 5 н. Логика"));
+            Assert.Equal(new int[] { }, DetectiveSemester.SetterCouplesInCalendar.GetAllExceptionWeeks("Внешний и внутренний PR"));
+            Assert.Equal(new int[] { }, DetectiveSemester.SetterCouplesInCalendar.GetAllExceptionWeeks("Дискретная математика"));
+            Assert.Equal(new int[] { }, DetectiveSemester.SetterCouplesInCalendar.GetAllExceptionWeeks("11,13,15,17 н. Правоведение"));
         }
 
         /**
