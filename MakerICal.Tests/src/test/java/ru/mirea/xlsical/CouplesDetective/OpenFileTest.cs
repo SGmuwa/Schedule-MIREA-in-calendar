@@ -18,144 +18,105 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package ru.mirea.xlsical.CouplesDetective;
+using System.Collections.Generic;
+using System.IO;
+using ru.mirea.xlsical.CouplesDetective.xl;
+using Xunit;
 
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.junit.Test;
-import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
-import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
-import ru.mirea.xlsical.interpreter.PercentReady;
+namespace ru.mirea.xlsical.CouplesDetective
+{
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
-
-import static org.junit.Assert.*;
-
-/// <summary>
-/// Тестирование базовых инструментов работы с Excel файлами.
-/// </summary>
-public class OpenFileTest {
-
-    @Test
-    public void testOpenBadFile() {
-        File test = new File("tests/badExcel.xlsx");
-        for(int i = 0; i < 1000; i++) {
-            assertTrue(test.exists());
-            ArrayList<? extends ExcelFileInterface> files = null;
-            try {
-                files = OpenFile.newInstances(test.getAbsolutePath());
-                fail();
-            } catch (Exception e) {
-                // good
-            }
-            assertNull(files);
-        }
-    }
-
-    @Test
-    public void testOpenNormalFile() throws Exception {
-        File file = new File("tests/IIT-3k-18_19-osen.xlsx");
-        assertTrue(file.exists());
-        for(int i = 0; i < 200; i++) {
-            ArrayList<? extends ExcelFileInterface> files =
-                    OpenFile.newInstances(file.getAbsolutePath());
-            for (ExcelFileInterface aFile : files) {
-                aFile.close();
+    /// <summary>
+    /// Тестирование базовых инструментов работы с Excel файлами.
+    /// </summary>
+    public class OpenFileTest
+    {
+        [Fact]
+        public void TestOpenBadFile()
+        {
+            FileInfo test = new FileInfo("tests/badExcel.xlsx");
+            for (int i = 0; i < 1000; i++)
+            {
+                Assert.True(test.Exists);
+                Assert.Throws<System.Exception>(() => OpenFile.NewInstances(test));
             }
         }
-    }
 
-    @Test
-    public void testHeapSpace() throws Exception {
-        File[] heap = {new File("tests/heap1.xlsx"), new File("tests/heap2.xlsx")};
-        for(int i = 0; i < 5; i++) {
-            for (File aHeap : heap) {
-                assertTrue(aHeap.exists());
-                ArrayList<? extends ExcelFileInterface> files =
-                        OpenFile.newInstances(aHeap.getAbsolutePath());
-                for (ExcelFileInterface file : files) {
-                    file.close();
+        [Fact]
+        public void TestOpenNormalFile()
+        {
+            FileInfo file = new FileInfo("tests/IIT-3k-18_19-osen.xlsx");
+            Assert.True(file.Exists);
+            for (int i = 0; i < 200; i++)
+            {
+                IList<ExcelFileInterface> files = OpenFile.NewInstances(file);
+                foreach (ExcelFileInterface aFile in files)
+                    aFile.Dispose();
+            }
+        }
+
+        [Fact]
+        public void TestHeapSpace()
+        {
+            FileInfo[] heap = { new FileInfo("tests/heap1.xlsx"), new FileInfo("tests/heap2.xlsx") };
+            for (int i = 0; i < 5; i++)
+            {
+                foreach (FileInfo aHeap in heap)
+                {
+                    Assert.True(aHeap.Exists);
+                    IList<ExcelFileInterface> files =
+                            OpenFile.NewInstances(aHeap);
+                    foreach (ExcelFileInterface file in files)
+                        file.Dispose();
                 }
             }
         }
-    }
 
-    @Test
-    public void testOpenXLS() throws Exception {
-        Workbook workbook = new HSSFWorkbook();
-        Sheet sheet = workbook.createSheet("1");
-
-        // создаем подписи к столбцам (это будет первая строчка в листе Excel файла)
-        Row row = sheet.createRow(0);
-        row.createCell(0).setCellValue("АА");
-        row.createCell(1).setCellValue("БА");
-
-        // создаем подписи к столбцам (это будет вторая строчка в листе Excel файла)
-        Row row1 = sheet.createRow(1);
-        row1.createCell(0).setCellValue("АБ");
-        row1.createCell(1).setCellValue("Груша");
-
-        File testFile = new File("delete1.xls");
-        if(testFile.exists())
-            assertTrue(testFile.delete());
-
-        try (FileOutputStream out = new FileOutputStream(testFile)) {
-            workbook.write(out);
-        }
-
-        assertTrue(testFile.exists());
-        assertTrue(testFile.delete());
-
-        try (FileOutputStream out = new FileOutputStream(testFile)) {
-            workbook.write(out);
-        }
-
-        assertTrue(testFile.exists());
-
-        Workbook wb = WorkbookFactory.create(new FileInputStream(testFile));
-        wb.close();
-
-        assertTrue(testFile.exists());
-        assertTrue(testFile.delete());
-
-        try (FileOutputStream out = new FileOutputStream(testFile)) {
-            workbook.write(out);
-        }
-
-        assertTrue(testFile.exists());
-
-        OpenFile.newInstances(testFile.getPath()).get(0).close();
-
-        assertTrue(testFile.exists());
-        assertTrue(testFile.delete());
-
-        try (FileOutputStream out = new FileOutputStream(testFile)) {
-            workbook.write(out);
-        }
-
-        assertTrue(testFile.exists());
-
-        for(int i = 0; i < 2; i++) {
-            ExcelFileInterface openFile = OpenFile.newInstances(testFile.getPath()).get(0);
-            assertEquals("Error 1:1(AA)", "АА", openFile.getCellData(1, 1));
-            assertEquals("Error 1:2(AБ)", "АБ", openFile.getCellData(1, 2));
-            assertEquals("Error 2:1(БА)", "БА", openFile.getCellData(2, 1));
-            assertEquals("Error 2:2(Груша)", "Груша", openFile.getCellData(2, 2));
-            try {
-                assertEquals("Error -1:-1(null)", "", openFile.getCellData(-1, -1));
-                fail();
-            } catch (Exception e) {
-                // good.
+        [Fact]
+        public void TestOpenXLS()
+        {
+            IList<ExcelFileInterface> list = OpenFile.NewInstances("tests/small.xlsx");
+            Assert.Equal(1, list.Count);
+            using (ExcelFileInterface file = list[0])
+            {
+                Assert.Equal("Груша и лягушка", file.GetCellData(1, 1));
+                Assert.Equal("12", file.GetCellData(2, 1));
+                Assert.Equal("Градусник", file.GetCellData(1, 2));
+                Assert.Equal("13,4", file.GetCellData(2, 2));
+                Assert.Equal("Груша и лягушка; 12; Градусник; 13,4", file.GetCellData(3, 3));
             }
-            assertEquals("Error 999:999( )", "", openFile.getCellData(999, 999));
-            openFile.close();
         }
-        assertTrue("Ошибка при последнем удалении файла", testFile.delete());
+
+        [Fact]
+        public void TestOpenXLSColors()
+        {
+            IList<ExcelFileInterface> list = OpenFile.NewInstances("tests/small.xlsx");
+            Assert.Equal(1, list.Count);
+            using (ExcelFileInterface file = list[0])
+            {
+                Assert.True(file.IsBackgroundColorsEquals(1, 1, 2, 1));
+                Assert.True(file.IsBackgroundColorsEquals(2, 1, 1, 1));
+                Assert.True(file.IsBackgroundColorsEquals(1, 1, 1, 1));
+                Assert.True(file.IsBackgroundColorsEquals(2, 1, 2, 1));
+
+                Assert.True(file.IsBackgroundColorsEquals(1, 2, 2, 2));
+                Assert.True(file.IsBackgroundColorsEquals(2, 2, 1, 2));
+                Assert.True(file.IsBackgroundColorsEquals(1, 2, 1, 2));
+                Assert.True(file.IsBackgroundColorsEquals(2, 2, 2, 2));
+
+                Assert.True(file.IsBackgroundColorsEquals(1, 3, 2, 3));
+                Assert.True(file.IsBackgroundColorsEquals(2, 3, 1, 3));
+                Assert.True(file.IsBackgroundColorsEquals(1, 3, 1, 3));
+                Assert.True(file.IsBackgroundColorsEquals(2, 3, 2, 3));
+                
+                Assert.False(file.IsBackgroundColorsEquals(1, 1, 1, 2));
+                Assert.False(file.IsBackgroundColorsEquals(1, 2, 1, 1));
+                Assert.False(file.IsBackgroundColorsEquals(1, 1, 1, 3));
+                Assert.False(file.IsBackgroundColorsEquals(1, 3, 1, 1));
+                
+                Assert.False(file.IsBackgroundColorsEquals(1, 2, 1, 3));
+                Assert.False(file.IsBackgroundColorsEquals(1, 3, 1, 2));
+            }
+        }
     }
 }
