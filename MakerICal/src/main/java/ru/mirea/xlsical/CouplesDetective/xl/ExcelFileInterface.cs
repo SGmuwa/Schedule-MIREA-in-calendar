@@ -26,6 +26,7 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
     /// </summary>
     public interface ExcelFileInterface : IDisposable
     {
+#warning Create [] access.
         /// <summary>
         /// Получение текстовых данных из файла.
         /// </summary>
