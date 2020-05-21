@@ -27,15 +27,12 @@ using ru.mirea.xlsical.CouplesDetective.xl;
 
 namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
 {
-
-    /**
-     * Данный класс отвечает за получение календарных пар из Excel расписания.
-     * Умеет читать только семестровое расписание.
-     * @author <a href="https://github.com/SGmuwa/">[SG]Muwa</a>.
-     */
+    /// <summary>
+    /// Данный класс отвечает за получение календарных пар из Excel расписания.
+    /// Умеет читать только семестровое расписание.
+    /// </summary>
     public class DetectiveSemester : Detective
     {
-
         public DetectiveSemester(ExcelFileInterface file, DetectiveDate dateSettings) : base(file, dateSettings) { }
 
         /// <summary>
@@ -47,7 +44,7 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
         /// <returns></returns>
         /// <exception cref="DetectiveException">Появилась проблема, связанная с обработкой Excel файла.</exception>
         /// <exception cref="System.IO.IOException">Во время работы с Excel file — файл стал недоступен.</exception>
-        public IEnumerable<CoupleInCalendar> StartAnInvestigation(ZonedDateTime start, ZonedDateTime finish, int startWeek)
+        public ICollection<CoupleInCalendar> StartAnInvestigation(ZonedDateTime start, ZonedDateTime finish, int startWeek)
         {
             LinkedList<CoupleInExcel> couplesInExcel = startViewer();
             LinkedList<CoupleInCalendar> @out = new LinkedList<CoupleInCalendar>();
@@ -74,18 +71,20 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
             return @out;
         }
 
-        /**
-         * Функция ищет занятия для seeker в файле File.
-         *
-         * @param start  Дата и время начала составления расписания.
-         *               Стоит отметить, что если указать день начала с воскресенья,
-         *               то в понедельник будет номер недели равный двум.
-         * @param finish Дата и время конца составления расписания.
-         * @throws DetectiveException Появилась проблема, связанная с обработкой Excel файла.
-         * @throws IOException        Во время работы с Excel file - файл стал недоступен.
-         * @see #startAnInvestigation(ZonedDateTime, ZonedDateTime, int) 
-         */
-        public override IEnumerable<CoupleInCalendar> StartAnInvestigation(ZonedDateTime start, ZonedDateTime finish)
+        /// <summary>
+        /// Функция ищет занятия для seeker в файле File.
+        /// </summary>
+        /// <param name="start">
+        /// Дата и время начала семестра.
+        /// Стоит отметить, что если указать день начала с воскресенья,
+        /// то в понедельник будет номер недели равный двум.
+        /// </param>
+        /// <param name="finish">Дата и время конца семестра.</param>
+        /// <returns>Набор календарных пар из Excel файла.</returns>
+        /// <exception cref="DetectiveException">Появилась проблема, связанная с обработкой Excel файла.</exception>
+        /// <exception cref="IOException">Во время работы с Excel file - файл стал недоступен.</exception>
+        /// <seealso cref="StartAnInvestigation(ZonedDateTime, ZonedDateTime, int)"/>
+        public override ICollection<CoupleInCalendar> StartAnInvestigation(ZonedDateTime start, ZonedDateTime finish)
             => StartAnInvestigation(start, finish, 1);
 
         /// <summary>

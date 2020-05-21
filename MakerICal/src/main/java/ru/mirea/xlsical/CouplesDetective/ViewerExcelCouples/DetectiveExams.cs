@@ -39,7 +39,7 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
         /// <returns>Перечисление занятий для seeker.</returns>
         /// <exception cref="DetectiveException">Появилась проблема, связанная с обработкой Excel файла.</exception>
         /// <exception cref="System.IO.IOException">Во время работы с Excel file - файл стал недоступен.</exception>
-        public override IEnumerable<CoupleInCalendar> StartAnInvestigation(ZonedDateTime start, ZonedDateTime finish)
+        public override ICollection<CoupleInCalendar> StartAnInvestigation(ZonedDateTime start, ZonedDateTime finish)
         {
 #warning throw new System.NotImplementedException();
             throw new System.NotImplementedException();

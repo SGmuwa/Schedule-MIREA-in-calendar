@@ -138,7 +138,7 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
 
         public void Dispose() => file.Dispose();
         
-        public abstract IEnumerable<CoupleInCalendar> StartAnInvestigation(ZonedDateTime start, ZonedDateTime finish);
+        public abstract ICollection<CoupleInCalendar> StartAnInvestigation(ZonedDateTime start, ZonedDateTime finish);
         public abstract ZonedDateTime GetStartTime(ZonedDateTime now);
         public abstract ZonedDateTime GetFinishTime(ZonedDateTime now);
     }

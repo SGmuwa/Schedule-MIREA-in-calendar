@@ -41,7 +41,7 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
         /// <returns>Список занятий.</returns>
         /// <exception cref="DetectiveException">Появилась проблема, связанная с обработкой Excel файла.</exception>
         /// <exception cref="System.IO.IOException">Во время работы с Excel file - файл стал недоступен.</exception>
-        public IEnumerable<CoupleInCalendar> StartAnInvestigation(ZonedDateTime start, ZonedDateTime finish)
+        public ICollection<CoupleInCalendar> StartAnInvestigation(ZonedDateTime start, ZonedDateTime finish)
             => detectiveSemester.StartAnInvestigation(start, finish);
 
         /// <summary>

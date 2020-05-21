@@ -16,127 +16,118 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package ru.mirea.xlsical.CouplesDetective;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using NodaTime;
+using ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples;
+using ru.mirea.xlsical.CouplesDetective.xl;
+using ru.mirea.xlsical.interpreter;
+using ru.mirea.xlsical.Server;
+using Xunit;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.junit.Test;
-import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.*;
-import ru.mirea.xlsical.CouplesDetective.xl.ExcelFileInterface;
-import ru.mirea.xlsical.CouplesDetective.xl.OpenFile;
-import ru.mirea.xlsical.Server.TaskExecutor;
-import ru.mirea.xlsical.interpreter.*;
+namespace ru.mirea.xlsical.CouplesDetective
+{
+    /// <summary>
+    /// Тестирование конвейера задач.
+    /// На вход конвейера поступают запросы, а на выходе — iCal файлы.
+    /// </summary>
+    public class TaskExecutorTest
+    {
+        [Fact]
+        public void PullPollStep()
+        {
+            TaskExecutor te = GlobalTaskExecutor.taskExecutor;
+            te.add(new PackageToMakerICal(null, null));
+            te.step();
+            PackageToProviderHTTP ptc = te.take();
 
-import java.io.File;
-import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
+            Assert.Null(ptc.CalFile);
+            Assert.Equal(0, ptc.Count);
+            Assert.Equal("Ошибка: отсутствуют критерии поиска.", ptc.Messages);
+        }
 
-import static org.junit.Assert.*;
+        [Fact]
+        public void SendSampleExcel()
+        {
+            TaskExecutor a = GlobalTaskExecutor.taskExecutor;
+            a.add(new PackageToMakerICal(null,
+                    new Seeker(
+                            "ИКБО-04-16",
+                            new LocalDate(2018, 9, 1),
+                            new LocalDate(2018, 9, 3),
+                            DateTimeZoneProviders.Tzdb["Europe/Minsk"]
+                    )
+            ));
 
-/// <summary>
-/// Тестирование конвейера задач.
-/// На вход конвейера поступают запросы, а на выходе — iCal файлы.
-/// </summary>
-public class TaskExecutorTest {
+            a.step();
+            PackageToProviderHTTP b = a.take();
+            Assert.NotNull(b.CalFile);
+            System.Console.WriteLine(b.CalFile);
+            Assert.Equal(3, b.Count);
+        }
 
-    @Test
-    public void pullPollStep() throws InterruptedException {
-        TaskExecutor te = GlobalTaskExecutor.taskExecutor;
-        te.add(new PackageToServer(null, null));
-        te.step();
-        PackageToClient ptc = te.take();
+        [Fact]
+        public void SendSampleExcelAllSem()
+        {
+            TaskExecutor a = new TaskExecutor(GlobalTaskExecutor.coupleHistorian);
+            a.add(new PackageToMakerICal(null,
+                    new Seeker(
+                            "ИКБО-04-16",
+                            new LocalDate(2018, 9, 1),
+                            new LocalDate(2018, 12, 31),
+                            DateTimeZoneProviders.Tzdb["Europe/Minsk"]
+                    )
+            ));
 
-        assertNull(ptc.CalFile);
-        assertEquals(0, ptc.Count);
-        assertEquals("Ошибка: отстствуют критерии поиска.", ptc.Messages);
-    }
+            a.step();
+            PackageToProviderHTTP b = a.take();
+            System.Console.WriteLine(b.CalFile);
+            Assert.NotNull(b.CalFile);
+            Assert.Equal(232, b.Count);
+        }
 
-    @Test
-    public void sendSampleExcel() throws InterruptedException {
-        TaskExecutor a = GlobalTaskExecutor.taskExecutor;
-        a.add(new PackageToServer(null,
-                new Seeker(
-                        "ИКБО-04-16",
-                        LocalDate.of(2018, 9, 1),
-                        LocalDate.of(2018, 9, 3),
-                        ZoneId.of("Europe/Minsk")
-                )
-        ));
+        [Fact]
+        public void SendExcelAllSem()
+        {
+            // В этом тесте надо уточнить, чтобы код думал, что сейчас 1 сентября 2018 года,
+            // чтобы построил расписание на осенний семестр 2018 года.
+            CoupleHistorian historian = GlobalTaskExecutor.coupleHistorian;
 
-        a.step();
-        PackageToClient b = a.take();
-        assertNotNull(b.CalFile);
-        System.out.println(b.CalFile);
-        assertEquals(3, b.Count);
-    }
+            TaskExecutor a = new TaskExecutor(historian);
+            a.add(new PackageToMakerICal(null,
+                    new Seeker(
+                            "ИКБО-04-16",
+                            new LocalDate(2018, 9, 1),
+                            new LocalDate(2018, 12, 31),
+                            DateTimeZoneProviders.Tzdb["Europe/Minsk"]
+                    )
+            ));
 
-    @Test
-    public void sendSampleExcelAllSem() throws InterruptedException, IOException {
-        TaskExecutor a = new TaskExecutor(GlobalTaskExecutor.coupleHistorian);
-        a.add(new PackageToServer(null,
-                new Seeker(
-                        "ИКБО-04-16",
-                        LocalDate.of(2018, 9, 1),
-                        LocalDate.of(2018, 12, 31),
-                        ZoneId.of("Europe/Minsk")
-                )
-        ));
+            a.step();
+            PackageToProviderHTTP b = a.take();
+            System.Console.WriteLine(b.CalFile);
+            Assert.NotNull(b.CalFile);
+            Assert.Equal(232, b.Count);
+        }
 
-        a.step();
-        PackageToClient b = a.take();
-        System.out.println(b.CalFile);
-        assertNotNull(b.CalFile);
-        assertEquals(232, b.Count);
-    }
+        [Fact]
+        public void SendExcelManual()
+        {
+            // В этом тесте надо уточнить, чтобы код думал, что сейчас 1 сентября 2018 года,
+            // чтобы построил расписание на осенний семестр 2018 года.
+            IList<ExcelFileInterface> files = OpenFile.NewInstances("tests/Zach_IIT-3k-18_19-osen.xlsx");
+            IDetective det = new DetectiveLastWeekS(files[0], new DetectiveDate());
 
-    @Test
-    public void sendExcelAllSem() throws InterruptedException, IOException {
-        // В этом тесте надо уточнить, чтобы код думал, что сейчас 1 сентября 2018 года,
-        // чтобы построил расписание на осенний семестр 2018 года.
-        CoupleHistorian historian = GlobalTaskExecutor.coupleHistorian;
-
-        TaskExecutor a = new TaskExecutor(historian);
-        a.add(new PackageToServer(null,
-                new Seeker(
-                        "ИКБО-04-16",
-                        LocalDate.of(2018, 9, 1),
-                        LocalDate.of(2018, 12, 31),
-                        ZoneId.of("Europe/Minsk")
-                )
-        ));
-
-        a.step();
-        PackageToClient b = a.take();
-        System.out.println(b.CalFile);
-        assertNotNull(b.CalFile);
-        assertEquals(232, b.Count);
-    }
-
-    @Test
-    public void sendExcelManual() throws InterruptedException, IOException, InvalidFormatException, DetectiveException {
-        // В этом тесте надо уточнить, чтобы код думал, что сейчас 1 сентября 2018 года,
-        // чтобы построил расписание на осенний семестр 2018 года.
-        List<? extends ExcelFileInterface> files = OpenFile.newInstances("tests/Zach_IIT-3k-18_19-osen.xlsx");
-        IDetective det = new DetectiveLastWeekS(files.get(0), new DetectiveDate());
-
-        List<CoupleInCalendar> couples = det.startAnInvestigation(
-                ZonedDateTime.of(
-                        LocalDate.of(2018, 12, 24),
-                        LocalTime.of(0, 0, 0),
-                        ZoneId.of("Europe/Moscow")
-                ),
-                ZonedDateTime.of(
-                        LocalDate.of(2018, 12, 30),
-                        LocalTime.of(0, 0, 0),
-                        ZoneId.of("Europe/Moscow")
-                )
-        );
-        couples.removeIf((coup) -> !coup.nameOfGroup.equals("ИКБО-02-16"));
-        String str = ExportCouplesToICal.start(couples, new PercentReady());
-        System.out.println(str);
+            ICollection<CoupleInCalendar> couples = det.StartAnInvestigation(
+                DateTimeZoneProviders.Tzdb["Europe/Minsk"]
+                .AtStartOfDay(new LocalDate(2018, (int)IsoMonth.December, 24)),
+                DateTimeZoneProviders.Tzdb["Europe/Minsk"]
+                .AtStartOfDay(new LocalDate(2018, (int)IsoMonth.December, 30))
+            );
+            var a = from c in couples where c.NameOfGroup.Equals("ИКБО-02-16") select c;
+            FileInfo str = ExportCouplesToICal.start(couples, new PercentReady());
+            System.Console.WriteLine($"SendExcelManual: {str.FullName}");
+        }
     }
 }
