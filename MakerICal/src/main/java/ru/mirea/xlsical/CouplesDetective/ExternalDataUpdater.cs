@@ -111,9 +111,12 @@ namespace ru.mirea.xlsical.CouplesDetective
         private void createCacheDir()
         {
             pathToCache.Create();
-            if (pathToCache.Attributes.HasFlag(FileAttributes.Directory)
-            && !pathToCache.Attributes.HasFlag(FileAttributes.ReadOnly))
-                throw new System.IO.IOException("Need directory and not readonly.");
+            if (!pathToCache.Attributes.HasFlag(FileAttributes.Directory)
+            || pathToCache.Attributes.HasFlag(FileAttributes.ReadOnly))
+                throw new System.IO.IOException(
+                    $"Need directory ({(pathToCache.Attributes.HasFlag(FileAttributes.Directory) ? "ok" : "fail")}) "
+                    + $"and not readonly ({(!pathToCache.Attributes.HasFlag(FileAttributes.ReadOnly) ? "ok" : "fail")}): "
+                    + $"{pathToCache.FullName}, {pathToCache.Attributes}");
         }
 
         public ExternalDataUpdater(List<FileInfo> excelFiles, List<Teacher> teachers)
