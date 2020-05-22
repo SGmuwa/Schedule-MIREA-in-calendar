@@ -72,17 +72,17 @@ namespace ru.mirea.xlsical.CouplesDetective
 
         public void Reset()
         {
-            if (enumeratorInExcel != null)
-            {
-                enumeratorInExcel.Dispose();
-                enumeratorInExcel = null;
-            }
+            Dispose();
             enumeratorOfExcels.Reset();
         }
 
         public void Dispose()
         {
-            Reset();
+            if (enumeratorInExcel != null)
+            {
+                enumeratorInExcel.Dispose();
+                enumeratorInExcel = null;
+            }
         }
     }
 }
