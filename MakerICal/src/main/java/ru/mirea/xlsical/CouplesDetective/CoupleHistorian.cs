@@ -23,6 +23,7 @@ using NodaTime;
 using ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples;
 using System.Linq;
 using System.Text.RegularExpressions;
+using ru.mirea.xlsical.CouplesDetective.xl;
 
 namespace ru.mirea.xlsical.CouplesDetective
 {
@@ -130,12 +131,11 @@ namespace ru.mirea.xlsical.CouplesDetective
             ZonedDateTime now = this.now == null ? new ZonedDateTime(LocalDateTime.FromDateTime(System.DateTime.UtcNow), DateTimeZone.Utc, Offset.Zero) : this.now;
 
             {
-                EnumeratorExcels it = edUpdater.OpenTablesFromExternal();
-                float size = it.Count * 3;
+                float size = edUpdater.Count();
                 int i = 0;
-                while (it.MoveNext())
+                foreach (ExcelFileInterface file in edUpdater)
                 {
-                    Detective detective = Detective.ChooseDetective(it.Current, settingDates);
+                    Detective detective = Detective.ChooseDetective(file, settingDates);
                     try
                     {
                         newCache.AddLastRange(detective.StartAnInvestigation(
@@ -145,14 +145,6 @@ namespace ru.mirea.xlsical.CouplesDetective
                     }
                     catch (IOException) { }
                     catch (DetectiveException) { }
-                    try
-                    {
-                        it.Current.Dispose();
-                    }
-                    catch (IOException)
-                    {
-                        System.Console.WriteLine("can't close file: " + it.Current.ToString());
-                    }
                     if (i + 1 < size)
                         cycles[0].Ready = ++i / size;
                 }

@@ -24,17 +24,14 @@ using ru.mirea.xlsical.CouplesDetective.xl;
 
 namespace ru.mirea.xlsical.CouplesDetective
 {
-    public class EnumeratorExcels : IEnumerator<ExcelFileInterface>
+    public class EnumeratorExcelsFileInfo : IEnumerator<ExcelFileInterface>
     {
-        public EnumeratorExcels(List<FileInfo> excelFiles, bool needIngoreErrors = true)
+        public EnumeratorExcelsFileInfo(IEnumerable<FileInfo> excelFiles, bool needIngoreErrors = true)
         {
-            List<FileInfo> clone = new List<FileInfo>(excelFiles);
-            Count = clone.Count;
-            enumeratorOfExcels = clone.GetEnumerator();
+            enumeratorOfExcels = excelFiles.GetEnumerator();
             NeedIngoreErrors = needIngoreErrors;
         }
 
-        public int Count { get; }
         private readonly IEnumerator<FileInfo> enumeratorOfExcels;
         private IEnumerator<ExcelFileInterface> enumeratorInExcel = null;
 
@@ -88,7 +85,6 @@ namespace ru.mirea.xlsical.CouplesDetective
         public void Dispose()
         {
             Reset();
-            enumeratorOfExcels.Dispose();
         }
     }
 }

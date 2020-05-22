@@ -39,7 +39,7 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
 
         private SetInt closed;
 
-        private readonly FileInfo fileName;
+        private readonly string fileName;
 
         private readonly SpreadsheetDocument document;
 
@@ -68,7 +68,32 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
             first.closed = setInt;
 
             for (int i = 1; i < size; i++)
-                @out.Add(new OpenFile(first.document, i, size, setInt, fileName));
+                @out.Add(new OpenFile(first.document, i, size, setInt, fileName.Name));
+            return @out;
+        }
+
+#warning Должен возвращаться лист, поддерживающий using.
+        /// <summary>
+        /// Открывает Excel файл вместе со всеми его листами.
+        /// </summary>
+        /// <param name="stream">Поток файла, в котором содержится Excel файл.</param>
+        /// <returns>Возвращает список открытых листов.</returns>
+        /// <exception cref="System.IO.IOException">Ошибка доступа к файлу.</exception>
+        /// <exception cref="System.InvalidCastException">Ошибка распознования .xls или .xlsx файла.</exception>
+        public static List<ExcelFileInterface> NewInstances(Stream stream)
+        {
+            if (stream == null)
+                throw new System.ArgumentNullException(nameof(stream));
+            SetInt setInt = new SetInt();
+            OpenFile first = new OpenFile(stream, 0);
+            int size = first.document.WorkbookPart.Workbook.Descendants<Sheet>().Count();
+            List<ExcelFileInterface> @out = new List<ExcelFileInterface>(size);
+            @out.Add(first);
+            first.needToClose = size;
+            first.closed = setInt;
+
+            for (int i = 1; i < size; i++)
+                @out.Add(new OpenFile(first.document, i, size, setInt, stream.ToString()));
             return @out;
         }
 
@@ -174,8 +199,27 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
         {
             this.document = SpreadsheetDocument.Open(fileName.FullName, false);
             this.numberSheet = numberSheet;
-            this.fileName = fileName;
+            this.fileName = fileName.Name;
         }
+
+
+
+        /// <summary>
+        /// Создаёт экземпляр открытия файла.
+        /// Для открытия всех листов Excel файла используйте <see cref="NewInstances(string)"/>.
+        /// </summary>
+        /// <param name="stream">Поток, который необходимо открыть.</param>
+        /// <param name="numberSheet">Номер страницы книги Excel.</param>
+        /// <exception cref="System.IO.IOException">Ошибка доступа к файлу.</exception>
+        /// <exception cref="System.InvalidCastException">Ошибка распознования файла.</exception>
+        private OpenFile(Stream stream, int numberSheet)
+        {
+            this.document = SpreadsheetDocument.Open(stream, false);
+            this.numberSheet = numberSheet;
+            this.fileName = stream.ToString();
+        }
+
+
 
         /// <summary>
         /// Создаёт экземпляр открытия файла.
@@ -188,7 +232,7 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
         /// <param name="fileName">Имя файла.</param>
         /// <exception cref="System.IO.IOException">Ошибка доступа к файлу.</exception>
         /// <exception cref="System.InvalidCastException">Ошибка распознования файла.</exception>
-        private OpenFile(SpreadsheetDocument document, int numberSheet, int needToClose, SetInt closed, FileInfo fileName)
+        private OpenFile(SpreadsheetDocument document, int numberSheet, int needToClose, SetInt closed, string fileName)
         {
             this.document = document;
             this.numberSheet = numberSheet;

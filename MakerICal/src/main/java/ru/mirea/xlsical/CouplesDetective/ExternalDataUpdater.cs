@@ -24,6 +24,8 @@ using System.Threading;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Net;
+using ru.mirea.xlsical.CouplesDetective.xl;
+using System.Collections;
 
 namespace ru.mirea.xlsical.CouplesDetective
 {
@@ -31,7 +33,7 @@ namespace ru.mirea.xlsical.CouplesDetective
     /// Класс, который отвечает за синхронизацию с <a href="https://www.mirea.ru/education/">mirea.ru</a>.
     /// Данный класс потокобезопасный.
     /// </summary>
-    public class ExternalDataUpdater
+    public class ExternalDataUpdater : IEnumerable<ExcelFileInterface>
     {
         public ExternalDataUpdater(bool isNeedDownload)
         : this("cache/excel/", isNeedDownload)
@@ -119,12 +121,17 @@ namespace ru.mirea.xlsical.CouplesDetective
             pathToCache = null;
             if (excelFiles != null)
                 this.excelFiles = excelFiles;
-            else
-                this.excelFiles = new List<FileInfo>();
             if (teachers != null)
                 this.teachers = teachers;
-            else
-                this.teachers = new List<Teacher>();
+        }
+
+        public ExternalDataUpdater(IEnumerable<Stream> excelStreams, List<Teacher> teachers)
+        {
+            pathToCache = null;
+            if (excelFiles != null)
+                this.excelStreams = excelStreams;
+            if (teachers != null)
+                this.teachers = teachers;
         }
 
         /// <summary>
@@ -142,10 +149,15 @@ namespace ru.mirea.xlsical.CouplesDetective
         /// </summary>
         private static readonly System.Random random = new System.Random();
 
-        /**
-         * Расположение доступных файлов Excel
-         */
+        /// <summary>
+        /// Расположение доступных файлов Excel
+        /// </summary>
         private List<FileInfo> excelFiles = new List<FileInfo>();
+
+        /// <summary>
+        /// Работающие потоки чтения Excel файлов.
+        /// </summary>
+        private IEnumerable<Stream> excelStreams = null;
 
         /// <summary>
         /// Список преподавателей.
@@ -161,12 +173,18 @@ namespace ru.mirea.xlsical.CouplesDetective
         /// Функция отвечает за то, чтобы получить таблицы из сайта <a href="https://www.mirea.ru/education/schedule-main/schedule/">mirea.ru</a>.
         /// Стоит отметить, что если в кэше есть не устаревшие таблицы, то функция
         /// вернёт таблицы из кэша.
-        /// Файлы надо закрывать методом <see cref="EnumeratorExcels.Dispose()">!
         /// Если вам по-середине понадобилось закрыть все файлы, вам всё равно придётся все элементы перебрать и закрыть.
         /// </summary>
         /// <returns>Возвращает все таблицы из сайта <a href="https://www.mirea.ru/education/schedule-main/schedule/">mirea.ru</a>. Вызвать метод .close обязательно.</returns>
-        public EnumeratorExcels OpenTablesFromExternal()
-            => new EnumeratorExcels(excelFiles);
+        public IEnumerator<ExcelFileInterface> GetEnumerator()
+        {
+            if(excelFiles?.Count != 0)
+                return new EnumeratorExcelsFileInfo(excelFiles);
+            if(excelStreams != null)
+                return new EnumeratorExcelsStream(excelStreams);
+            else
+                return System.Linq.Enumerable.Empty<ExcelFileInterface>().GetEnumerator();
+        }
 
         /// <summary>
         /// Функция ведёт поиск полного имени преподавателя.
@@ -376,7 +394,7 @@ namespace ru.mirea.xlsical.CouplesDetective
 
             int size = excelUrls.Count;
             List<FileInfo> excelFilesPaths = new List<FileInfo>(size);
-            IEnumerator<String> it = excelUrls.GetEnumerator();
+            IEnumerator<string> it = excelUrls.GetEnumerator();
             for (int i = 0; i < size; i++)
             {
                 String url = it.Current;
@@ -454,5 +472,8 @@ namespace ru.mirea.xlsical.CouplesDetective
         {
             this.needUpdate = needUpdate;
         }
+
+        IEnumerator IEnumerable.GetEnumerator()
+            => GetEnumerator();
     }
 }

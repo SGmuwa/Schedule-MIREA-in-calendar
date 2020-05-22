@@ -47,29 +47,33 @@ namespace ru.mirea.xlsical.CouplesDetective
             // 1 файл в колледже
             // -10 pdf
             // .xls 101 файл.
-            EnumeratorExcels files = edu.OpenTablesFromExternal();
-            // Осторожно! Число со временем тестирования может меняться!
-            /* <a ref="view-source:https://www.mirea.ru/education/schedule-main/schedule/">
-             * сюда</a> и проверить количество соответствий с ".xls"*/
-            //assertEquals(files.size(), 101);
-            //for (ExcelFileInterface file : files) {
-            //    file.close();
-            //}
-            Assert.True(files.MoveNext());
-            Assert.True(files.MoveNext());
-            edu.Stop();
-            int count = 0;
-            Console.WriteLine("ExternalDataUpdaterTest.java#run: start open files");
-            files.Reset();
-            while (files.MoveNext())
+            using (var files = edu.GetEnumerator())
             {
-                ExcelFileInterface efi = files.Current;
-                Console.WriteLine(efi);
-                efi.Dispose();
-                count++;
+                // Осторожно! Число со временем тестирования может меняться!
+                /* <a ref="view-source:https://www.mirea.ru/education/schedule-main/schedule/">
+                 * сюда</a> и проверить количество соответствий с ".xls"*/
+                //assertEquals(files.size(), 101);
+                //for (ExcelFileInterface file : files) {
+                //    file.close();
+                //}
+                Assert.True(files.MoveNext());
+                Assert.True(files.MoveNext());
+                edu.Stop();
+                int count = 0;
+                Console.WriteLine("ExternalDataUpdaterTest.java#run: start open files");
+                files.Reset();
+                while (files.MoveNext())
+                {
+                    ExcelFileInterface efi = files.Current;
+                    Console.WriteLine(efi);
+                    efi.Dispose();
+                    count++;
+                }
+                #warning Неточное число
+                Assert.True(count > 100);
+                Console.WriteLine(nameof(ExternalDataUpdaterTest.run) + " " + count);
             }
-            Assert.True(count > 100);
-            //assertEquals(101, count);
+            //Assert.Equal(101, count);
             Thread.Sleep(20);
         }
     }
