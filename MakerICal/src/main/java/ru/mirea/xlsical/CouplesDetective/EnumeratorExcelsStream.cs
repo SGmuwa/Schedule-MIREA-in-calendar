@@ -54,6 +54,8 @@ namespace ru.mirea.xlsical.CouplesDetective
                 try
                 {
                     enumeratorInExcel = OpenFile.NewInstances(enumeratorOfExcels.Current).GetEnumerator();
+                    if (enumeratorInExcel.MoveNext())
+                        return true;
                 }
                 catch (Exception e)
                 {
@@ -64,8 +66,6 @@ namespace ru.mirea.xlsical.CouplesDetective
                     }
                     else throw;
                 }
-                if (enumeratorInExcel.MoveNext())
-                    return true;
             }
             return false;
         }
