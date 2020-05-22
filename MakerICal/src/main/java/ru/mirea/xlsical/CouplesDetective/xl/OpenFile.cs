@@ -255,40 +255,21 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
             WorkbookPart wbPart = document.WorkbookPart;
             Sheet myExcelSheet = wbPart.Workbook.Descendants<Sheet>().ElementAt(numberSheet);
             WorksheetPart wsPart = (WorksheetPart)(wbPart.GetPartById(myExcelSheet.Id));
+            string xmlCoordinate = CoordinateToAddress(column - 1, row);
             return wsPart.Worksheet.Descendants<Cell>().
-              Where(c => c.CellReference == CoordinateToAddress(column - 1, row)).FirstOrDefault();
+              Where(c => c.CellReference == xmlCoordinate).FirstOrDefault();
         }
 
         private static string CoordinateToAddress(int column, int row)
         {
             const string abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            return new string(IntToStringFast(column, abc.ToArray())) + row;
-        }
-
-        /// <summary>
-        /// An optimized method using an array as buffer instead of
-        /// string concatenation. This is faster for return values having
-        /// a length > 1.
-        /// </summary>
-        private static string IntToStringFast(int value, char[] baseChars)
-        {
-            // https://stackoverflow.com/questions/923771/quickest-way-to-convert-a-base-10-number-to-any-base-in-net
-            // 32 is the worst cast buffer size for base 2 and int.MaxValue
-            int i = 32;
-            char[] buffer = new char[i];
-            int targetBase = baseChars.Length;
-
-            do
-            {
-                buffer[--i] = baseChars[value % targetBase];
-                value = value / targetBase;
-            }
-            while (value > 0);
-
-            char[] result = new char[32 - i];
-            Array.Copy(buffer, i, result, 0, 32 - i);
-
-            return new string(result);
+            int two = column / abc.Length - 1;
+            if (two > abc.Length)
+                throw new NotSupportedException("column size can't be more than ZZ (702?)");
+            if (two == -1)
+                return $"{abc[column]}{row}";
+            else
+                return $"{abc[two]}{abc[column % abc.Length]}{row}";
         }
 
         public override string ToString()
