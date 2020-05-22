@@ -729,7 +729,7 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
                 return @out;
             }
 
-            private static readonly Regex regFinishWeek = new Regex(@"(^| )[Дд]о ?+\d+");
+            private static readonly Regex regFinishWeek = new Regex(@"(^| )[Дд]о *\d+");
 
             /// <summary>
             /// Функция ищет, до какой недели идут пары. Ищет "До %d", где %d - целое число.
@@ -745,7 +745,7 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
                     return null;
             }
 
-            private static readonly Regex regStartWeek = new Regex(@"(^| )[СсCc] ?+\d+");
+            private static readonly Regex regStartWeek = new Regex(@"(^| )[СсCc] *\d+");
 
             /// <summary>
             /// Функция ищет, с какой недели идут пары. Ищет "C %d", где %d - целое число.
