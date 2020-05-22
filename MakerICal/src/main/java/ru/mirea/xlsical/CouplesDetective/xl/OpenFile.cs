@@ -18,6 +18,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -258,13 +259,36 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
               Where(c => c.CellReference == CoordinateToAddress(column - 1, row)).FirstOrDefault();
         }
 
-        public static string CoordinateToAddress(int column, int row)
+        private static string CoordinateToAddress(int column, int row)
         {
             const string abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            string column_abcbase = System.Convert.ToString(column, abc.Length);
-            IEnumerable<byte> column_abcbaselist = from char a in column_abcbase select System.Convert.ToByte(a.ToString(), abc.Length);
-            IEnumerable<char> column_output = from byte a in column_abcbaselist select abc[a];
-            return new string(column_output.ToArray()) + row;
+            return new string(IntToStringFast(column, abc.ToArray())) + row;
+        }
+
+        /// <summary>
+        /// An optimized method using an array as buffer instead of
+        /// string concatenation. This is faster for return values having
+        /// a length > 1.
+        /// </summary>
+        private static string IntToStringFast(int value, char[] baseChars)
+        {
+            // https://stackoverflow.com/questions/923771/quickest-way-to-convert-a-base-10-number-to-any-base-in-net
+            // 32 is the worst cast buffer size for base 2 and int.MaxValue
+            int i = 32;
+            char[] buffer = new char[i];
+            int targetBase = baseChars.Length;
+
+            do
+            {
+                buffer[--i] = baseChars[value % targetBase];
+                value = value / targetBase;
+            }
+            while (value > 0);
+
+            char[] result = new char[32 - i];
+            Array.Copy(buffer, i, result, 0, 32 - i);
+
+            return new string(result);
         }
 
         public override string ToString()

@@ -20,6 +20,8 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using ru.mirea.xlsical.CouplesDetective.xl;
 using Xunit;
 
@@ -31,66 +33,70 @@ namespace ru.mirea.xlsical.CouplesDetective
     /// </summary>
     public class OpenFileTest
     {
+        private Assembly assembly = Assembly.GetExecutingAssembly();
+
         [Fact]
         public void TestOpenBadFile()
         {
-            FileInfo test = new FileInfo("tests/badExcel.xlsx");
-            for (int i = 0; i < 1000; i++)
-            {
-                Assert.True(test.Exists);
-                Assert.Throws<System.Exception>(() => OpenFile.NewInstances(test));
-            }
+            using (Stream test = assembly.GetManifestResourceStream("MakerICal.Tests.tests.badExcel.xlsx"))
+                for (int i = 0; i < 1000; i++)
+                    Assert.Throws<System.IO.FileFormatException>(() => OpenFile.NewInstances(test));
         }
 
         [Fact]
         public void TestOpenNormalFile()
         {
-            FileInfo file = new FileInfo("tests/IIT-3k-18_19-osen.xlsx");
-            Assert.True(file.Exists);
-            for (int i = 0; i < 200; i++)
+            using (Stream file = assembly.GetManifestResourceStream("MakerICal.Tests.tests.IIT-3k-18_19-osen.xlsx"))
             {
-                IList<ExcelFileInterface> files = OpenFile.NewInstances(file);
-                foreach (ExcelFileInterface aFile in files)
-                    aFile.Dispose();
+                for (int i = 0; i < 200; i++)
+                {
+                    IList<ExcelFileInterface> files = OpenFile.NewInstances(file);
+                    foreach (ExcelFileInterface aFile in files)
+                        aFile.Dispose();
+                }
             }
         }
 
         [Fact]
         public void TestHeapSpace()
         {
-            FileInfo[] heap = { new FileInfo("tests/heap1.xlsx"), new FileInfo("tests/heap2.xlsx") };
+            IEnumerable<Stream> heap = new EnumerableResourceStreams(new string[]{ "MakerICal.Tests.tests.heap1.xlsx", "MakerICal.Tests.tests.heap2.xlsx" });
             for (int i = 0; i < 5; i++)
             {
-                foreach (FileInfo aHeap in heap)
+                foreach (Stream aHeap in heap)
                 {
-                    Assert.True(aHeap.Exists);
                     IList<ExcelFileInterface> files =
                             OpenFile.NewInstances(aHeap);
                     foreach (ExcelFileInterface file in files)
                         file.Dispose();
                 }
             }
+            foreach (Stream s in heap)
+                s.Dispose();
         }
 
         [Fact]
         public void TestOpenXLS()
         {
-            IList<ExcelFileInterface> list = OpenFile.NewInstances("tests/small.xlsx");
-            Assert.Equal(1, list.Count);
-            using (ExcelFileInterface file = list[0])
+            using (Stream stream = assembly.GetManifestResourceStream("MakerICal.Tests.tests.small.xlsx"))
             {
-                Assert.Equal("Груша и лягушка", file.GetCellData(1, 1));
-                Assert.Equal("12", file.GetCellData(2, 1));
-                Assert.Equal("Градусник", file.GetCellData(1, 2));
-                Assert.Equal("13,4", file.GetCellData(2, 2));
-                Assert.Equal("Груша и лягушка; 12; Градусник; 13,4", file.GetCellData(3, 3));
+                IList<ExcelFileInterface> list = OpenFile.NewInstances(stream);
+                Assert.Equal(1, list.Count);
+                using (ExcelFileInterface file = list[0])
+                {
+                    Assert.Equal("Груша и лягушка", file.GetCellData(1, 1));
+                    Assert.Equal("12", file.GetCellData(2, 1));
+                    Assert.Equal("Градусник", file.GetCellData(1, 2));
+                    Assert.Equal("13,4", file.GetCellData(2, 2));
+                    Assert.Equal("Груша и лягушка; 12; Градусник; 13,4", file.GetCellData(3, 3));
+                }
             }
         }
 
         [Fact]
         public void TestOpenXLSColors()
         {
-            IList<ExcelFileInterface> list = OpenFile.NewInstances("tests/small.xlsx");
+            IList<ExcelFileInterface> list = OpenFile.NewInstances("MakerICal.Tests.tests.small.xlsx");
             Assert.Equal(1, list.Count);
             using (ExcelFileInterface file = list[0])
             {
@@ -116,6 +122,23 @@ namespace ru.mirea.xlsical.CouplesDetective
                 
                 Assert.False(file.IsBackgroundColorsEquals(1, 2, 1, 3));
                 Assert.False(file.IsBackgroundColorsEquals(1, 3, 1, 2));
+            }
+        }
+
+        [Fact]
+        public void SpreadsheetDocumentStreamTest()
+        {
+            string filename = "MakerICal.Tests.tests.small.xlsx";
+            using (Stream stream = assembly.GetManifestResourceStream(filename))
+            {
+                ICollection<ExcelFileInterface> files = OpenFile.NewInstances(stream);
+                Assert.Equal(1, files.Count);
+                using (ExcelFileInterface file = files.First())
+                {
+                    Assert.Equal("Груша и лягушка", file.GetCellData(1, 1));
+                }
+                stream.Seek(0, SeekOrigin.Begin);
+                Assert.Equal(80, stream.ReadByte());
             }
         }
     }
