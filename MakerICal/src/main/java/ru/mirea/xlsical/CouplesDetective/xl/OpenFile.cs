@@ -46,6 +46,7 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
 
         private readonly int numberSheet;
 
+#warning Кэш можно улучшить, если сохранять только цвет и текст.
         private readonly Dictionary<(int column, int row), Cell> cellCache = new Dictionary<(int column, int row), Cell>();
 
 #warning Должен возвращаться лист, поддерживающий using.
