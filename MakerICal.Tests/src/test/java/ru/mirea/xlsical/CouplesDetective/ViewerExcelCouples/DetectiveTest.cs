@@ -66,7 +66,7 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
         {
             DetectiveDate detectiveDate = new DetectiveDate();
             IDetective detective = new DetectiveSemester(null, detectiveDate);
-            ZonedDateTime current = DateTimeZoneProviders.Tzdb["Europe/Minsk"].AtStrictly(new LocalDate(2019, 1, 1).At(LocalTime.Noon));
+            ZonedDateTime current = DateTimeZoneProviders.Tzdb["Europe/Minsk"].AtStrictly(new LocalDate(2018, 12, 10).At(LocalTime.Noon));
 
             Assert.Equal(
                     DateTimeZoneProviders.Tzdb["Europe/Minsk"].AtStrictly(new LocalDate(2018, 9, 3).At(LocalTime.Midnight)),
