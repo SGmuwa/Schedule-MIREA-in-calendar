@@ -145,6 +145,8 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
                         break;
                     case CellValues.Number:
                         return cell.CellValue.InnerText;
+                    case CellValues.String:
+                        return cell.CellValue.InnerText;
                     default:
                         return cell.InnerText;
                 }
