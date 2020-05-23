@@ -167,7 +167,8 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
         {
             Cell cellA = getCell(column1, row1);
             Cell cellB = getCell(column2, row2);
-            if (cellA == null || cellB == null) return false;
+            if (cellA == null || cellB == null)
+                return cellA == null && cellB == null;
             return GetCellPatternFill(cellA).Equals(GetCellPatternFill(cellB));
         }
 
