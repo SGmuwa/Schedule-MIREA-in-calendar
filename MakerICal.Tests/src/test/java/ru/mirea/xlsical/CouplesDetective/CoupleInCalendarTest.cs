@@ -419,14 +419,14 @@ namespace ru.mirea.xlsical.CouplesDetective
         [Fact]
         public void StartTestRex()
         {
-            Assert.True(Regex.IsMatch("volume", "^[a-z0-9_-]{3,15}$"));
-            Assert.False(Regex.IsMatch("_@BEST", "^[a-z0-9_-]{3,15}$"));
-            Assert.True(Regex.IsMatch("1 w. 1", @"^.+w\.?.+$"));
-            Assert.True(Regex.IsMatch("1 н. 1", @"^.+н\.?.+$"));
-            Assert.True(Regex.IsMatch("1 н. 1", @".+н\.?.+"));
-            Assert.False(Regex.IsMatch("1 н. 1", @"н\.?"));
-            Assert.True(Regex.IsMatch("1 н. 1", @"(^.+\s[нН]\.?.+$)"));
-            Assert.False(Regex.IsMatch("1 н. 1\n", @"(^.+\s[нН]\.?.+$)|()"));
+            Assert.Matches("^[a-z0-9_-]{3,15}$", "volume");
+            Assert.DoesNotMatch("^[a-z0-9_-]{3,15}$", "_@BEST");
+            Assert.Matches(@"^.+w\.?.+$", "1 w. 1");
+            Assert.Matches(@"^.+н\.?.+$", "1 н. 1");
+            Assert.Matches(@".+н\.?.+", "1 н. 1");
+            Assert.DoesNotMatch(@"н\.?", "1 н. 1");
+            Assert.Matches(@"(^.+\s[нН]\.?.+$)", "1 н. 1");
+            Assert.DoesNotMatch(@"(^.+\s[нН]\.?.+$)|()", "1 н. 1\n");
 
             Assert.Equal(new int[] { 1 }, DetectiveSemester.SetterCouplesInCalendar.GetAllOnlyWeeks("1 н. 1"));
             Assert.Equal(new int[] { 5 }, DetectiveSemester.SetterCouplesInCalendar.GetAllOnlyWeeks("кр 5 н Логика"));
