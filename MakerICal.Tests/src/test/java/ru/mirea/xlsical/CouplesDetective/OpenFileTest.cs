@@ -124,6 +124,9 @@ namespace ru.mirea.xlsical.CouplesDetective
 
                     Assert.False(file.IsBackgroundColorsEquals(1, 2, 1, 3));
                     Assert.False(file.IsBackgroundColorsEquals(1, 3, 1, 2));
+
+                    Assert.True(file.IsBackgroundColorsEquals(1, 3, 2, 3));
+                    Assert.True(file.IsBackgroundColorsEquals(2, 3, 1, 3));
                 }
             }
         }
