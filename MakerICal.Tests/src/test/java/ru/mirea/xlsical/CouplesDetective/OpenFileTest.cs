@@ -141,5 +141,38 @@ namespace ru.mirea.xlsical.CouplesDetective
                 Assert.Equal(80, stream.ReadByte());
             }
         }
+
+        [Theory]
+        [InlineData(1, "A1")]
+        [InlineData(2, "B1")]
+        [InlineData(3, "C1")]
+        [InlineData(4, "D1")]
+        [InlineData(5, "E1")]
+        [InlineData(6, "F1")]
+        [InlineData(7, "G1")]
+        [InlineData(8, "H1")]
+        [InlineData(9, "I1")]
+        [InlineData(10, "J1")]
+        [InlineData(11, "K1")]
+        [InlineData(12, "L1")]
+        [InlineData(13, "M1")]
+        [InlineData(14, "N1")]
+        [InlineData(15, "O1")]
+        [InlineData(16, "P1")]
+        [InlineData(17, "Q1")]
+        [InlineData(18, "R1")]
+        [InlineData(19, "S1")]
+        [InlineData(20, "T1")]
+        [InlineData(21, "U1")]
+        [InlineData(22, "V1")]
+        [InlineData(23, "W1")]
+        [InlineData(24, "X1")]
+        [InlineData(25, "Y1")]
+        [InlineData(26, "Z1")]
+        [InlineData(27, "AA1")]
+        [InlineData(28, "AB1")]
+        [InlineData(29, "AC1")]
+        public void AddressToCoordinateTest(int num, string address)
+            => Assert.Equal(num, OpenFile.StaticTools.AddressToCoordinate(address).column);
     }
 }

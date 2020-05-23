@@ -46,6 +46,8 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
 
         private readonly int numberSheet;
 
+        private readonly Dictionary<(int column, int row), Cell> cellCache = new Dictionary<(int column, int row), Cell>();
+
 #warning Должен возвращаться лист, поддерживающий using.
         /// <summary>
         /// Открывает Excel файл вместе со всеми его листами.
@@ -201,6 +203,7 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
             this.document = SpreadsheetDocument.Open(fileName.FullName, false);
             this.numberSheet = numberSheet;
             this.fileName = fileName.Name;
+            CreateCache();
         }
 
 
@@ -218,6 +221,7 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
             this.document = SpreadsheetDocument.Open(stream, false);
             this.numberSheet = numberSheet;
             this.fileName = stream.ToString();
+            CreateCache();
         }
 
 
@@ -240,6 +244,16 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
             this.needToClose = needToClose;
             this.closed = closed;
             this.fileName = fileName;
+            CreateCache();
+        }
+
+        private void CreateCache()
+        {
+            WorkbookPart wbPart = document.WorkbookPart;
+            Sheet myExcelSheet = wbPart.Workbook.Descendants<Sheet>().ElementAt(numberSheet);
+            WorksheetPart wsPart = (WorksheetPart)(wbPart.GetPartById(myExcelSheet.Id));
+            foreach (Cell cell in wsPart.Worksheet.Descendants<Cell>())
+                cellCache[StaticTools.AddressToCoordinate(cell.CellReference)] = cell;
         }
 
         /// <summary>
@@ -252,24 +266,7 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
         {
             if (column < 1 || row < 1)
                 throw new System.ArgumentException("column and row must be more 0.");
-            WorkbookPart wbPart = document.WorkbookPart;
-            Sheet myExcelSheet = wbPart.Workbook.Descendants<Sheet>().ElementAt(numberSheet);
-            WorksheetPart wsPart = (WorksheetPart)(wbPart.GetPartById(myExcelSheet.Id));
-            string xmlCoordinate = CoordinateToAddress(column - 1, row);
-            return wsPart.Worksheet.Descendants<Cell>().
-              Where(c => c.CellReference == xmlCoordinate).FirstOrDefault();
-        }
-
-        private static string CoordinateToAddress(int column, int row)
-        {
-            const string abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            int two = column / abc.Length - 1;
-            if (two > abc.Length)
-                throw new NotSupportedException("column size can't be more than ZZ (702?)");
-            if (two == -1)
-                return $"{abc[column]}{row}";
-            else
-                return $"{abc[two]}{abc[column % abc.Length]}{row}";
+            return cellCache.GetValueOrDefault((column, row));
         }
 
         public override string ToString()
@@ -281,5 +278,32 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
             $", {nameof(document)} = {document}" +
             $", {nameof(numberSheet)} = {numberSheet}" +
             $" }}";
+
+        public static class StaticTools
+        {
+            public static (int column, int row) AddressToCoordinate(string address)
+            {
+                const string abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                address = address.ToUpper();
+                int startRow = -1;
+                while (address[++startRow] > '9') ;
+                (int column, int row) output = (0, int.Parse(address.Remove(0, startRow)));
+                for (int i = 0; i < startRow; i++)
+                    output.column = output.column * abc.Length + address[i] - 'A' + 1;
+                return output;
+            }
+
+            public static string CoordinateToAddress(int column, int row)
+            {
+                const string abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                int two = column / abc.Length - 1;
+                if (two > abc.Length)
+                    throw new NotSupportedException("column size can't be more than ZZ (702)");
+                if (two == -1)
+                    return $"{abc[column]}{row}";
+                else
+                    return $"{abc[two]}{abc[column % abc.Length]}{row}";
+            }
+        }
     }
 }
