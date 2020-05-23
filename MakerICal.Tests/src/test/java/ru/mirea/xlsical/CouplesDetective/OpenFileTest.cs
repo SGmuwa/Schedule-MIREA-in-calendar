@@ -87,7 +87,7 @@ namespace ru.mirea.xlsical.CouplesDetective
                     Assert.Equal("Груша и лягушка", file.GetCellData(1, 1));
                     Assert.Equal("12", file.GetCellData(2, 1));
                     Assert.Equal("Градусник", file.GetCellData(1, 2));
-                    Assert.Equal("13,4", file.GetCellData(2, 2));
+                    Assert.Equal("13.4", file.GetCellData(2, 2));
                     Assert.Equal("Груша и лягушка; 12; Градусник; 13,4", file.GetCellData(3, 3));
                 }
             }

@@ -123,7 +123,7 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
             Cell cell = getCell(column, row);
             if (cell == null)
                 return "";
-            string output = cell.InnerText;
+            string output;
 
             if (cell.DataType != null)
                 switch (cell.DataType.Value)
@@ -136,12 +136,20 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
                         if (stringTable != null)
                             output =
                                 stringTable.SharedStringTable
-                                .ElementAt(int.Parse(output)).InnerText;
+                                .ElementAt(int.Parse(cell.InnerText)).InnerText;
+                        else
+                            return cell.InnerText;
                         break;
                     case CellValues.Boolean:
-                        output = output == "0" ? "ЛОЖЬ" : "ИСТИНА";
+                        output = cell.InnerText == "0" ? "ЛОЖЬ" : "ИСТИНА";
                         break;
+                    case CellValues.Number:
+                        return cell.CellValue.InnerText;
+                    default:
+                        return cell.InnerText;
                 }
+            else
+                output = cell.InnerText;
             return output;
         }
 
