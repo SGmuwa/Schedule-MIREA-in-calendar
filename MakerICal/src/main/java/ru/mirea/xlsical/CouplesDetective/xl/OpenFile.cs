@@ -162,7 +162,7 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
         /// <param name="row1">Первая сравниваемая ячейка. Порядковый номер строки. Отсчёт начинается с 1.</param>
         /// <param name="column2">Вторая сравниваемая ячейка. Порядковый номер столбца. Отсчёт начинается с 1.</param>
         /// <param name="row2">Вторая сравниваемая ячейка. Порядковый номер строки. Отсчёт начинается с 1.</param>
-        /// <returns><code>true</code>, если цвета совпадают. Иначе — <code>false</code>.</returns>
+        /// <returns><c>true</c>, если цвета совпадают. Иначе — <c>false</c>.</returns>
         public bool IsBackgroundColorsEquals(int column1, int row1, int column2, int row2)
         {
             Cell cellA = getCell(column1, row1);
