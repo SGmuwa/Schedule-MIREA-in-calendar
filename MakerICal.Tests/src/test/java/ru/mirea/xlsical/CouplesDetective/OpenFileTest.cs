@@ -60,7 +60,7 @@ namespace ru.mirea.xlsical.CouplesDetective
         [Fact]
         public void TestHeapSpace()
         {
-            IEnumerable<Stream> heap = new EnumerableResourceStreams(new string[]{ "MakerICal.Tests.tests.heap1.xlsx", "MakerICal.Tests.tests.heap2.xlsx" });
+            IEnumerable<Stream> heap = new EnumerableResourceStreams(new string[] { "MakerICal.Tests.tests.heap1.xlsx", "MakerICal.Tests.tests.heap2.xlsx" });
             for (int i = 0; i < 5; i++)
             {
                 foreach (Stream aHeap in heap)
@@ -96,40 +96,42 @@ namespace ru.mirea.xlsical.CouplesDetective
         [Fact]
         public void TestOpenXLSColors()
         {
-            IList<ExcelFileInterface> list = OpenFile.NewInstances("MakerICal.Tests.tests.small.xlsx");
-            Assert.Equal(1, list.Count);
-            using (ExcelFileInterface file = list[0])
+            using (Stream stream = assembly.GetManifestResourceStream("MakerICal.Tests.tests.small.xlsx"))
             {
-                Assert.True(file.IsBackgroundColorsEquals(1, 1, 2, 1));
-                Assert.True(file.IsBackgroundColorsEquals(2, 1, 1, 1));
-                Assert.True(file.IsBackgroundColorsEquals(1, 1, 1, 1));
-                Assert.True(file.IsBackgroundColorsEquals(2, 1, 2, 1));
+                IList<ExcelFileInterface> list = OpenFile.NewInstances(stream);
+                Assert.Equal(1, list.Count);
+                using (ExcelFileInterface file = list[0])
+                {
+                    Assert.True(file.IsBackgroundColorsEquals(1, 1, 2, 1));
+                    Assert.True(file.IsBackgroundColorsEquals(2, 1, 1, 1));
+                    Assert.True(file.IsBackgroundColorsEquals(1, 1, 1, 1));
+                    Assert.True(file.IsBackgroundColorsEquals(2, 1, 2, 1));
 
-                Assert.True(file.IsBackgroundColorsEquals(1, 2, 2, 2));
-                Assert.True(file.IsBackgroundColorsEquals(2, 2, 1, 2));
-                Assert.True(file.IsBackgroundColorsEquals(1, 2, 1, 2));
-                Assert.True(file.IsBackgroundColorsEquals(2, 2, 2, 2));
+                    Assert.True(file.IsBackgroundColorsEquals(1, 2, 2, 2));
+                    Assert.True(file.IsBackgroundColorsEquals(2, 2, 1, 2));
+                    Assert.True(file.IsBackgroundColorsEquals(1, 2, 1, 2));
+                    Assert.True(file.IsBackgroundColorsEquals(2, 2, 2, 2));
 
-                Assert.True(file.IsBackgroundColorsEquals(1, 3, 2, 3));
-                Assert.True(file.IsBackgroundColorsEquals(2, 3, 1, 3));
-                Assert.True(file.IsBackgroundColorsEquals(1, 3, 1, 3));
-                Assert.True(file.IsBackgroundColorsEquals(2, 3, 2, 3));
-                
-                Assert.False(file.IsBackgroundColorsEquals(1, 1, 1, 2));
-                Assert.False(file.IsBackgroundColorsEquals(1, 2, 1, 1));
-                Assert.False(file.IsBackgroundColorsEquals(1, 1, 1, 3));
-                Assert.False(file.IsBackgroundColorsEquals(1, 3, 1, 1));
-                
-                Assert.False(file.IsBackgroundColorsEquals(1, 2, 1, 3));
-                Assert.False(file.IsBackgroundColorsEquals(1, 3, 1, 2));
+                    Assert.True(file.IsBackgroundColorsEquals(1, 3, 2, 3));
+                    Assert.True(file.IsBackgroundColorsEquals(2, 3, 1, 3));
+                    Assert.True(file.IsBackgroundColorsEquals(1, 3, 1, 3));
+                    Assert.True(file.IsBackgroundColorsEquals(2, 3, 2, 3));
+
+                    Assert.False(file.IsBackgroundColorsEquals(1, 1, 1, 2));
+                    Assert.False(file.IsBackgroundColorsEquals(1, 2, 1, 1));
+                    Assert.False(file.IsBackgroundColorsEquals(1, 1, 1, 3));
+                    Assert.False(file.IsBackgroundColorsEquals(1, 3, 1, 1));
+
+                    Assert.False(file.IsBackgroundColorsEquals(1, 2, 1, 3));
+                    Assert.False(file.IsBackgroundColorsEquals(1, 3, 1, 2));
+                }
             }
         }
 
         [Fact]
         public void SpreadsheetDocumentStreamTest()
         {
-            string filename = "MakerICal.Tests.tests.small.xlsx";
-            using (Stream stream = assembly.GetManifestResourceStream(filename))
+            using (Stream stream = assembly.GetManifestResourceStream("MakerICal.Tests.tests.small.xlsx"))
             {
                 ICollection<ExcelFileInterface> files = OpenFile.NewInstances(stream);
                 Assert.Equal(1, files.Count);
