@@ -184,7 +184,7 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
              * Мы отнимаем секунду и получаем последнюю секунду, когда могут проводится
              * семестровые занятия.
              */
-            ZonedDateTime current = DetectiveLastWeekS.GetStartTime(this.dateSettings, now).PlusMinutes(-1);
+            ZonedDateTime current = DetectiveLastWeekS.GetStartTime(this.dateSettings, now).PlusSeconds(-1);
             if (current.DayOfWeek == IsoDayOfWeek.Sunday)
                 current = current.PlusDays(-1);
             return current;
