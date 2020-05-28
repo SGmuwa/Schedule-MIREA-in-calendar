@@ -19,9 +19,12 @@
 */
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 
@@ -36,18 +39,13 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
     /// </summary>
     public class OpenFile : ExcelFileInterface
     {
-        private int needToClose;
-
-        private SetInt closed;
-
         private readonly string fileName;
-
-        private readonly SpreadsheetDocument document;
 
         private readonly int numberSheet;
 
-#warning Кэш можно улучшить, если сохранять только цвет и текст.
-        private readonly Dictionary<(int column, int row), Cell> cellCache = new Dictionary<(int column, int row), Cell>();
+        private (Task task, CancellationTokenSource token)? cacheTask = null;
+
+        private readonly ConcurrentDictionary<(int column, int row), (string text, PatternFill color)> cellCache = new ConcurrentDictionary<(int column, int row), (string text, PatternFill color)>();
 
 #warning Должен возвращаться лист, поддерживающий using.
         /// <summary>
@@ -63,20 +61,10 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
                 throw new System.ArgumentNullException(nameof(fileName));
             if (!fileName.Exists)
                 throw new System.IO.FileNotFoundException(fileName.FullName);
-            SetInt setInt = new SetInt();
-            OpenFile first = new OpenFile(fileName, 0);
-            int size = first.document.WorkbookPart.Workbook.Descendants<Sheet>().Count();
-            List<ExcelFileInterface> @out = new List<ExcelFileInterface>(size);
-            @out.Add(first);
-            first.needToClose = size;
-            first.closed = setInt;
-
-            for (int i = 1; i < size; i++)
-                @out.Add(new OpenFile(first.document, i, size, setInt, fileName.Name));
-            return @out;
+            using (SpreadsheetDocument document = SpreadsheetDocument.Open(fileName.FullName, false))
+                return NewInstances(document, fileName.FullName);
         }
 
-#warning Должен возвращаться лист, поддерживающий using.
         /// <summary>
         /// Открывает Excel файл вместе со всеми его листами.
         /// </summary>
@@ -88,17 +76,72 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
         {
             if (stream == null)
                 throw new System.ArgumentNullException(nameof(stream));
-            SetInt setInt = new SetInt();
-            OpenFile first = new OpenFile(stream, 0);
-            int size = first.document.WorkbookPart.Workbook.Descendants<Sheet>().Count();
-            List<ExcelFileInterface> @out = new List<ExcelFileInterface>(size);
-            @out.Add(first);
-            first.needToClose = size;
-            first.closed = setInt;
+            using (SpreadsheetDocument document = SpreadsheetDocument.Open(stream, false))
+                return NewInstances(document, stream.ToString());
+        }
 
-            for (int i = 1; i < size; i++)
-                @out.Add(new OpenFile(first.document, i, size, setInt, stream.ToString()));
-            return @out;
+        public static List<ExcelFileInterface> NewInstances(SpreadsheetDocument document, string documentName)
+        {
+            if (document == null)
+                throw new System.ArgumentNullException(nameof(document));
+            int size = document.WorkbookPart.Workbook.Descendants<Sheet>().Count();
+            List<ExcelFileInterface> output = new List<ExcelFileInterface>(size);
+            for (int i = 0; i < size; i++)
+            {
+                OpenFile toAdd = new OpenFile(i, documentName);
+                toAdd.CreateCache(document).task.Wait();
+                output.Add(toAdd);
+            }
+            return output;
+        }
+
+        public static List<ExcelFileInterface> NewInstancesAndClose(FileInfo fileName, Action callBack = null)
+        {
+            if (fileName == null)
+                throw new System.ArgumentNullException(nameof(fileName));
+            if (!fileName.Exists)
+                throw new System.IO.FileNotFoundException(fileName.FullName);
+            SpreadsheetDocument document = SpreadsheetDocument.Open(fileName.FullName, false);
+            return NewInstancesAndClose(document, fileName.FullName);
+        }
+
+        public static List<ExcelFileInterface> NewInstancesAndClose(Stream stream, Action callBack = null)
+        {
+            if (stream == null)
+                throw new System.ArgumentNullException(nameof(stream));
+            SpreadsheetDocument document = SpreadsheetDocument.Open(stream, false);
+            var output = NewInstancesAndClose(document, stream.ToString(), () => { stream.Dispose(); callBack?.Invoke(); });
+            return output;
+        }
+
+        public static List<ExcelFileInterface> NewInstancesAndClose(SpreadsheetDocument document, string documentName, Action callBack = null)
+        {
+            if (document == null)
+                throw new System.ArgumentNullException(nameof(document));
+            int size = document.WorkbookPart.Workbook.Descendants<Sheet>().Count();
+            List<ExcelFileInterface> output = new List<ExcelFileInterface>(size);
+            for (int i = 0; i < size; i++)
+            {
+                OpenFile toAdd = new OpenFile(i, documentName);
+                toAdd.cacheTask = toAdd.CreateCache(document);
+                output.Add(toAdd);
+            }
+            Task.Run(() =>
+            {
+                try
+                {
+                    Parallel.ForEach(output.Cast<OpenFile>(), (excel) =>
+                    {
+                        excel.cacheTask.Value.task.Wait();
+                    });
+                }
+                finally
+                {
+                    document.Dispose();
+                    callBack?.Invoke();
+                }
+            });
+            return output;
         }
 
         /// <summary>
@@ -112,6 +155,9 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
         public static List<ExcelFileInterface> NewInstances(string fileName)
             => NewInstances(new FileInfo(fileName ?? throw new System.ArgumentNullException(nameof(fileName))));
 
+        public static List<ExcelFileInterface> NewInstancesAndClose(string fileName, Action callBack = null)
+            => NewInstancesAndClose(new FileInfo(fileName ?? throw new System.ArgumentNullException(nameof(fileName))), callBack);
+
         /// <summary>
         /// Получение данных в текстовом виде из указанной ячейки Excel файла.
         /// </summary>
@@ -120,41 +166,7 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
         /// <returns>Текстовые данные в ячейке. Не NULL.</returns>
         /// <exception cref="System.IO.IOException">Потерян доступ к файлу.</exception>
         public string GetCellData(int column, int row)
-        {
-            Cell cell = getCell(column, row);
-            if (cell == null)
-                return "";
-            string output;
-
-            if (cell.DataType != null)
-                switch (cell.DataType.Value)
-                {
-                    case CellValues.SharedString:
-                        var stringTable =
-                            document.WorkbookPart.GetPartsOfType<SharedStringTablePart>()
-                                .FirstOrDefault();
-
-                        if (stringTable != null)
-                            output =
-                                stringTable.SharedStringTable
-                                .ElementAt(int.Parse(cell.InnerText)).InnerText;
-                        else
-                            return cell.InnerText;
-                        break;
-                    case CellValues.Boolean:
-                        output = cell.InnerText == "0" ? "ЛОЖЬ" : "ИСТИНА";
-                        break;
-                    case CellValues.Number:
-                        return cell.CellValue.InnerText;
-                    case CellValues.String:
-                        return cell.CellValue.InnerText;
-                    default:
-                        return cell.InnerText;
-                }
-            else
-                output = cell.InnerText;
-            return output;
-        }
+            => getCell(column, row).text;
 
         /// <summary>
         /// Узнаёт фоновый цвет двух ячеек и отвечает на вопрос, одинаковый ли у них фоновый цвет.
@@ -166,25 +178,12 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
         /// <returns><c>true</c>, если цвета совпадают. Иначе — <c>false</c>.</returns>
         public bool IsBackgroundColorsEquals(int column1, int row1, int column2, int row2)
         {
-            Cell cellA = getCell(column1, row1);
-            Cell cellB = getCell(column2, row2);
+            PatternFill cellA = getCell(column1, row1).color;
+            PatternFill cellB = getCell(column2, row2).color;
             if (cellA == null || cellB == null)
                 return cellA == null && cellB == null;
-            return GetCellPatternFill(cellA).Equals(GetCellPatternFill(cellB));
+            return cellA.Equals(cellB);
         }
-
-        private PatternFill GetCellPatternFill(Cell theCell)
-        {
-            WorkbookStylesPart styles = document.WorkbookPart.WorkbookStylesPart;
-            int cellStyleIndex = theCell.StyleIndex == null ? 0 : (int)theCell.StyleIndex.Value;
-            CellFormat cellFormat = (CellFormat)styles.Stylesheet.CellFormats.ChildElements[cellStyleIndex];
-            Fill fill = (Fill)styles.Stylesheet.Fills.ChildElements[(int)cellFormat.FillId.Value];
-            return fill.PatternFill;
-        }
-
-        private bool isOpen = true;
-
-        private readonly object sync_close = new object();
 
         /// <summary>
         /// Закрывает Excel файл.
@@ -192,51 +191,9 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
         /// <exception cref="System.IO.IOException">Ошибка при закрытии файла.</exception>
         public void Dispose()
         {
-            lock (sync_close)
-                if (isOpen && closed.Value < needToClose)
-                {
-                    isOpen = false;
-                    closed.Add();
-                    if (closed.Value == needToClose)
-                        document.Dispose();
-                }
+            cacheTask?.token.Cancel();
+            cacheTask?.token.Dispose();
         }
-
-        /// <summary>
-        /// Создаёт экземпляр открытия файла.
-        /// Для открытия всех листов Excel файла используйте <see cref="NewInstances(string)"/>.
-        /// </summary>
-        /// <param name="fileName">Имя файла, который необходимо открыть.</param>
-        /// <param name="numberSheet">Номер страницы книги Excel.</param>
-        /// <exception cref="System.IO.IOException">Ошибка доступа к файлу.</exception>
-        /// <exception cref="System.InvalidCastException">Ошибка распознования файла.</exception>
-        private OpenFile(FileInfo fileName, int numberSheet)
-        {
-            this.document = SpreadsheetDocument.Open(fileName.FullName, false);
-            this.numberSheet = numberSheet;
-            this.fileName = fileName.Name;
-            CreateCache();
-        }
-
-
-
-        /// <summary>
-        /// Создаёт экземпляр открытия файла.
-        /// Для открытия всех листов Excel файла используйте <see cref="NewInstances(string)"/>.
-        /// </summary>
-        /// <param name="stream">Поток, который необходимо открыть.</param>
-        /// <param name="numberSheet">Номер страницы книги Excel.</param>
-        /// <exception cref="System.IO.IOException">Ошибка доступа к файлу.</exception>
-        /// <exception cref="System.InvalidCastException">Ошибка распознования файла.</exception>
-        private OpenFile(Stream stream, int numberSheet)
-        {
-            this.document = SpreadsheetDocument.Open(stream, false);
-            this.numberSheet = numberSheet;
-            this.fileName = stream.ToString();
-            CreateCache();
-        }
-
-
 
         /// <summary>
         /// Создаёт экземпляр открытия файла.
@@ -244,50 +201,59 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
         /// </summary>
         /// <param name="document">Открытый документ.</param>
         /// <param name="numberSheet">Номер страницы книги Excel.</param>
-        /// <param name="needToClose">Количество открытых листов у Excel файла при newInstance.</param>
-        /// <param name="closed">Количество закрытых листов Excel у файла.</param>
         /// <param name="fileName">Имя файла.</param>
         /// <exception cref="System.IO.IOException">Ошибка доступа к файлу.</exception>
         /// <exception cref="System.InvalidCastException">Ошибка распознования файла.</exception>
-        private OpenFile(SpreadsheetDocument document, int numberSheet, int needToClose, SetInt closed, string fileName)
+        private OpenFile(int numberSheet, string fileName)
         {
-            this.document = document;
             this.numberSheet = numberSheet;
-            this.needToClose = needToClose;
-            this.closed = closed;
             this.fileName = fileName;
-            CreateCache();
         }
 
-        private void CreateCache()
+        private (Task task, CancellationTokenSource token) CreateCache(SpreadsheetDocument document)
         {
-            WorkbookPart wbPart = document.WorkbookPart;
-            Sheet myExcelSheet = wbPart.Workbook.Descendants<Sheet>().ElementAt(numberSheet);
-            WorksheetPart wsPart = (WorksheetPart)(wbPart.GetPartById(myExcelSheet.Id));
-            foreach (Cell cell in wsPart.Worksheet.Descendants<Cell>())
-                cellCache[StaticTools.AddressToCoordinate(cell.CellReference)] = cell;
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
+            return (Task.Run(() =>
+            {
+                WorkbookPart wbPart = document.WorkbookPart;
+                Sheet myExcelSheet = wbPart.Workbook.Descendants<Sheet>().ElementAt(numberSheet);
+                WorksheetPart wsPart = (WorksheetPart)(wbPart.GetPartById(myExcelSheet.Id));
+                foreach (Cell cell in wsPart.Worksheet.Descendants<Cell>())
+                {
+                    if(tokenSource.Token.IsCancellationRequested)
+                        return;
+                    cellCache[StaticTools.AddressToCoordinate(cell.CellReference)] = (StaticTools.CellToString(document, cell), StaticTools.GetCellPatternFill(document, cell));
+                }
+            }), tokenSource);
         }
+
+        private static readonly (string text, PatternFill color) emptyCellData = ("", new PatternFill());
 
         /// <summary>
         /// Получение ячейки по номеру колонки и строки.
         /// </summary>
         /// <param name="column">Порядковый номер колонки.</param>
         /// <param name="row">Порядковый номер строки.</param>
-        /// <returns>Ячейка по данному адресу.</returns>
-        private Cell getCell(int column, int row)
+        /// <returns>Информация о ячейке по данному адресу.</returns>
+        private (string text, PatternFill color) getCell(int column, int row)
         {
             if (column < 1 || row < 1)
                 throw new System.ArgumentException("column and row must be more 0.");
-            return cellCache.GetValueOrDefault((column, row));
+            bool isCacheRunning = cacheTask.HasValue && cacheTask.Value.task.Status == TaskStatus.Running;
+            if (cellCache.TryGetValue((column, row), out var output))
+                return output;
+            if (isCacheRunning)
+            {
+                cacheTask.Value.task.Wait();
+                return cellCache.GetValueOrDefault((column, row), emptyCellData);
+            }
+            return emptyCellData;
         }
 
         public override string ToString()
         => $"{nameof(OpenFile)} {{" +
-            $" {nameof(needToClose)} = {needToClose}" +
-            $", {nameof(closed)} = {closed}" +
             $", {nameof(fileName)} = '{fileName}'" +
-            $", {nameof(isOpen)} = {isOpen}" +
-            $", {nameof(document)} = {document}" +
+            $", count of cache {nameof(cellCache)} = {cellCache.Count}" +
             $", {nameof(numberSheet)} = {numberSheet}" +
             $" }}";
 
@@ -315,6 +281,51 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
                     return $"{abc[column]}{row}";
                 else
                     return $"{abc[two]}{abc[column % abc.Length]}{row}";
+            }
+
+            public static PatternFill GetCellPatternFill(SpreadsheetDocument document, Cell theCell)
+            {
+                WorkbookStylesPart styles = document.WorkbookPart.WorkbookStylesPart;
+                int cellStyleIndex = theCell.StyleIndex == null ? 0 : (int)theCell.StyleIndex.Value;
+                CellFormat cellFormat = (CellFormat)styles.Stylesheet.CellFormats.ChildElements[cellStyleIndex];
+                Fill fill = (Fill)styles.Stylesheet.Fills.ChildElements[(int)cellFormat.FillId.Value];
+                return fill.PatternFill;
+            }
+
+            public static string CellToString(SpreadsheetDocument document, Cell cell)
+            {
+                if (cell == null)
+                    return "";
+                string output;
+
+                if (cell.DataType != null)
+                    switch (cell.DataType.Value)
+                    {
+                        case CellValues.SharedString:
+                            var stringTable =
+                                document.WorkbookPart.GetPartsOfType<SharedStringTablePart>()
+                                    .FirstOrDefault();
+
+                            if (stringTable != null)
+                                output =
+                                    stringTable.SharedStringTable
+                                    .ElementAt(int.Parse(cell.InnerText)).InnerText;
+                            else
+                                return cell.InnerText;
+                            break;
+                        case CellValues.Boolean:
+                            output = cell.InnerText == "0" ? "ЛОЖЬ" : "ИСТИНА";
+                            break;
+                        case CellValues.Number:
+                            return cell.CellValue.InnerText;
+                        case CellValues.String:
+                            return cell.CellValue.InnerText;
+                        default:
+                            return cell.InnerText;
+                    }
+                else
+                    output = cell.InnerText;
+                return output;
             }
         }
     }

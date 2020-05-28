@@ -98,7 +98,7 @@ namespace ru.mirea.xlsical.CouplesDetective
         {
             using (Stream stream = assembly.GetManifestResourceStream("MakerICal.Tests.tests.small.xlsx"))
             {
-                IList<ExcelFileInterface> list = OpenFile.NewInstances(stream);
+                IList<ExcelFileInterface> list = OpenFile.NewInstancesAndClose(stream);
                 Assert.Equal(1, list.Count);
                 using (ExcelFileInterface file = list[0])
                 {
