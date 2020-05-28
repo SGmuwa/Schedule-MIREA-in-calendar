@@ -398,7 +398,7 @@ namespace ru.mirea.xlsical.CouplesDetective
             int size = excelUrls.Count;
             List<FileInfo> excelFilesPaths = new List<FileInfo>(size);
             IEnumerator<string> it = excelUrls.GetEnumerator();
-            for (int i = 0; i < size; i++)
+            for (int i = 0; it.MoveNext(); i++)
             {
                 String url = it.Current;
                 excelFilesPaths.Add(new FileInfo(Path.Combine(pathToCache.FullName, DateTime.UtcNow.ToString().Replace(':', '-').Replace('.', '_') + "_" + random.NextLong() + "_" + url.Substring(url.LastIndexOf("/") + 1))));

@@ -177,9 +177,9 @@ namespace ru.mirea.xlsical.CouplesDetective
                 PR_init,
                 fileForCacheCoupleHistorian);
             coupleHistorian = coupleHistorian1;
+            taskExecutor = new TaskExecutor(coupleHistorian);
         }
 
-        public static readonly TaskExecutor taskExecutor =
-                new TaskExecutor(coupleHistorian);
+        public static readonly TaskExecutor taskExecutor;
     }
 }
