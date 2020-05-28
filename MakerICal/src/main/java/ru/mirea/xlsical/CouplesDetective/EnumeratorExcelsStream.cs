@@ -53,7 +53,7 @@ namespace ru.mirea.xlsical.CouplesDetective
                 }
                 try
                 {
-                    enumeratorInExcel = OpenFile.NewInstances(enumeratorOfExcels.Current).GetEnumerator();
+                    enumeratorInExcel = OpenFile.NewInstancesParallel(enumeratorOfExcels.Current).GetEnumerator();
                     if (enumeratorInExcel.MoveNext())
                         return true;
                 }

@@ -95,26 +95,26 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
             return output;
         }
 
-        public static List<ExcelFileInterface> NewInstancesAndClose(FileInfo fileName, Action callBack = null)
+        public static List<ExcelFileInterface> NewInstancesParallel(FileInfo fileName, Action callBack = null)
         {
             if (fileName == null)
                 throw new System.ArgumentNullException(nameof(fileName));
             if (!fileName.Exists)
                 throw new System.IO.FileNotFoundException(fileName.FullName);
             SpreadsheetDocument document = SpreadsheetDocument.Open(fileName.FullName, false);
-            return NewInstancesAndClose(document, fileName.FullName);
+            return NewInstancesParallel(document, fileName.FullName, () => { document.Dispose(); callBack?.Invoke(); });
         }
 
-        public static List<ExcelFileInterface> NewInstancesAndClose(Stream stream, Action callBack = null)
+        public static List<ExcelFileInterface> NewInstancesParallel(Stream stream, Action callBack = null)
         {
             if (stream == null)
                 throw new System.ArgumentNullException(nameof(stream));
             SpreadsheetDocument document = SpreadsheetDocument.Open(stream, false);
-            var output = NewInstancesAndClose(document, stream.ToString(), () => { stream.Dispose(); callBack?.Invoke(); });
+            var output = NewInstancesParallel(document, stream.ToString(), () => { document.Dispose(); stream.Dispose(); callBack?.Invoke(); });
             return output;
         }
 
-        public static List<ExcelFileInterface> NewInstancesAndClose(SpreadsheetDocument document, string documentName, Action callBack = null)
+        public static List<ExcelFileInterface> NewInstancesParallel(SpreadsheetDocument document, string documentName, Action callBack = null)
         {
             if (document == null)
                 throw new System.ArgumentNullException(nameof(document));
@@ -137,7 +137,6 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
                 }
                 finally
                 {
-                    document.Dispose();
                     callBack?.Invoke();
                 }
             });
@@ -155,8 +154,8 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
         public static List<ExcelFileInterface> NewInstances(string fileName)
             => NewInstances(new FileInfo(fileName ?? throw new System.ArgumentNullException(nameof(fileName))));
 
-        public static List<ExcelFileInterface> NewInstancesAndClose(string fileName, Action callBack = null)
-            => NewInstancesAndClose(new FileInfo(fileName ?? throw new System.ArgumentNullException(nameof(fileName))), callBack);
+        public static List<ExcelFileInterface> NewInstancesParallel(string fileName, Action callBack = null)
+            => NewInstancesParallel(new FileInfo(fileName ?? throw new System.ArgumentNullException(nameof(fileName))), callBack);
 
         /// <summary>
         /// Получение данных в текстовом виде из указанной ячейки Excel файла.

@@ -184,7 +184,13 @@ namespace ru.mirea.xlsical.CouplesDetective
             if(excelFiles?.Count != 0)
                 return new EnumeratorExcelsFileInfo(excelFiles);
             if(excelStreams != null)
-                return new EnumeratorExcelsStream(excelStreams);
+            {
+                List<ExcelFileInterface> list = new List<ExcelFileInterface>();
+                var i = new EnumeratorExcelsStream(excelStreams);
+                while(i.MoveNext())
+                    list.Add(i.Current);
+                return list.GetEnumerator();
+            }
             else
                 return System.Linq.Enumerable.Empty<ExcelFileInterface>().GetEnumerator();
         }
