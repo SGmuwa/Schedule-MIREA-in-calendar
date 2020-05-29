@@ -25,35 +25,66 @@ namespace ru.mirea.xlsical.CouplesDetective
     /// </summary>
     public class Couple
     {
+        private string address = string.Empty;
+        private string audience = string.Empty;
+        private string nameOfTeacher = string.Empty;
+        private string nameOfGroup = string.Empty;
+        private string typeOfLesson = string.Empty;
+        private string itemTitle = string.Empty;
+
         /// <summary>
         /// Название пары (предмета).
         /// </summary>
-        public string ItemTitle { get; }
+        public string ItemTitle
+        {
+            get => itemTitle;
+            private set => itemTitle = value ?? throw new ArgumentNullException(nameof(value));
+        }
         
         /// <summary>
         /// Тип занятия (лекция, практика, лабораторная работа).
         /// </summary>
-        public string TypeOfLesson { get; }
+        public string TypeOfLesson
+        {
+            get => typeOfLesson;
+            private set => typeOfLesson = value ?? throw new ArgumentNullException(nameof(value));
+        }
         
         /// <summary>
         /// Название (номер) группы.
         /// </summary>
-        public string NameOfGroup { get; set; }
+        public string NameOfGroup
+        {
+            get => nameOfGroup;
+            set => nameOfGroup = value ?? throw new ArgumentNullException(nameof(value));
+        }
 
         /// <summary>
         /// Имя преподавателя.
         /// </summary>
-        public string NameOfTeacher { get; set; }
+        public string NameOfTeacher
+        {
+            get => nameOfTeacher;
+            set => nameOfTeacher = value ?? throw new ArgumentNullException(nameof(value));
+        }
         
         /// <summary>
         /// Номер аудитории.
         /// </summary>
-        public string Audience { get; set; }
+        public string Audience
+        {
+            get => audience;
+            set => audience = value ?? throw new ArgumentNullException(nameof(value));
+        }
         
         /// <summary>
         /// Адрес корпуса.
         /// </summary>
-        public string Address { get; }
+        public string Address
+        {
+            get => address;
+            private set => address = value ?? throw new ArgumentNullException(nameof(value));
+        }
 
         /// <summary>
         /// Создание в памяти экземпляров параметров вне-временных параметров пары.

@@ -311,6 +311,8 @@ namespace ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples
                     return file.GetCellData(titleOfDay.X, y + 1);
                 }
             // Если никакой адрес не найден, надо искать defaultAddress группы. Чаще всего java попадает в эту ветку кода.
+            if(addresses.Count < 1)
+                return "";
             pointToGroupName = new Point(pointToGroupName.X + 3, pointToGroupName.Y);
             foreach (Point c in addresses.Keys)
                 if (file.IsBackgroundColorsEquals(pointToGroupName.X, pointToGroupName.Y, c.X, c.Y))
