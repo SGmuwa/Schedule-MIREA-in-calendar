@@ -23,6 +23,7 @@ namespace ru.mirea.xlsical.CouplesDetective
     /// <summary>
     /// Класс, который описывает в общем, что общего между календарной и Excel парой.
     /// </summary>
+    [Serializable]
     public class Couple
     {
         private string address = string.Empty;
@@ -40,7 +41,7 @@ namespace ru.mirea.xlsical.CouplesDetective
             get => itemTitle;
             private set => itemTitle = value ?? throw new ArgumentNullException(nameof(value));
         }
-        
+
         /// <summary>
         /// Тип занятия (лекция, практика, лабораторная работа).
         /// </summary>
@@ -49,7 +50,7 @@ namespace ru.mirea.xlsical.CouplesDetective
             get => typeOfLesson;
             private set => typeOfLesson = value ?? throw new ArgumentNullException(nameof(value));
         }
-        
+
         /// <summary>
         /// Название (номер) группы.
         /// </summary>
@@ -67,7 +68,7 @@ namespace ru.mirea.xlsical.CouplesDetective
             get => nameOfTeacher;
             set => nameOfTeacher = value ?? throw new ArgumentNullException(nameof(value));
         }
-        
+
         /// <summary>
         /// Номер аудитории.
         /// </summary>
@@ -76,7 +77,7 @@ namespace ru.mirea.xlsical.CouplesDetective
             get => audience;
             set => audience = value ?? throw new ArgumentNullException(nameof(value));
         }
-        
+
         /// <summary>
         /// Адрес корпуса.
         /// </summary>
@@ -104,6 +105,8 @@ namespace ru.mirea.xlsical.CouplesDetective
             this.Audience = audience;
             this.Address = address;
         }
+
+        protected Couple() {}
 
         public override bool Equals(object o)
         {

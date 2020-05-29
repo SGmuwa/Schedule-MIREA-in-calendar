@@ -50,10 +50,20 @@ namespace ru.mirea.xlsical.CouplesDetective
         /// <typeparam name="T">Тип, который используется для записи.</typeparam>
         /// <param name="fileInfo">Местоположение файла, с которого надо произвести чтение.</param>
         /// <returns>Возвращает новый экземпляр, полученный из файла.</returns>
-        public static T ReadFromBinaryFile<T>(FileInfo fileInfo)
+        public static T ReadFromBinaryFile<T>(FileInfo fileInfo) where T : new()
         {
-            using Stream stream = File.Open(fileInfo.FullName, FileMode.Open);
-            return (T)binaryFormatter.Deserialize(stream);
+            try
+            {
+                using Stream stream = File.Open(fileInfo.FullName, FileMode.Open);
+                return (T)binaryFormatter.Deserialize(stream);
+            }
+            catch (System.Runtime.Serialization.SerializationException)
+            {
+                if (fileInfo.Exists)
+                    fileInfo.MoveTo(Path.Combine(fileInfo.DirectoryName, System.DateTime.Now.Ticks + fileInfo.Name));
+                else throw;
+                return new T();
+            }
         }
     }
 }

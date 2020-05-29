@@ -33,6 +33,10 @@ namespace ru.mirea.xlsical.CouplesDetective
     [System.Serializable]
     public partial class CoupleInCalendar : Couple, IEnumerable<CoupleInCalendar>
     {
+        public CoupleInCalendar() : base()
+        {
+        }
+
         public CoupleInCalendar(string itemTitle, string typeOfLesson, string nameOfGroup, string nameOfTeacher, string audience, string address, ZonedDateTime dateAndTimeOfCouple, ZonedDateTime dateAndTimeFinishOfCouple)
         : base(itemTitle, typeOfLesson, nameOfGroup, nameOfTeacher, audience, address)
         {
@@ -56,31 +60,91 @@ namespace ru.mirea.xlsical.CouplesDetective
         public CoupleInCalendar(string itemTitle, string typeOfLesson, string nameOfGroup, string nameOfTeacher, string audience, string address, ZonedDateTime dateAndTimeOfCouple, ZonedDateTime dateAndTimeFinishOfCouple, CoupleInCalendar next, Duration durationToNext)
         : base(itemTitle, typeOfLesson, nameOfGroup, nameOfTeacher, audience, address)
         {
-            DateAndTimeOfCouple = dateAndTimeOfCouple;
-            DateAndTimeFinishOfCouple = dateAndTimeFinishOfCouple;
+            this.DateAndTimeOfCouple = dateAndTimeOfCouple;
+            this.DateAndTimeFinishOfCouple = dateAndTimeFinishOfCouple;
             Next = next;
-            DurationToNext = durationToNext;
+            this.DurationToNext = durationToNext;
         }
-        
+
+        private (long ticks, string zone) dateAndTimeOfCouple;
+        private (long ticks, string zone) dateAndTimeFinishOfCouple;
+
         /// <summary>
         /// Дата и время пары.
         /// </summary>
-        public readonly ZonedDateTime DateAndTimeOfCouple;
-        
+        [System.NonSerialized]
+        private ZonedDateTime? dateAndTimeOfCoupleCache = null;
+
         /// <summary>
         /// Дата и время конца пары.
         /// </summary>
-        public readonly ZonedDateTime DateAndTimeFinishOfCouple;
+        [System.NonSerialized]
+        private ZonedDateTime? dateAndTimeFinishOfCoupleCache = null;
 
         /// <summary>
         /// Указатель на следующий похожий элемент.
         /// </summary>
         private CoupleInCalendar Next = null;
 
+        private long? durationToNext = null;
+
         /// <summary>
         /// Сколько времени должно пройти до следующей такой же пары.
         /// </summary>
-        private Duration? DurationToNext = null;
+        [System.NonSerialized]
+        private Duration? durationToNextCache = null;
+
+        /// <summary>
+        /// Дата и время пары.
+        /// </summary>
+        public ZonedDateTime DateAndTimeOfCouple
+        {
+            get
+            {
+                if (!dateAndTimeOfCoupleCache.HasValue)
+                    dateAndTimeOfCoupleCache = new ZonedDateTime(Instant.FromUnixTimeMilliseconds(dateAndTimeOfCouple.ticks), DateTimeZoneProviders.Tzdb[dateAndTimeOfCouple.zone]);
+                return dateAndTimeOfCoupleCache.Value;
+            }
+            private set
+            {
+                dateAndTimeOfCouple = (value.ToInstant().ToUnixTimeMilliseconds(), value.Zone.ToString());
+                dateAndTimeOfCoupleCache = value;
+            }
+        }
+
+        /// <summary>
+        /// Дата и время конца пары.
+        /// </summary>
+        public ZonedDateTime DateAndTimeFinishOfCouple
+        {
+            get
+            {
+                if (!dateAndTimeFinishOfCoupleCache.HasValue)
+                    dateAndTimeFinishOfCoupleCache = new ZonedDateTime(Instant.FromUnixTimeMilliseconds(dateAndTimeFinishOfCouple.ticks), DateTimeZoneProviders.Tzdb[dateAndTimeFinishOfCouple.zone]);
+                return dateAndTimeFinishOfCoupleCache.Value;
+            }
+            private set
+            {
+                dateAndTimeFinishOfCouple = (value.ToInstant().ToUnixTimeMilliseconds(), value.Zone.ToString());
+                dateAndTimeFinishOfCoupleCache = value;
+            }
+        }
+
+        public Duration? DurationToNext
+        {
+            get
+            {
+                if(!durationToNextCache.HasValue && durationToNext.HasValue)
+                    durationToNextCache = Duration.FromMilliseconds(durationToNext.Value);
+                return durationToNextCache;
+            }
+
+            set
+            {
+                durationToNext = value.HasValue ? (long?)value.Value.BclCompatibleTicks : null;
+                durationToNextCache = value;
+            }
+        }
 
         /// <summary>
         /// Добавляет календарную пару в группу календарных пар.
