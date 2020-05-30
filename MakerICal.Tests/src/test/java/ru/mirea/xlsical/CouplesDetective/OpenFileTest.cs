@@ -179,5 +179,17 @@ namespace ru.mirea.xlsical.CouplesDetective
         [InlineData(29, "AC1")]
         public void AddressToCoordinateTest(int num, string address)
             => Assert.Equal(num, OpenFile.StaticTools.AddressToCoordinate(address).column);
+        
+        [Fact]
+        public void CheckITSemesterTime()
+        {
+            using (Stream stream = assembly.GetManifestResourceStream("MakerICal.Tests.tests.big.excel.2018-12-10T16-08-36_640847_3181413907927372660_Institut-IT-3-kurs.xlsx"))
+            {
+                ICollection<ExcelFileInterface> files = OpenFile.NewInstances(stream);
+                Assert.Equal(1, files.Count);
+                using (ExcelFileInterface file = files.First())
+                    Assert.Equal("9:00", file.GetCellData(3, 4));
+            }
+        }
     }
 }
