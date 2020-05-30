@@ -17,6 +17,7 @@
 */
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using NodaTime;
@@ -48,7 +49,7 @@ namespace ru.mirea.xlsical.CouplesDetective
         }
 
         [Fact]
-        public void SendSampleExcel()
+        public void SendSampleExcel3()
         {
             TaskExecutor a = GlobalTaskExecutor.taskExecutor;
             a.add(new PackageToMakerICal(null,
