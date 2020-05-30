@@ -1,5 +1,6 @@
 package ru.mirea.xlsical.CouplesDetective;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Test;
 import ru.mirea.xlsical.CouplesDetective.ViewerExcelCouples.*;
@@ -35,6 +36,7 @@ public class TaskExecutorTest {
 
     @Test
     public void sendSampleExcel() throws InterruptedException {
+        StopWatch stopwatch = StopWatch.createStarted();
         TaskExecutor a = GlobalTaskExecutor.taskExecutor;
         a.add(new PackageToServer(null,
                 new Seeker(
@@ -47,6 +49,8 @@ public class TaskExecutorTest {
 
         a.step();
         PackageToClient b = a.take();
+        stopwatch.stop();
+        System.out.println(stopwatch.toString());
         assertNotNull(b.CalFile);
         System.out.println(b.CalFile);
         assertEquals(3, b.Count);
