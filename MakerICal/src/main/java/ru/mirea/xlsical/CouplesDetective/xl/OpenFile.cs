@@ -341,7 +341,8 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
                 {
                     var formatNodes = numFormatParentNode.ChildElements.OfType<NumberingFormat>();
                     foreach (var formatNode in formatNodes)
-                        formatMappings[formatNode.NumberFormatId.Value] = formatNode.FormatCode;
+                        if (formatNode.FormatCode != "General")
+                            formatMappings[formatNode.NumberFormatId.Value] = formatNode.FormatCode;
                 }
                 return formatMappings;
             }
