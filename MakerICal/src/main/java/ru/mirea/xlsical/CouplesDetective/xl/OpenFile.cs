@@ -20,10 +20,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using NodaTime;
 
 namespace ru.mirea.xlsical.CouplesDetective.xl
 {
@@ -64,15 +66,13 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
             if (!fileName.Exists)
                 throw new System.IO.FileNotFoundException(fileName.FullName);
             SetInt setInt = new SetInt();
-            OpenFile first = new OpenFile(fileName, 0);
-            int size = first.document.WorkbookPart.Workbook.Descendants<Sheet>().Count();
+            SpreadsheetDocument document = SpreadsheetDocument.Open(fileName.FullName, false);
+            int size = document.WorkbookPart.Workbook.Descendants<Sheet>().Count();
             List<ExcelFileInterface> @out = new List<ExcelFileInterface>(size);
-            @out.Add(first);
-            first.needToClose = size;
-            first.closed = setInt;
+            Dictionary<uint, String> formatMappings = StaticTools.BuildFormatMappingsFromXlsx(document);
 
-            for (int i = 1; i < size; i++)
-                @out.Add(new OpenFile(first.document, i, size, setInt, fileName.Name));
+            for (int i = 0; i < size; i++)
+                @out.Add(new OpenFile(document, i, size, setInt, fileName.Name, formatMappings));
             return @out;
         }
 
@@ -89,15 +89,13 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
             if (stream == null)
                 throw new System.ArgumentNullException(nameof(stream));
             SetInt setInt = new SetInt();
-            OpenFile first = new OpenFile(stream, 0);
-            int size = first.document.WorkbookPart.Workbook.Descendants<Sheet>().Count();
+            SpreadsheetDocument document = SpreadsheetDocument.Open(stream, false);
+            int size = document.WorkbookPart.Workbook.Descendants<Sheet>().Count();
             List<ExcelFileInterface> @out = new List<ExcelFileInterface>(size);
-            @out.Add(first);
-            first.needToClose = size;
-            first.closed = setInt;
+            Dictionary<uint, String> formatMappings = StaticTools.BuildFormatMappingsFromXlsx(document);
 
-            for (int i = 1; i < size; i++)
-                @out.Add(new OpenFile(first.document, i, size, setInt, stream.ToString()));
+            for (int i = 0; i < size; i++)
+                @out.Add(new OpenFile(document, i, size, setInt, stream.ToString(), formatMappings));
             return @out;
         }
 
@@ -112,6 +110,8 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
         public static List<ExcelFileInterface> NewInstances(string fileName)
             => NewInstances(new FileInfo(fileName ?? throw new System.ArgumentNullException(nameof(fileName))));
 
+        private Dictionary<uint, String> FormatMappingsFromXlsx;
+
         /// <summary>
         /// Получение данных в текстовом виде из указанной ячейки Excel файла.
         /// </summary>
@@ -125,6 +125,26 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
             if (cell == null)
                 return "";
             string output;
+
+            var formants = FormatMappingsFromXlsx;
+
+            WorkbookStylesPart styles = document.WorkbookPart.WorkbookStylesPart;
+            int cellStyleIndex = cell.StyleIndex == null ? 0 : (int)cell.StyleIndex.Value;
+            CellFormat cellFormat = (CellFormat)styles.Stylesheet.CellFormats.ChildElements[cellStyleIndex];
+            if (formants.ContainsKey(cellFormat.NumberFormatId))
+            {
+                CultureInfo ci = (CultureInfo)CultureInfo.CurrentCulture.Clone();
+                ci.NumberFormat.CurrencyDecimalSeparator = ".";
+                double durF = double.Parse(cell.InnerText, NumberStyles.Any, ci);
+                var foramt = formants[cellFormat.NumberFormatId];
+                if (foramt.Contains("mm"))
+                {
+                    Duration d = Duration.FromDays(durF);
+                    return d.ToString(foramt, null);
+                }
+                else
+                    return durF.ToString(foramt);
+            }
 
             if (cell.DataType != null)
                 switch (cell.DataType.Value)
@@ -206,56 +226,22 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
         /// Создаёт экземпляр открытия файла.
         /// Для открытия всех листов Excel файла используйте <see cref="NewInstances(string)"/>.
         /// </summary>
-        /// <param name="fileName">Имя файла, который необходимо открыть.</param>
-        /// <param name="numberSheet">Номер страницы книги Excel.</param>
-        /// <exception cref="System.IO.IOException">Ошибка доступа к файлу.</exception>
-        /// <exception cref="System.InvalidCastException">Ошибка распознования файла.</exception>
-        private OpenFile(FileInfo fileName, int numberSheet)
-        {
-            this.document = SpreadsheetDocument.Open(fileName.FullName, false);
-            this.numberSheet = numberSheet;
-            this.fileName = fileName.Name;
-            CreateCache();
-        }
-
-
-
-        /// <summary>
-        /// Создаёт экземпляр открытия файла.
-        /// Для открытия всех листов Excel файла используйте <see cref="NewInstances(string)"/>.
-        /// </summary>
-        /// <param name="stream">Поток, который необходимо открыть.</param>
-        /// <param name="numberSheet">Номер страницы книги Excel.</param>
-        /// <exception cref="System.IO.IOException">Ошибка доступа к файлу.</exception>
-        /// <exception cref="System.InvalidCastException">Ошибка распознования файла.</exception>
-        private OpenFile(Stream stream, int numberSheet)
-        {
-            this.document = SpreadsheetDocument.Open(stream, false);
-            this.numberSheet = numberSheet;
-            this.fileName = stream.ToString();
-            CreateCache();
-        }
-
-
-
-        /// <summary>
-        /// Создаёт экземпляр открытия файла.
-        /// Для открытия всех листов Excel файла используйте <see cref="NewInstances(string)"/>.
-        /// </summary>
         /// <param name="document">Открытый документ.</param>
         /// <param name="numberSheet">Номер страницы книги Excel.</param>
         /// <param name="needToClose">Количество открытых листов у Excel файла при newInstance.</param>
         /// <param name="closed">Количество закрытых листов Excel у файла.</param>
         /// <param name="fileName">Имя файла.</param>
+        /// <param name="formatMappings">Расшифровка кодировок форматов ячеек.</param>
         /// <exception cref="System.IO.IOException">Ошибка доступа к файлу.</exception>
         /// <exception cref="System.InvalidCastException">Ошибка распознования файла.</exception>
-        private OpenFile(SpreadsheetDocument document, int numberSheet, int needToClose, SetInt closed, string fileName)
+        private OpenFile(SpreadsheetDocument document, int numberSheet, int needToClose, SetInt closed, string fileName, Dictionary<uint, String> formatMappings)
         {
             this.document = document;
             this.numberSheet = numberSheet;
             this.needToClose = needToClose;
             this.closed = closed;
             this.fileName = fileName;
+            this.FormatMappingsFromXlsx = formatMappings;
             CreateCache();
         }
 
@@ -315,6 +301,49 @@ namespace ru.mirea.xlsical.CouplesDetective.xl
                     return $"{abc[column]}{row}";
                 else
                     return $"{abc[two]}{abc[column % abc.Length]}{row}";
+            }
+
+            public static Dictionary<uint, String> BuildFormatMappingsFromXlsx(SpreadsheetDocument document)
+            {
+                Dictionary<uint, String> formatMappings = new Dictionary<uint, String>()
+                {
+                    {1, "0"},
+                    {2, "0.00"},
+                    {3, "#,##0"},
+                    {4, "#,##0.00"},
+                    {9, "0%"},
+                    {10, "0.00%"},
+                    {11, "0.00E+00"},
+                    {12, "# ?/?"},
+                    {13, "# ??/??"},
+                    {14, "d/m/yyyy"},
+                    {15, "d-mmm-yy"},
+                    {16, "d-mmm"},
+                    {17, "mmm-yy"},
+                    {18, "h:mm tt"},
+                    {19, "h:mm:ss tt"},
+                    {20, "H:mm"},
+                    {21, "H:mm:ss"},
+                    {22, "m/d/yyyy H:mm"},
+                    {37, "#,##0 ;(#,##0)"},
+                    {38, "#,##0 ;[Red](#,##0)"},
+                    {39, "#,##0.00;(#,##0.00)"},
+                    {40, "#,##0.00;[Red](#,##0.00)"},
+                    {45, "mm:ss"},
+                    {46, "[h]:mm:ss"},
+                    {47, "mmss.0"},
+                    {48, "##0.0E+0"},
+                    {49, "@"}
+                };
+                var stylePart = document.WorkbookPart.WorkbookStylesPart;
+                var numFormatsParentNodes = stylePart.Stylesheet.ChildElements.OfType<NumberingFormats>();
+                foreach (var numFormatParentNode in numFormatsParentNodes)
+                {
+                    var formatNodes = numFormatParentNode.ChildElements.OfType<NumberingFormat>();
+                    foreach (var formatNode in formatNodes)
+                        formatMappings[formatNode.NumberFormatId.Value] = formatNode.FormatCode;
+                }
+                return formatMappings;
             }
         }
     }
