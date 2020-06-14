@@ -424,9 +424,9 @@ namespace ru.mirea.xlsical.CouplesDetective
             Assert.Matches(@"^.+w\.?.+$", "1 w. 1");
             Assert.Matches(@"^.+н\.?.+$", "1 н. 1");
             Assert.Matches(@".+н\.?.+", "1 н. 1");
-            Assert.DoesNotMatch(@"н\.?", "1 н. 1");
+            Assert.DoesNotMatch(@"^н\.?$", "1 н. 1");
             Assert.Matches(@"(^.+\s[нН]\.?.+$)", "1 н. 1");
-            Assert.DoesNotMatch(@"(^.+\s[нН]\.?.+$)|()", "1 н. 1\n");
+            Assert.DoesNotMatch(@"^.+\s[нН]\.?.+$", "1 н. 1\n");
 
             Assert.Equal(new int[] { 1 }, DetectiveSemester.SetterCouplesInCalendar.GetAllOnlyWeeks("1 н. 1"));
             Assert.Equal(new int[] { 5 }, DetectiveSemester.SetterCouplesInCalendar.GetAllOnlyWeeks("кр 5 н Логика"));
