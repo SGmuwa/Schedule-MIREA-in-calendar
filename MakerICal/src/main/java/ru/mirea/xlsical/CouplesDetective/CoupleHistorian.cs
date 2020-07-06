@@ -239,6 +239,15 @@ namespace ru.mirea.xlsical.CouplesDetective
                 if (time1.compareTo(time2) < 0) { // Если time1 раньше time2.
 
                  */
+                 #warning DEBUG
+                if (couple.Audience == "А-15"
+                    && couple.DateAndTimeOfCouple.Day == 3
+                    && couple.DateAndTimeOfCouple.Month == (int)IsoMonth.September
+                    && couple.NameOfTeacher == "Жемчужникова Т.Н."
+                    && couple.TypeOfLesson == "лк")
+                {
+                    int weiojwio = 0;
+                }
                 if (
                         // queryCriteria.dateStart раньше или равно couple.dateAndTimeFinishOfCouple
                         ZonedDateTime.Comparer.Instant.Compare(queryCriteria.DateStart, couple.DateAndTimeFinishOfCouple) <= 0

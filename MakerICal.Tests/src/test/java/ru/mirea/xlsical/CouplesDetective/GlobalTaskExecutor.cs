@@ -153,7 +153,7 @@ namespace ru.mirea.xlsical.CouplesDetective
                 "MakerICal.Tests.tests.big.excel.2018-12-10T16-08-36_645846500_-5165008637843634938_2755.Raspisanie.01.09.2018-Raspisanie.xls"
             };
 
-        private static readonly IEnumerable<Stream> excelFiles201812Streams = new EnumerableResourceStreams(excelFiles201812);
+        private static readonly IEnumerable<Stream> excelFiles201812Streams = new EnumerableResourceStreams(new string[] {"MakerICal.Tests.tests.big.excel.2018-12-10T16-08-36_640847_3181413907927372660_Institut-IT-3-kurs.xlsx"});
 
         private static readonly PercentReady PR_init = new PercentReady(
                 subscribers: new SampleConsoleTransferPercentReady("GlobalTaskExecutor.cs: ").TransferValue
